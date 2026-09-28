@@ -105,7 +105,7 @@ public class Enemy
 
     public static Enemy BigZ() => new()
     {
-        Name = "Big Z", AttackName = "Crush", MaxHp = 9999, Hp = 9999, Atk = 40, Color = new Color(120, 24, 36),
+        Name = "Big Z", AttackName = "Crush", MaxHp = 9999, Hp = 9999, Atk = 20, Color = new Color(120, 24, 36),
         Size = 1.7f, DodgeShrink = 0.26f, NeedleSpeed = 3.4f, IsBoss = true,
     };
 }

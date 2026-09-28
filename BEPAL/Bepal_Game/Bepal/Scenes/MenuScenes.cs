@@ -9,15 +9,13 @@ namespace Bepal;
 public class MainMenuScene : Scene
 {
     readonly Button _play = new(new Rectangle(Gfx.W / 2 - 120, 380, 240, 56), "Play");
-    readonly Button _option = new(new Rectangle(Gfx.W / 2 - 120, 450, 240, 56), "Option");
-    readonly Button _quit = new(new Rectangle(Gfx.W / 2 - 120, 520, 240, 56), "Quit");
+    readonly Button _quit = new(new Rectangle(Gfx.W / 2 - 120, 450, 240, 56), "Quit");
     float _time;
 
     public override void Update(float dt)
     {
         _time += dt;
         if (_play.Update() || Input.Confirm) M.Reset(new ChooseStarterScene());
-        else if (_option.Update()) M.Push(DialogueScene.Say("", null, "Options are not available in this prototype yet."));
         else if (_quit.Update()) Game1.Instance.Exit();
     }
 
@@ -31,7 +29,6 @@ public class MainMenuScene : Scene
         Art.Pet(sb, Species.Blinkbun, Pet.Create(Species.Blinkbun).Color, new Vector2(200, 640), 1f, _time, new Vector2(640, 300));
         Art.Pet(sb, Species.Mossling, Pet.Create(Species.Mossling).Color, new Vector2(1080, 640), 1f, _time + 1, new Vector2(640, 300));
         _play.Draw(sb);
-        _option.Draw(sb);
         _quit.Draw(sb);
         if (MathF.Sin(_time * 4) > -0.3f)
             Gfx.Text(sb, Gfx.Font, "[ Space ] to Enter", new Vector2(Gfx.W / 2f, 612), Palette.Text, 0.5f);

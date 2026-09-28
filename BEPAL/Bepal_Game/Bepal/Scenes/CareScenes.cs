@@ -113,11 +113,14 @@ public class QteScene : Scene
     int _attempts = Balance.Attempts;
     float _time;
     float _finish = -1;
-    float _zoneSpeed = 0.9f;        // Clean: how fast the zone runs away
     int _perfects, _greats, _levelUps;
     bool _playerLevelUp;
     const float BaseSpeed = 2.4f;
     const float TrainSpeed = 3.6f;
+    const float CleanZoneSpeed = 0.6f;   // Clean: fixed run-away speed, always below the needle's BaseSpeed
+    const float HealFadeRate = 1.5f;     // Heal: needle fade cycle (lower = slower, easier to read)
+    const float HealMinAlpha = 0.3f;     // Heal: needle never fades below this
+    const float HealShrink = 0.5f;       // Heal: zone shrink rate multiplier (lower = dot lives longer)
 
     public override bool Overlay => true;
 
@@ -169,15 +172,15 @@ public class QteScene : Scene
         switch (_care)
         {
             case Care.Clean:   // zone runs away in the needle's direction, slower than the needle
-                foreach (var z in _wheel.Zones) z.Center += _wheel.Dir * _zoneSpeed * dt;
+                foreach (var z in _wheel.Zones) z.Center += _wheel.Dir * CleanZoneSpeed * dt;
                 break;
-            case Care.Heal:    // needle fades in and out; zone slowly shrinks, respawns when gone
-                float f = MathF.Cos(_time * 2.1f);
-                _wheel.NeedleAlpha = MathHelper.Clamp(0.5f + f * 0.9f, 0, 1);
+            case Care.Heal:    // needle fades in and out (never fully gone); zone slowly shrinks, respawns when gone
+                float f = MathF.Cos(_time * HealFadeRate);
+                _wheel.NeedleAlpha = MathHelper.Clamp(0.6f + f * 0.7f, HealMinAlpha, 1);
                 foreach (var z in _wheel.Zones.ToArray())
                 {
-                    z.Perfect -= 0.035f * dt;
-                    z.Great -= 0.07f * dt;
+                    z.Perfect -= 0.035f * HealShrink * dt;
+                    z.Great -= 0.07f * HealShrink * dt;
                     if (z.Perfect <= 0.02f) SpawnZone(z);
                 }
                 break;
@@ -203,11 +206,6 @@ public class QteScene : Scene
         if (hit == Hit.Miss)
         {
             if (_care == Care.Feed) _wheel.Speed = BaseSpeed;
-            if (_care == Care.Clean)
-            {
-                _wheel.Speed = BaseSpeed;
-                _zoneSpeed = 0.9f;
-            }
             return;
         }
 
@@ -227,11 +225,6 @@ public class QteScene : Scene
                 break;
             case Care.Clean:
                 _pet.Clean += perfect ? 6 : 3;
-                if (perfect)
-                {
-                    _zoneSpeed *= 1.2f;                                     // new dot runs faster
-                    _wheel.Speed = MathF.Max(_wheel.Speed * 0.9f, 1.2f);    // needle slows down
-                }
                 break;
             case Care.Heal:
                 _pet.Hp += perfect ? 6 : 3;
