@@ -117,7 +117,7 @@ public class QteScene : Scene
     bool _playerLevelUp;
     const float BaseSpeed = 2.4f;
     const float TrainSpeed = 3.6f;
-    const float CleanZoneSpeed = 0.6f;   // Clean: fixed run-away speed, always below the needle's BaseSpeed
+    const float CleanZoneSpeed = 4.8f;   // Clean: fixed run-away speed, always below the needle's BaseSpeed
     const float HealFadeRate = 1.5f;     // Heal: needle fade cycle (lower = slower, easier to read)
     const float HealMinAlpha = 0.3f;     // Heal: needle never fades below this
     const float HealShrink = 0.5f;       // Heal: zone shrink rate multiplier (lower = dot lives longer)
