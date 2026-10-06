@@ -100,7 +100,7 @@ public class Enemy
     public static Enemy Toothless() => new()
     {
         Name = "Toothless", AttackName = "Acid", MaxHp = 120, Hp = 120, Atk = 15, Color = new Color(52, 46, 64),
-        DodgeShrink = 0.11f, NeedleSpeed = 2.8f,
+        DodgeShrink = 0.05f, NeedleSpeed = 2f,
     };
 
     public static Enemy BigZ() => new()
