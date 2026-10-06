@@ -51,6 +51,8 @@ public class ShotRunner
         _shots.Add(("10_upgrade", () => { var g = Gs(); return With(new BaseScene(g), new UpgradeScene(g)); }, 0.2f));
         _shots.Add(("11_doctor", () => { var g = Gs(); return With(new BaseScene(g), new DoctorScene(g)); }, 0.2f));
         _shots.Add(("12_notebook", () => { var g = Gs(); return With(new BaseScene(g), new NotebookScene(g)); }, 0.2f));
+        _shots.Add(("12b_notebook_pet_lv1", () => { var g = Gs(); return With(new BaseScene(g), new NotebookScene(g, 0)); }, 0.2f));
+        _shots.Add(("12c_notebook_pet_lv2", () => { var g = Gs(); g.Pets[0].Level = Balance.PassiveLevel; return With(new BaseScene(g), new NotebookScene(g, 0)); }, 0.2f));
         _shots.Add(("13_shop", () => { var g = Gs(3); return With(new BaseScene(g), new ShopScene(g)); }, 0.2f));
         _shots.Add(("14_dialogue", () => { var g = Gs(); return With(new BaseScene(g), DialogueScene.Say("Toothless", null, "Arrrrrrhrhrhrhhrrhrhrha")); }, 2f));
         _shots.Add(("15_choice", () => { var g = Gs(); return With(new BaseScene(g), new ChoiceScene("Toothless is at the door. What will you do?",

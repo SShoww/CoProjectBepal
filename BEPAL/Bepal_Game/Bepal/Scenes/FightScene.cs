@@ -27,6 +27,8 @@ public class FightScene : Scene
     float _end = -1;
     bool _won;
     bool _waitingForSwap;
+    bool _poisoned;
+    int _combo;   // Nibbleclaw: consecutive Attack hits
 
     public FightScene(GameState gs, Enemy enemy, Pet pet, Action<bool> onEnd)
     {
@@ -61,13 +63,14 @@ public class FightScene : Scene
 
     void EnemyHits()
     {
-        _pet.Hp -= _enemy.Atk;
+        int dmg = (int)MathF.Round(_enemy.Atk * (_poisoned ? Balance.PoisonDealtMul : 1f));
+        _pet.Hp -= dmg;
         _pet.ClampStats();
         _petFlash = 1;
         _lunge = 1;
         Audio.Play(Sfx.FightPetHurt);
         Gfx.Shake(14, 0.35f);
-        _popups.Add($"{_enemy.AttackName}! -{_enemy.Atk}", Palette.Danger, new Vector2(300, 200));
+        _popups.Add($"{_enemy.AttackName}! -{dmg}", Palette.Danger, new Vector2(300, 200));
         NewDodge();
         if (_pet.Dead) PetFell();
     }
@@ -85,6 +88,7 @@ public class FightScene : Scene
         M.Push(new PetPickScene($"{_pet.Name} has fallen! Send another pet", alive, p =>
         {
             _pet = p;
+            _combo = 0;
             _waitingForSwap = false;
             NewDodge();
         }));
@@ -129,14 +133,33 @@ public class FightScene : Scene
         }
         else if (zone == _attack)
         {
-            float dmg = _pet.Atk * (hit == Hit.Perfect ? 1f : 0.75f);
+            float dmg = _pet.Atk * (hit == Hit.Perfect ? 1f : 0.75f) * (_poisoned ? Balance.PoisonTakenMul : 1f);
+            if (_pet.Has(Species.Nibbleclaw))
+            {
+                dmg *= 1 + _combo * Balance.NibbleComboStep;
+                _combo++;
+                if (_combo > 1) _popups.Add($"Combo x{_combo}", Palette.Coin, new Vector2(300, 260));
+            }
             _enemy.Hp = MathF.Max(0, _enemy.Hp - dmg);
             _enemyFlash = 1;
             Audio.Play(Sfx.FightPlayerAttack);
             Gfx.Shake(8, 0.2f);
             _popups.Add(hit, new Vector2(Gfx.W / 2f, 250));
             _popups.Add($"-{(int)dmg}", Palette.Text, new Vector2(1000, 150));
+            if (_pet.Has(Species.Blinkbun)) _wheel.Needle = 0;
             MoveAttack();
+            if (_pet.Has(Species.Mossling))
+            {
+                int heal = Math.Max(1, (int)MathF.Round(_pet.MaxHp * Balance.MosslingHealPct));
+                _pet.Hp += heal;
+                _pet.ClampStats();
+                _popups.Add($"+{heal}", Palette.Heal, new Vector2(300, 260));
+            }
+            if (_pet.Has(Species.Toothless) && !_poisoned)
+            {
+                _poisoned = true;
+                _popups.Add("Poisoned!", new Color(170, 90, 220), new Vector2(1000, 220));
+            }
             if (_enemy.Hp <= 0)
             {
                 _won = true;
@@ -146,6 +169,7 @@ public class FightScene : Scene
         else
         {
             _popups.Add("Miss", Palette.Danger, new Vector2(Gfx.W / 2f, 250));
+            _combo = 0;
             EnemyHits();
         }
     }
@@ -163,7 +187,7 @@ public class FightScene : Scene
         var enemyFeet = new Vector2(1010 - _lunge * 60, 560);
         Art.Pet(sb, _pet.Species, Color.Lerp(_pet.Color, Color.Red, _petFlash), petFeet, 1.4f, _time, enemyFeet - new Vector2(0, 80),
             1f, _pet.Dead);
-        Art.Enemy(sb, _enemy, enemyFeet, _time, petFeet, _enemyFlash);
+        Art.Enemy(sb, _enemy, enemyFeet, _time, petFeet, MathF.Max(_enemyFlash, _poisoned ? 0.25f : 0));
 
         // Pet HP (small bar over its head) and enemy HP (top right), per Figma
         Ui.Bar(sb, new Rectangle((int)petFeet.X - 70, 380, 140, 16), _pet.Hp, _pet.MaxHp, Palette.Hp);
