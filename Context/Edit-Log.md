@@ -3,6 +3,9 @@
 ล่าสุด 10 งาน งานละ 3 บรรทัด เขียนผ่าน `tools/context/log-edit.py` เท่านั้น — รายการเก่าอยู่ที่ [archive/edit-log/](archive/edit-log/)
 
 <!-- entries -->
+- **2026-10-07 02:55 · Q-20261007-parallax** — เพิ่ม sprite parallax 5 ชั้น, หน้าต่างใหญ่ 6 บานในบ้าน (ห่างประตู), foreground jungle 2x; อัปเดต CLAUDE.md/monogame skill ว่ามี image assets
+  - Files: BEPAL/Bepal_Game/Bepal/World/Backdrop.cs, BEPAL/Bepal_Game/Bepal/Scenes/BaseScene.cs, BEPAL/Bepal_Game/Bepal/Core/Gfx.cs, BEPAL/Bepal_Game/Bepal/Content, CLAUDE.md, .claude/skills/monogame/SKILL.md
+  - Validation: build 0 warn, autoplay ปกติ/--refuse ผ่าน, ดู --shots แล้ว; ไม่ผ่าน PR ตามคำสั่งผู้ใช้; ยังไม่ได้เล่นจริง
 - **2026-10-07 01:59 · Q-20261007-audio-sfx** — เพิ่ม Audio/Sfx: SFX 17 ไฟล์ WAV + synth (QtePerfect, Typewriter), เคาะประตูวนจนเปิด; ปิด Quest
   - Files: BEPAL/Bepal_Game/Bepal/Core/Audio.cs, BEPAL/Bepal_Game/Bepal/Content/Sfx, BEPAL/Bepal_Game/Bepal/Scenes, BEPAL/Assets/_candidates
   - Validation: build 0 warn, autoplay ปกติ/--refuse ผ่าน; ผู้ใช้ฟังเสียงจริงและยืนยัน 2026-10-07
