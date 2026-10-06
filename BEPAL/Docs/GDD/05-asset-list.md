@@ -19,7 +19,7 @@ project: BePal
 | **P1** | มีแล้วดีใน Prototype — อยู่ในฉากที่อาจโดนตัด (สมุด → Upgrade → ร้านค้า → หมอ ตาม 06 §6) |
 | **Later** | เกมเต็ม / นอกขอบเขต Prototype (06 §5) |
 
-> **สถานะปัจจุบัน:** ในโค้ดยังไม่มีไฟล์ภาพ/เสียงเลย — ตัวละครทั้งหมดวาดด้วยรูปทรงใน `World/Art.cs` และฉากหลัง parallax ใน `World/Backdrop.cs` · ฟอนต์ใช้ `Segoe UI` ชั่วคราว
+> **สถานะปัจจุบัน:** ในโค้ดมีภาพ 5 ไฟล์ (`Content/Sprites/bg_parallax_sky|clouds|hills|mid|near.png`, 320x180 pixel art วาดที่ 4x) ใช้เป็นฉากหลัง parallax ใน `World/Backdrop.cs` — ตัวละครทั้งหมดยังวาดด้วยรูปทรงใน `World/Art.cs` · ฟอนต์ใช้ `Segoe UI` ชั่วคราว
 
 ### ข้อกำหนดทั่วไปสำหรับภาพ
 
