@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+**AI workflow first:** follow [AGENTS.md](AGENTS.md) (language, token rules, multi-agent) and start every session from [README.md](README.md) → `Context/`. This file covers the game code only.
+
 ## Project
 
 BePal — a university team's MonoGame prototype (virtual-pet care + survival, "Endless Survival Management"). The repo is also an Obsidian vault (`.obsidian/`); design docs are Markdown, mostly in Thai.
