@@ -1,5 +1,5 @@
 ### 2026-10-07 — Q-20261007-pet-passive — Pet Passive (unlock Lv2) ตาม Figma screenshots
-- Status: ready-to-close
+- Status: closed (ผู้ใช้สั่งปิด 2026-10-07)
 - Owner: Claude Code (session 5de13596)
 - Goal: Mossling heal 1% MaxHp ต่อ attack hit, Toothless ใส่พิษ (ศัตรูรับดาเมจ+ / ตีเบาลง, ไม่ stack), Blinkbun วาร์ปเข็มไป 12 นาฬิกา; ปลดล็อกที่ Lv2; ข้อมูลแสดงในสมุด (Notebook)
 - Files: BEPAL/Bepal_Game/Bepal/Model/Pet.cs, BEPAL/Bepal_Game/Bepal/Model/GameState.cs, BEPAL/Bepal_Game/Bepal/Scenes/FightScene.cs, BEPAL/Bepal_Game/Bepal/Scenes/BaseMenus.cs, BEPAL/Docs/GDD/04-class-diagram.md
