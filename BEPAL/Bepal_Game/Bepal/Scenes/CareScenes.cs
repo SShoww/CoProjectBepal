@@ -68,6 +68,7 @@ public class CareSelectScene : Scene
 
         _chosen = Enum.Parse<Care>(zone.Label!);
         _gs.Energy--;
+        Audio.Play(Sfx.QteSelect);
         Gfx.Shake(10, 0.3f);
         _popups.Add(zone.Label!, zone.Color, new Vector2(Gfx.W / 2f, 120));
         _openDelay = 0.4f;
@@ -205,11 +206,14 @@ public class QteScene : Scene
     {
         if (hit == Hit.Miss)
         {
+            Audio.Play(Sfx.QteMiss);
             if (_care == Care.Feed) _wheel.Speed = BaseSpeed;
             return;
         }
 
         bool perfect = hit == Hit.Perfect;
+        if (perfect) Audio.Play(Sfx.QtePerfect, Balance.PerfectVolume, Balance.PerfectPitch);
+        else Audio.Play(Sfx.QteGreat);
         if (perfect) _perfects++; else _greats++;
         if (_gs.AddExp(1)) _playerLevelUp = true;   // player EXP: every successful press
 
@@ -238,6 +242,7 @@ public class QteScene : Scene
     void Close()
     {
         M.Remove(this);
+        if (_levelUps > 0 || _playerLevelUp) Audio.Play(Sfx.UiLevelUp);
         var lines = new System.Collections.Generic.List<string>
         {
             $"{_care} finished: {_perfects} Perfect, {_greats} Great, {Balance.Attempts - _perfects - _greats} Miss.",

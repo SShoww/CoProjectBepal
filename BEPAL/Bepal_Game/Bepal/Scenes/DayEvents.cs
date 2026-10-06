@@ -11,6 +11,7 @@ public static class DayEvents
     public static void OpenDoor(SceneManager m, GameState gs)
     {
         gs.DoorDone = true;
+        Audio.Play(Sfx.DoorOpen);
         switch (gs.Day)
         {
             case 2: Toothless(m, gs); break;
@@ -52,6 +53,7 @@ public static class DayEvents
                     var t = Pet.Create(Species.Toothless);
                     gs.Pets.Add(t);
                     gs.Coin += Balance.ToothlessReward;
+                    Audio.Play(Sfx.NewPet);
                     m.Push(DialogueScene.Say("", null, "You got new pet !!!",
                         $"Toothless curls up by the hearth. (+{Balance.ToothlessReward} coin from the sanctuary fund)"));
                 })), onCancel: () => ToothlessChoice(m, gs)))
@@ -75,6 +77,7 @@ public static class DayEvents
             {
                 gs.Pets.Remove(target);
                 gs.Coin += Balance.MerchantOffer;
+                Audio.Play(Sfx.UiCoin);
                 m.Push(DialogueScene.Say("Merchant", null, "A pleasure doing business. It'll be... well looked after.",
                     $"The cart rolls away. You can still hear {target.Name} crying long after it's gone."));
             }, gs.Pets.Count > 1),
@@ -92,6 +95,7 @@ public static class DayEvents
             p.ClampStats();
         }
         gs.DisasterSeen = true;
+        Audio.Play(Sfx.Storm);
         Gfx.Shake(18, 0.8f);
         m.Push(DialogueScene.Say("", null,
             "You crack the door open. No one is there. Only the wind.",

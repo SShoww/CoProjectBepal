@@ -34,3 +34,105 @@
 /processorParam:PremultiplyAlpha=True
 /processorParam:TextureFormat=Color
 /build:Fonts/Small.spritefont
+
+#begin Sfx/sfx_event_door_knock.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sfx/sfx_event_door_knock.wav
+
+#begin Sfx/sfx_event_door_open.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sfx/sfx_event_door_open.wav
+
+#begin Sfx/sfx_event_end_day.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sfx/sfx_event_end_day.wav
+
+#begin Sfx/sfx_event_new_pet.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sfx/sfx_event_new_pet.wav
+
+#begin Sfx/sfx_event_storm.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sfx/sfx_event_storm.wav
+
+#begin Sfx/sfx_fight_boss_roar.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sfx/sfx_fight_boss_roar.wav
+
+#begin Sfx/sfx_fight_dodge.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sfx/sfx_fight_dodge.wav
+
+#begin Sfx/sfx_fight_pet_hurt.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sfx/sfx_fight_pet_hurt.wav
+
+#begin Sfx/sfx_fight_player_attack.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sfx/sfx_fight_player_attack.wav
+
+#begin Sfx/sfx_qte_great.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sfx/sfx_qte_great.wav
+
+#begin Sfx/sfx_qte_miss.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sfx/sfx_qte_miss.wav
+
+#begin Sfx/sfx_qte_select.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sfx/sfx_qte_select.wav
+
+#begin Sfx/sfx_ui_click.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sfx/sfx_ui_click.wav
+
+#begin Sfx/sfx_ui_coin.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sfx/sfx_ui_coin.wav
+
+#begin Sfx/sfx_ui_levelup.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sfx/sfx_ui_levelup.wav
+
+#begin Sfx/sfx_world_footstep.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sfx/sfx_world_footstep.wav
+
+#begin Sfx/sfx_world_interact.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sfx/sfx_world_interact.wav

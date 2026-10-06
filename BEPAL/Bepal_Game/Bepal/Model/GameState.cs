@@ -8,6 +8,14 @@ namespace Bepal;
 public static class Balance
 {
     public const int LastDay = 5;
+    /// <summary>Seconds between door knocks while a door event is pending (clip is 3 s + pause).</summary>
+    public const float KnockInterval = 5f;
+    /// <summary>Dialogue typewriter speed, characters per second.</summary>
+    public const float TextSpeed = 55f;
+    /// <summary>Pitch shift of the QTE Perfect chime: -1..1, 1.0 = one octave (0 = as synthesized, G5 -> D6).</summary>
+    public const float PerfectPitch = 0f;
+    /// <summary>Volume of the QTE Perfect chime, 0..1.</summary>
+    public const float PerfectVolume = 0.8f;
     public const int StartCoin = 150;
     public const int DailyCoin = 100;
     public const int ToothlessReward = 200;

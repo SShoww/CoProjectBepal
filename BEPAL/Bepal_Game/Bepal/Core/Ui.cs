@@ -40,7 +40,12 @@ public class Button
     public bool Hover => Enabled && Rect.Contains(Input.Mouse);
 
     /// <summary>Returns true when clicked this frame.</summary>
-    public bool Update() => Hover && Input.Click;
+    public bool Update()
+    {
+        if (!Hover || !Input.Click) return false;
+        Audio.Play(Sfx.UiClick);
+        return true;
+    }
 
     public void Draw(SpriteBatch sb)
     {

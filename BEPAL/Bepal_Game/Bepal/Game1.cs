@@ -34,9 +34,12 @@ namespace Bepal
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             Gfx.Init(GraphicsDevice, Content);
-            _scenes.ResetNow(new MainMenuScene());
 
             var args = System.Environment.GetCommandLineArgs();
+            Audio.Muted = System.Array.IndexOf(args, "--autoplay") >= 0 || System.Array.IndexOf(args, "--shots") >= 0;
+            Audio.Load(Content);
+            _scenes.ResetNow(new MainMenuScene());
+
             int i = System.Array.IndexOf(args, "--shots");
             if (i >= 0 && i + 1 < args.Length) _shots = new ShotRunner(args[i + 1]);
             if (System.Array.IndexOf(args, "--autoplay") >= 0)
@@ -72,6 +75,7 @@ namespace Bepal
             Input.Update();
             Gfx.UpdateShake(dt);
             _scenes.Update(dt);
+            Audio.EndFrame(dt);
             base.Update(gameTime);
         }
 

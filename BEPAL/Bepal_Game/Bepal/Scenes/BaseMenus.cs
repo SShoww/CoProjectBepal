@@ -43,6 +43,7 @@ public class UpgradeScene : Scene
             if (!_plus[i].Update()) continue;
             _gs.Coin -= r.coin;
             _gs.Points -= r.points;
+            Audio.Play(Sfx.UiCoin);
             switch (i)
             {
                 case 0: _gs.QteUpgrade++; break;
@@ -108,6 +109,7 @@ public class DoctorScene : Scene
                     new Option("Yes", () =>
                     {
                         _gs.Coin -= Balance.ReviveCost;
+                        Audio.Play(Sfx.UiCoin);
                         pet.Hp = 1;
                         M.Remove(this);
                         M.Push(DialogueScene.Say("Doctor", null, $"{pet.Name} is breathing again. Barely. Keep it fed and clean."));
@@ -265,6 +267,7 @@ public class ShopScene : Scene
             M.Push(new PetPickScene("Who gets the Crab Apple?", _gs.Pets, p =>
             {
                 _gs.Coin -= Items[0].Price;
+                Audio.Play(Sfx.UiCoin);
                 p.Hp += 18;
                 p.Stomach += 20;
                 p.ClampStats();
@@ -273,12 +276,14 @@ public class ShopScene : Scene
         if (_buy[1].Update())
         {
             _gs.Coin -= Items[1].Price;
+            Audio.Play(Sfx.UiCoin);
             _gs.Energy += 2;
             _popups.Add("+2 Energy!", Palette.Heal, new Vector2(Gfx.W / 2f, 150));
         }
         if (_buy[2].Update())
         {
             _gs.Coin -= Items[2].Price;
+            Audio.Play(Sfx.UiCoin);
             _gs.SeaTea = true;
             _popups.Add("Sea Tea ready for the next fight", Palette.Clean, new Vector2(Gfx.W / 2f, 150));
         }

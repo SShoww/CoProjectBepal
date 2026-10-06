@@ -37,6 +37,7 @@ public class FightScene : Scene
         _wheel.Speed = enemy.NeedleSpeed;
         _dodgeStart = gs.SeaTea ? 0.38f : 0.32f;   // Sea Tea: Dodge zone +20% for this fight
         gs.SeaTea = false;
+        if (enemy.IsBoss) Audio.Play(Sfx.FightBossRoar);
         _attack = new Zone { Perfect = 0.08f, Great = 0.19f, Color = Palette.Heal, Label = "Attack" };
         _wheel.Zones.Add(_attack);
         _attack.Center = _wheel.FreeAngle(1.0f);
@@ -64,6 +65,7 @@ public class FightScene : Scene
         _pet.ClampStats();
         _petFlash = 1;
         _lunge = 1;
+        Audio.Play(Sfx.FightPetHurt);
         Gfx.Shake(14, 0.35f);
         _popups.Add($"{_enemy.AttackName}! -{_enemy.Atk}", Palette.Danger, new Vector2(300, 200));
         NewDodge();
@@ -121,6 +123,7 @@ public class FightScene : Scene
         var (hit, zone) = _wheel.Evaluate();
         if (zone == _dodge)
         {
+            Audio.Play(Sfx.FightDodge);
             _popups.Add("Dodge!", Palette.Feed, new Vector2(300, 200));
             NewDodge();
         }
@@ -129,6 +132,7 @@ public class FightScene : Scene
             float dmg = _pet.Atk * (hit == Hit.Perfect ? 1f : 0.75f);
             _enemy.Hp = MathF.Max(0, _enemy.Hp - dmg);
             _enemyFlash = 1;
+            Audio.Play(Sfx.FightPlayerAttack);
             Gfx.Shake(8, 0.2f);
             _popups.Add(hit, new Vector2(Gfx.W / 2f, 250));
             _popups.Add($"-{(int)dmg}", Palette.Text, new Vector2(1000, 150));
