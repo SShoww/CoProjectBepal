@@ -18,6 +18,16 @@ public class BaseScene : Scene
     public const float WorldW = 3840;
     public const float GroundY = 600;
     const float WallLeft = 120, WallRight = 3560;
+    // Big windows: centres 630 + 520*i, between the hanging lamps; last one ends ~160px short of the door
+    const int WindowCount = 6;
+    const float WindowW = 320, WindowH = 160, WindowTop = GroundY - 210;
+    static float WindowX(int i) => 630 + 520 * i;
+    static bool InWindow(float x)
+    {
+        for (int i = 0; i < WindowCount; i++)
+            if (x + 8 > WindowX(i) - WindowW / 2 && x < WindowX(i) + WindowW / 2) return true;
+        return false;
+    }
     public const float BedX = 300, UpgradeX = 900, HearthX = 1900, DoctorX = 2650, BookX = 3100, DoorX = 3640;
 
     readonly GameState _gs;
@@ -221,16 +231,10 @@ public class BaseScene : Scene
 
         Art.Player(sb, new Vector2(Sx(_playerX), GroundY + 6), _facing, _walkT);
 
-        // Ground and foreground parallax (1.3)
+        // Ground, then the sprite foreground (parallax 1.3) in front of everything
         Gfx.Rect(sb, 0, GroundY, Gfx.W, Gfx.H - GroundY, Gfx.Lerp(new Color(58, 40, 34), new Color(24, 18, 22), night));
         Gfx.Rect(sb, 0, GroundY, Gfx.W, 4, Gfx.Lerp(new Color(110, 74, 56), new Color(44, 32, 36), night));
-        for (int i = 0; i < 40; i++)
-        {
-            float x = ((i * 173 - _camX * 1.3f) % 5200 + 5200) % 5200 - 200;
-            if (x < -80 || x > Gfx.W + 80) continue;
-            float size = 0.6f + (i * 37 % 11) / 10f;
-            Gfx.Ellipse(sb, new Vector2(x, Gfx.H - 14), 60 * size, 30 * size, new Color(14, 10, 14) * 0.85f);
-        }
+        SharedBackdrop.DrawForeground(sb, _camX, night);
 
         // Darkness beyond the walls
         EdgeDark(sb, Sx(WallLeft), -1);
@@ -269,18 +273,36 @@ public class BaseScene : Scene
         // Back wall of the sanctuary
         float l = Sx(WallLeft), r = Sx(WallRight);
         var wall = Gfx.Lerp(new Color(86, 58, 52), new Color(40, 28, 32), night);
-        Gfx.Rect(sb, l, GroundY - 230, r - l, 230, wall);
+        float wallTop = GroundY - 230;
+        var panel = Color.Lerp(wall, Color.Black, 0.25f);
+        var frame = Color.Lerp(wall, Color.Black, 0.55f);
+        // Wall in segments so the big windows leave the backdrop visible
+        float cursor = l;
+        for (int i = 0; i < WindowCount; i++)
+        {
+            float wx = Sx(WindowX(i)) - WindowW / 2;
+            Gfx.Rect(sb, cursor, wallTop, wx - cursor, 230, wall);
+            Gfx.Rect(sb, wx, wallTop, WindowW, WindowTop - wallTop, wall);                            // above the glass
+            Gfx.Rect(sb, wx, WindowTop + WindowH, WindowW, GroundY - WindowTop - WindowH, wall);      // below the glass
+            cursor = wx + WindowW;
+        }
+        Gfx.Rect(sb, cursor, wallTop, r - cursor, 230, wall);
         Gfx.Rect(sb, l - 20, GroundY - 250, r - l + 40, 22, Color.Lerp(wall, Color.Black, 0.35f));   // roof beam
         for (float x = WallLeft; x < WallRight; x += 160)
-            Gfx.Rect(sb, Sx(x), GroundY - 230, 8, 230, Color.Lerp(wall, Color.Black, 0.25f));        // wall panels
-        // Round windows onto space
-        for (float x = WallLeft + 400; x < WallRight - 200; x += 700)
+            if (!InWindow(x)) Gfx.Rect(sb, Sx(x), wallTop, 8, 230, panel);                           // wall panels
+        // Big windows onto the outside (kept clear of the door)
+        for (int i = 0; i < WindowCount; i++)
         {
-            var c = new Vector2(Sx(x), GroundY - 150);
-            Gfx.Circle(sb, c, 52, Color.Lerp(wall, Color.Black, 0.4f));
-            Gfx.Circle(sb, c, 44, Gfx.Lerp(new Color(60, 50, 110), new Color(10, 10, 30), night));
-            Gfx.Rect(sb, c.X - 30, c.Y - 18, 3, 3, Color.White * 0.8f);
-            Gfx.Rect(sb, c.X + 12, c.Y + 8, 2, 2, Color.White * 0.6f);
+            float wx = Sx(WindowX(i)) - WindowW / 2;
+            if (wx > Gfx.W || wx + WindowW < 0) continue;
+            Gfx.Rect(sb, wx - 10, WindowTop - 10, WindowW + 20, 10, frame);                          // frame: top, bottom, left, right
+            Gfx.Rect(sb, wx - 10, WindowTop + WindowH, WindowW + 20, 10, frame);
+            Gfx.Rect(sb, wx - 10, WindowTop, 10, WindowH, frame);
+            Gfx.Rect(sb, wx + WindowW, WindowTop, 10, WindowH, frame);
+            Gfx.Rect(sb, wx, WindowTop, WindowW, WindowH, Color.White * (0.06f * (1 - night)));       // faint glass tint
+            Gfx.Rect(sb, wx + WindowW / 2 - 4, WindowTop, 8, WindowH, frame);                         // mullion
+            Gfx.Rect(sb, wx, WindowTop + WindowH / 2 - 4, WindowW, 8, frame);                         // transom
+            Gfx.Rect(sb, wx - 14, WindowTop + WindowH + 10, WindowW + 28, 8, panel);                  // sill
         }
         // Hanging lamps
         for (float x = WallLeft + 250; x < WallRight; x += 520)

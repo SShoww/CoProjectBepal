@@ -12,7 +12,7 @@ Project root for code: `BEPAL/Bepal_Game/Bepal/` (MonoGame DesktopGL 3.8.4, .NET
 2. Look at a neighbouring scene/file and match its style (naming, comment density, how it uses `Gfx`, `Palette`, `Input`).
 
 ## Conventions (do not break)
-- **No image assets.** Draw with `Gfx` primitives (rects, ellipses, arcs, glow, text, shake) and `World/Art.cs`. Only content is the SpriteFonts `Fonts/Main|Big|Small`. Colors come from `Palette` (`Core/Ui.cs`).
+- **Almost no image assets.** Draw with `Gfx` primitives (rects, ellipses, arcs, glow, text, shake) and `World/Art.cs`. Exception: the parallax/foreground PNGs in `Content/Sprites/` (`World/Backdrop.cs`, pixel art, `PointClamp` batch). New textures go in `Content/Sprites/` and must be registered in `Content.mgcb` with `TextureImporter`/`TextureProcessor`. Other content: SpriteFonts `Fonts/Main|Big|Small` and the SFX. Colors come from `Palette` (`Core/Ui.cs`).
 - **Tuning numbers live in `Balance`** (`Model/GameState.cs`), mirroring 06-vertical-slice.md. Never hard-code gameplay numbers in scenes.
 - **Scenes** go through `Core/SceneManager.cs`: only the top scene `Update`s; `Overlay => true` scenes draw over those beneath. Open with `M.Push(scene)`; close with `M.Remove(this)` then call the callback; full-screen changes use `M.Reset(scene, overlays...)`. Push/Pop/Remove call `Input.Consume()` — don't re-add your own consume to avoid key leaks.
 - **Wheel QTE** (`Scenes/Wheel.cs`) is shared by care select, care QTEs and fights. Angle 0 = top, clockwise, zones in radians; `Evaluate()` → `Hit.Miss/Great/Perfect`. Reuse it rather than writing a new timing mechanic.
