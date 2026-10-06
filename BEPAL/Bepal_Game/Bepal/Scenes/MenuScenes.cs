@@ -127,7 +127,11 @@ public class NightScene : Scene
 
     public override bool Overlay => true;
 
-    public NightScene(BaseScene b) => _base = b;
+    public NightScene(BaseScene b)
+    {
+        _base = b;
+        Audio.Play(Sfx.EndDay);
+    }
 
     public override void Update(float dt)
     {

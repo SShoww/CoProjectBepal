@@ -21,6 +21,7 @@
 | Scope prototype (ชนะเอกสารอื่น) | [../BEPAL/Docs/GDD/06-vertical-slice.md](../BEPAL/Docs/GDD/06-vertical-slice.md) | ตัดสินว่าอะไรอยู่ใน scope |
 | ดัชนี GDD + changelog ความขัดแย้งกับ Figma | [../BEPAL/Docs/GDD/README.md](../BEPAL/Docs/GDD/README.md) | งานออกแบบ/เนื้อหาเกม |
 | Class diagram (ต้อง sync เมื่อเพิ่ม/เปลี่ยนชื่อ scene) | [../BEPAL/Docs/GDD/04-class-diagram.md](../BEPAL/Docs/GDD/04-class-diagram.md) | เพิ่ม/เปลี่ยนชื่อ scene หรือโฟลเดอร์ |
+| Staging asset (sprite/SFX/music/font) + spec ไฟล์ + ขั้นตอนเข้า Content Pipeline | [../BEPAL/Assets/_candidates/README.md](../BEPAL/Assets/_candidates/README.md) | เพิ่ม/รับ asset รูป เสียง ฟอนต์ เช่นงาน audio |
 | Backlog / sprint ของทีม (งานของคน ไม่ใช่ Quest) | [../BEPAL/Docs/Agile/](../BEPAL/Docs/Agile/) | ถามเรื่องแผน sprint |
 
 ## เครื่องมือ

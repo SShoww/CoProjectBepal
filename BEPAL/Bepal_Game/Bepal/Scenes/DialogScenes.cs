@@ -36,7 +36,9 @@ public class DialogueScene : Scene
     public override void Update(float dt)
     {
         _time += dt;
-        _chars += dt * 55f;
+        int before = (int)_chars;
+        _chars += dt * Balance.TextSpeed;
+        TypeSound(before);
         if (Input.Confirm || Input.Click)
         {
             if (_chars < Current.Length) _chars = Current.Length;
@@ -47,6 +49,16 @@ public class DialogueScene : Scene
                 _onDone?.Invoke();
             }
         }
+    }
+
+    /// <summary>Tick on every 2nd revealed letter (spaces are silent); pitch wobbles slightly so it doesn't drone.</summary>
+    void TypeSound(int before)
+    {
+        string text = Current;
+        int now = Math.Min((int)_chars, text.Length);
+        for (int i = before; i < now; i++)
+            if (!char.IsWhiteSpace(text[i]) && i % 2 == 0)
+                Audio.Play(Sfx.Typewriter, 0.35f, (i * 7 % 5 - 2) * 0.04f, minGap: 0);
     }
 
     public override void Draw(SpriteBatch sb)

@@ -26,6 +26,7 @@ public class BaseScene : Scene
     float _walkT;
     float _camX;
     float _time;
+    float _knockT;
     public float Night;   // driven by NightScene
 
     class PetActor
@@ -85,6 +86,15 @@ public class BaseScene : Scene
     {
         _time += dt;
 
+        // Knocking repeats (clip + a short pause) until the red door is opened
+        _knockT -= dt;
+        if (!_gs.DoorEventPending) _knockT = 0;
+        else if (_knockT <= 0)
+        {
+            Audio.Play(Sfx.DoorKnock);
+            _knockT = Balance.KnockInterval;
+        }
+
         // Walking
         int move = (Input.Down(Keys.D) || Input.Down(Keys.Right) ? 1 : 0) - (Input.Down(Keys.A) || Input.Down(Keys.Left) ? 1 : 0);
         if (move != 0)
@@ -92,6 +102,7 @@ public class BaseScene : Scene
             _facing = move;
             _playerX = MathHelper.Clamp(_playerX + move * 330 * dt, 60, WorldW - 60);
             _walkT += dt;
+            Audio.Loop(Sfx.Footstep, 0.6f);
         }
         _camX = MathHelper.Lerp(_camX, MathHelper.Clamp(_playerX - Gfx.W / 2f, 0, WorldW - Gfx.W), 1 - MathF.Exp(-dt * 6));
 
@@ -136,6 +147,7 @@ public class BaseScene : Scene
 
     void Interact(Spot s)
     {
+        Audio.Play(Sfx.Interact);
         switch (s.Kind)
         {
             case Kind.Bed:
