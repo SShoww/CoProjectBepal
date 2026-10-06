@@ -3,6 +3,9 @@
 ล่าสุด 10 งาน งานละ 3 บรรทัด เขียนผ่าน `tools/context/log-edit.py` เท่านั้น — รายการเก่าอยู่ที่ [archive/edit-log/](archive/edit-log/)
 
 <!-- entries -->
+- **2026-10-07 03:13 · Q-20261007-rain-vfx** — เพิ่ม VFX ฝน Day 4 (Rain.cs): ฝนเบาก่อนเปิดประตู หนัก+ฟ้าแลบหลังเปิดประตู เห็นผ่านหน้าต่างฐาน
+  - Files: BEPAL/Bepal_Game/Bepal/World/Rain.cs, BEPAL/Bepal_Game/Bepal/Scenes/BaseScene.cs, BEPAL/Bepal_Game/Bepal/Scenes/DayEvents.cs, BEPAL/Bepal_Game/Bepal/Core/SceneManager.cs, BEPAL/Bepal_Game/Bepal/DevTools/ShotRunner.cs, BEPAL/Docs/GDD/04-class-diagram.md
+  - Validation: build 0 warning; shots 17/18 ตรวจแล้ว; autoplay ปกติและ --refuse ผ่าน; ยังไม่ผ่านการเล่นจริง
 - **2026-10-07 02:55 · Q-20261007-parallax** — เพิ่ม sprite parallax 5 ชั้น, หน้าต่างใหญ่ 6 บานในบ้าน (ห่างประตู), foreground jungle 2x; อัปเดต CLAUDE.md/monogame skill ว่ามี image assets
   - Files: BEPAL/Bepal_Game/Bepal/World/Backdrop.cs, BEPAL/Bepal_Game/Bepal/Scenes/BaseScene.cs, BEPAL/Bepal_Game/Bepal/Core/Gfx.cs, BEPAL/Bepal_Game/Bepal/Content, CLAUDE.md, .claude/skills/monogame/SKILL.md
   - Validation: build 0 warn, autoplay ปกติ/--refuse ผ่าน, ดู --shots แล้ว; ไม่ผ่าน PR ตามคำสั่งผู้ใช้; ยังไม่ได้เล่นจริง

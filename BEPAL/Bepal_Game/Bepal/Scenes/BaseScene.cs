@@ -95,6 +95,7 @@ public class BaseScene : Scene
     public override void Update(float dt)
     {
         _time += dt;
+        Rain.Target = _gs.Day == 4 ? (_gs.DoorDone ? 1f : 0.5f) : 0f;
 
         // Knocking repeats (clip + a short pause) until the red door is opened
         _knockT -= dt;
@@ -200,6 +201,7 @@ public class BaseScene : Scene
     {
         float night = MathHelper.Clamp(Night, 0, 1);
         SharedBackdrop.Draw(sb, _camX, night, _time, GroundY);
+        Rain.DrawSky(sb);
 
         DrawStructure(sb, night);
 
@@ -240,6 +242,7 @@ public class BaseScene : Scene
         EdgeDark(sb, Sx(WallLeft), -1);
         EdgeDark(sb, Sx(DoorX + 80), 1);
         Gfx.Rect(sb, 0, 0, Gfx.W, Gfx.H, new Color(10, 6, 24) * (night * 0.35f));
+        Rain.DrawFlash(sb);
 
         // Interaction prompt
         if (_near != null && M.Top == this)

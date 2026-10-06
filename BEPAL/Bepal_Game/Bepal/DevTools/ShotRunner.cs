@@ -56,6 +56,8 @@ public class ShotRunner
         _shots.Add(("15_choice", () => { var g = Gs(); return With(new BaseScene(g), new ChoiceScene("Toothless is at the door. What will you do?",
             new[] { new Option("Chase", () => { }), new Option("Tame", () => { }) })); }, 0.2f));
         _shots.Add(("16_tbc", () => With(new ToBeContinuedScene(5)), 3f));
+        _shots.Add(("17_rain_day4", () => With(new BaseScene(Gs(4)) { StartX = 1250 }), 3f));
+        _shots.Add(("18_storm_after_door", () => { var g = Gs(4); g.DoorDone = true; return With(new BaseScene(g) { StartX = 1250 }); }, 4f));
     }
 
     /// <summary>Returns false when all shots are done.</summary>
