@@ -8,6 +8,7 @@
 | [Status.md](Status.md) | ทุก session — สถานะ repo ปัจจุบันและข้อจำกัด |
 | [Agent-Handoff.md](Agent-Handoff.md) | ดู/สร้าง/อัปเดต Quest, รับช่วงงาน |
 | [quests/](quests/) | งานที่ยังไม่ปิด (หนึ่งไฟล์ต่องาน) |
+| [Gitflow.md](Gitflow.md) | สร้าง branch, เขียน commit message, merge/release/hotfix, pre-merge gates |
 | [Edit-Log.md](Edit-Log.md) | เมื่อต้องรู้ว่าใครแก้อะไรล่าสุด — ไม่อ่านอัตโนมัติ |
 | [archive/](archive/) | ประวัติ (snapshot) — เปิดเมื่อต้องสืบย้อนเท่านั้น |
 

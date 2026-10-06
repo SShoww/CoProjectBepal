@@ -24,6 +24,7 @@
 - ไม่ refactor สร้าง abstraction เอกสาร หรือ tests ที่ไม่ให้คุณค่ากับงาน
 - ตรวจด้วยคำสั่งเล็กที่สุดที่เหมาะกับการเปลี่ยนแปลงก่อน (คำสั่งของเกมอยู่ใน [CLAUDE.md](CLAUDE.md))
 - ไม่อ้างผลตรวจเก่าว่าเป็นผลตรวจใหม่
+- branch, commit message และ merge ตาม [Context/Gitflow.md](Context/Gitflow.md) — ห้าม commit ตรงลง `main`/`Develop`
 
 ## ความปลอดภัย
 - ไม่เก็บ secrets, tokens, passwords หรือข้อมูลส่วนตัวในเอกสารและ Log

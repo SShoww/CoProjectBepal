@@ -6,7 +6,7 @@
 **ตรวจล่าสุด:** 2026-10-06 โดย Claude Code (Q-20261006-ai-setup) · แหล่ง: `git status`, `git log -5`, [02-sprint-backlog.md](../BEPAL/Docs/Agile/02-sprint-backlog.md)
 
 ## ปัจจุบัน
-- Branch `main`, commit ล่าสุด `0cb2715 Add MonoGame workflow docs and skill guide`
+- ใช้ Gitflow ([Gitflow.md](Gitflow.md)) ตั้งแต่ 2026-10-06: `main` = `Develop` = `0cb2715`; งาน AI Setup + Gitflow + Toothless balance อยู่ใน branch `ai-setup` รอ PR เข้า `Develop`
 - อยู่ใน Sprint 2 (2026-10-05 → 2026-10-18): Art/Audio จริง + Balance + Passive — Sprint 1 (prototype Day 1–5) ส่งแล้วตามแผน 2026-09-30 (ยังไม่ได้ยืนยันผลส่ง)
 - ระบบ AI Setup (README/AGENTS/Context/tools) ติดตั้ง 2026-10-06
 
