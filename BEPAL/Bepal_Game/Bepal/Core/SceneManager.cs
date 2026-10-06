@@ -65,6 +65,7 @@ public class SceneManager
 
     public void Update(float dt)
     {
+        Rain.Tick(dt);
         if (_fadeDir != 0)
         {
             _fade += _fadeDir * dt * 2.5f;

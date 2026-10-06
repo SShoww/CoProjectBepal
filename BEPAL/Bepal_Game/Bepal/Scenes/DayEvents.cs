@@ -97,6 +97,7 @@ public static class DayEvents
         gs.DisasterSeen = true;
         Audio.Play(Sfx.Storm);
         Gfx.Shake(18, 0.8f);
+        Rain.Flash();
         m.Push(DialogueScene.Say("", null,
             "You crack the door open. No one is there. Only the wind.",
             "THUNDER STORM! Mud and lightning blast through the sanctuary!",
