@@ -58,7 +58,7 @@ public class DialogueScene : Scene
         int now = Math.Min((int)_chars, text.Length);
         for (int i = before; i < now; i++)
             if (!char.IsWhiteSpace(text[i]) && i % 2 == 0)
-                Audio.Play(Sfx.Typewriter, 0.35f, (i * 7 % 5 - 2) * 0.04f, minGap: 0);
+                Audio.Play(Sfx.Typewriter, 0.085f, (i * 7 % 5 - 2) * 0.04f, minGap: 0);
     }
 
     public override void Draw(SpriteBatch sb)

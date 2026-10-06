@@ -91,7 +91,7 @@ public static class Audio
         return new SoundEffect(buf, sampleRate, AudioChannels.Mono);
     }
 
-    public static void Play(string name, float volume = 1f, float pitch = 0f, float minGap = 0.05f)
+    public static void Play(string name, float volume = 0.4f, float pitch = 0f, float minGap = 0.05f)
     {
         if (Muted || !_ok || !_fx.TryGetValue(name, out var fx)) return;
         if (_last.TryGetValue(name, out var t) && _time - t < minGap) return;
