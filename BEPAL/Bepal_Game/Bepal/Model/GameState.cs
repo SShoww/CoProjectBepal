@@ -34,6 +34,14 @@ public static class Balance
 
     public const int Attempts = 10;
 
+    // Pet passives (first pass, to be balanced)
+    public const int PassiveLevel = 2;
+    public const float MosslingHealPct = 0.01f;
+    /// <summary>Toothless poison: enemy takes +25% damage and deals -25% damage.</summary>
+    /// <summary>Nibbleclaw combo: each consecutive Attack hit adds this fraction of base damage (10, 15, 20...).</summary>
+    public const float NibbleComboStep = 0.5f;
+    public const float PoisonTakenMul = 1.25f, PoisonDealtMul = 0.75f;
+
     // Upgrade costs (Figma Scene 12)
     public const int QteCoin = 100, QtePoints = 1, QteMax = 3;
     public const int EnergyCoin = 150, EnergyPoints = 3;

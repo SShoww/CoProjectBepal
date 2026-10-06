@@ -3,6 +3,9 @@
 ล่าสุด 10 งาน งานละ 3 บรรทัด เขียนผ่าน `tools/context/log-edit.py` เท่านั้น — รายการเก่าอยู่ที่ [archive/edit-log/](archive/edit-log/)
 
 <!-- entries -->
+- **2026-10-07 03:48 · Q-20261007-pet-passive** — เพิ่ม passive Lv2: Mossling heal 1%, Toothless พิษ, Blinkbun วาร์ปเข็ม + แสดงในสมุด
+  - Files: BEPAL/Bepal_Game/Bepal/Model/Pet.cs, Model/GameState.cs, Scenes/FightScene.cs, Scenes/BaseMenus.cs, DevTools/ShotRunner.cs, BEPAL/Docs/GDD/04-class-diagram.md
+  - Validation: build ผ่าน, autoplay ปกติ/refuse ผ่าน, shots 12b/12c ตรวจแล้ว; ยังไม่ได้เล่น fight Lv2 จริง
 - **2026-10-07 03:13 · Q-20261007-rain-vfx** — เพิ่ม VFX ฝน Day 4 (Rain.cs): ฝนเบาก่อนเปิดประตู หนัก+ฟ้าแลบหลังเปิดประตู เห็นผ่านหน้าต่างฐาน
   - Files: BEPAL/Bepal_Game/Bepal/World/Rain.cs, BEPAL/Bepal_Game/Bepal/Scenes/BaseScene.cs, BEPAL/Bepal_Game/Bepal/Scenes/DayEvents.cs, BEPAL/Bepal_Game/Bepal/Core/SceneManager.cs, BEPAL/Bepal_Game/Bepal/DevTools/ShotRunner.cs, BEPAL/Docs/GDD/04-class-diagram.md
   - Validation: build 0 warning; shots 17/18 ตรวจแล้ว; autoplay ปกติและ --refuse ผ่าน; ยังไม่ผ่านการเล่นจริง

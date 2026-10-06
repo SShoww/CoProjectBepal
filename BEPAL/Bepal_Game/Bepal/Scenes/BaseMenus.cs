@@ -158,7 +158,11 @@ public class NotebookScene : Scene
 
     public override bool Overlay => true;
 
-    public NotebookScene(GameState gs) => _gs = gs;
+    public NotebookScene(GameState gs, int tab = -1)
+    {
+        _gs = gs;
+        _tab = tab;
+    }
 
     public override void Update(float dt)
     {
@@ -209,6 +213,17 @@ public class NotebookScene : Scene
             Gfx.Text(sb, Gfx.Font, $"Stomach : {(int)p.Stomach}", new Vector2(x, y + 80), ink, 0, false);
             Gfx.Text(sb, Gfx.Font, $"Clean : {(int)p.Clean}", new Vector2(x, y + 120), ink, 0, false);
             Gfx.Text(sb, Gfx.Small, Gfx.Wrap(Gfx.Small, p.Description, 380), new Vector2(x, y + 180), ink, 0, false);
+            if (p.Passive != null)
+            {
+                var pass = new Vector2(x, y + 180 + Gfx.Small.MeasureString(Gfx.Wrap(Gfx.Small, p.Description, 380)).Y + 16);
+                if (p.PassiveUnlocked)
+                {
+                    Gfx.Text(sb, Gfx.Font, "Passive", pass, ink, 0, false);
+                    Gfx.Text(sb, Gfx.Small, Gfx.Wrap(Gfx.Small, p.Passive, 380), pass + new Vector2(0, 34), ink, 0, false);
+                }
+                else
+                    Gfx.Text(sb, Gfx.Small, $"Passive - unlocks at Level {Balance.PassiveLevel}", pass, ink * 0.55f, 0, false);
+            }
             Gfx.Text(sb, Gfx.Small, $"{_page + 1} / {_gs.Pets.Count}", new Vector2(Gfx.W / 2f, 610), ink, 0.5f, false);
         }
         else
