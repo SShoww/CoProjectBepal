@@ -16,30 +16,9 @@ date: 2026-10-07
 
 ## Scene Breakdown (อ้างอิง Figma — 06 · Game Flow Scenes 1–13 และ 07 · Game Flow (Event) Scenes 14–20)
 
-```mermaid
-flowchart LR
-    S1[S1 Main Menu] -->|Play| S2[S2 Choose first pet]
-    S1 -->|Option| OPT[Option]
-    S2 --> S3[S3 Habitat Base]
-    S3 --> S4[S4 Care pet]
-    S4 --> S5[S5 QTE Train] & S6[S6 QTE Feed] & S7[S7 QTE Clean] & S8[S8 QTE Heal]
-    S5 & S6 & S7 & S8 -->|ครบ 10 ครั้ง| S3
-    S3 -->|สมุด| S9[S9 สมุดหลัก]
-    S9 --> S10[S10 pet discovery] & S11[S11 Disaster]
-    S3 -->|Upgrade icon| S12[S12 Upgrade]
-    S3 -->|หมอ| S13[S13 Doctor]
-    S3 -->|End day → วันใหม่| S14[S14 Event: Knock Knock !!]
-    S14 --> S15[S15 pet encounter] & S20[S20 Merchant] & DIS[Disaster event]
-    S15 --> S16[S16 pet choice]
-    S16 -->|Chase| S3
-    S16 -->|Tame| S17[S17 choose pet to fight]
-    S17 --> S18[S18 fight]
-    S18 -->|ศัตรู HP = 0| S19[S19 You got new pet !!!]
-    S18 -->|สัตว์เราตาย| S17
-    S18 -->|ตายหมด: Game Over| S2
-    S19 --> S3
-    S20 --> S3
-```
+![scene-breakdown](diagrams/scene-breakdown.png)
+
+> Draw.io: [diagrams/scene-breakdown.drawio](diagrams/scene-breakdown.drawio) (เปิดด้วย VS Code Draw.io Integration)
 
 | Scene | หน้าจอ | UI บนหน้าจอ | Programmer | Art |
 | --- | --- | --- | --- | --- |

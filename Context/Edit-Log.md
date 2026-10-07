@@ -3,6 +3,9 @@
 ล่าสุด 10 งาน งานละ 3 บรรทัด เขียนผ่าน `tools/context/log-edit.py` เท่านั้น — รายการเก่าอยู่ที่ [archive/edit-log/](archive/edit-log/)
 
 <!-- entries -->
+- **2026-10-07 22:37 · Q-20261007-drawio-diagrams** — สร้าง .drawio 6 ไฟล์แทน mermaid GDD (เก็บ mermaid เดิม + ลิงก์)
+  - Files: BEPAL/Docs/GDD/diagrams/*.drawio, BEPAL/Docs/GDD/01-core-loop.md, 03-mechanics.md, 04-class-diagram.md, 11-narrative-world.md, 13-scene-breakdown.md
+  - Validation: Reviewer render/เทียบ XML ทุก edge PASS 6/6; ยังไม่ได้เปิดใน VS Code GUI
 - **2026-10-07 15:39 · Q-20261007-docs-restructure** — แยกหัวข้อ GDD ออกเป็นไฟล์ใหม่ 07-14 (pet-stats, care-qte, combat-encounters, economy-items, narrative-world, references-art-direction, scene-breakdown, audio-fonts-list) ย้ายข้อความคงเดิม + re-point ลิงก์
   - Files: BEPAL/Docs/GDD/07..14-*.md (ใหม่), 00, 01, 03, 05 GDD, GDD README, CLAUDE.md
   - Validation: link check 0 เสีย (Manager รันซ้ำ), บล็อกที่ย้ายไม่เหลือในไฟล์ต้นทาง, ไม่แก้ตัวเลข
