@@ -63,21 +63,9 @@ date: 2026-10-07
 > **หมายเหตุจาก Figma (07 · Game Flow (Event)):** Event เกิดหลังผู้เล่นกด **End day** แล้วขึ้นวันใหม่ ประตูจะขึ้น "Knock Knock !!" (กดประตูได้ตั้งแต่ **Day 2** เป็นต้นไป — Day 1 เป็นวันให้ผู้เล่นทำความรู้จักระบบ) และ Event จะ **สุ่มเกิด 3 แบบ**: เจอสัตว์ตัวใหม่ · เจอพ่อค้า · เจอภัยธรรมชาติ
 > ไทม์ไลน์ด้านล่าง (Day 2 = Toothless, Day 3 = Merchant) คือลำดับที่ใช้ใน **Vertical Slice / Prototype** ตามภาพ mockup ใน Figma ส่วนเกมเต็มใช้ระบบสุ่ม
 
-```mermaid
-flowchart TD
-    D1[Day 1: The Arrival] -->|เลือก Starter Pet| D2[Day 2: The Wild Infiltration]
-    D2 -->|เสียงเคาะประตู 'Knock Knock' + รับมือ Toothless| D2_Choice{ทางเลือก: ขับไล่ หรือ เชื่อง?}
-    D2_Choice -->|Chase| D2_End[Toothless หนีไป / จบวันอย่างสงบ]
-    D2_Choice -->|Tame| D2_Combat[เข้าสู่ฉาก Combat Taming / สยบ Toothless เข้าทีม]
-    D2_Combat --> D3[Day 3: The Traveling Merchant]
-    D2_End --> D3
-    D3 -->|พ่อค้าเร่เดินทางมาถึงพร้อมข้อเสนอซื้อสัตว์เลี้ยง| D3_Choice{ยอมขาย Toothless 5,000G?}
-    D3_Choice -->|Sell| D3_EndingA[จบแบบ Bittersweet: ได้เงินมหาศาลแต่สูญเสียสัตว์เลี้ยง]
-    D3_Choice -->|Refuse| D3_Boss[เข้าสู่ Boss Fight: Merchant Battle ปกป้องบ้าน]
-    D3_Boss -->|Victory| D3_EndingB[จบแบบ Heroic: ปกป้องสัตว์เลี้ยงสำเร็จและขับไล่พ่อค้า]
-    D3_EndingB --> D_Final[Final Day: Disaster]
-    D_Final -->|Thunderstorm| D_EndSlice[ดูแล ทำความสะอาดสัตว์เลี้ยง]
-```
+![narrative-days](diagrams/narrative-days.png)
+
+> Draw.io: [diagrams/narrative-days.drawio](diagrams/narrative-days.drawio) (เปิดด้วย VS Code Draw.io Integration)
 
 1. **Day 1 — The Arrival (การเริ่มต้น):**
    - ผู้เล่นเปิดร้าน เลือก Starter Pet ตัวแรก (Coco, Sproutlet, หรือ Gloomtail)

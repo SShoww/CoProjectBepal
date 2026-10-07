@@ -12,44 +12,17 @@ date: 2026-10-07
 
 วงจรการเล่นหลักของ BePal ถูกออกแบบให้เป็นวัฏจักรประจำวัน 4 เฟส (4-Phase Daily Loop) ที่ผู้เล่นต้องบริหารจัดการเวลา พลังงาน และสถานะของสัตว์เลี้ยง ท่ามกลางวิกฤตและเหตุการณ์ไม่คาดฝัน:
 
-```mermaid
-flowchart TD
-    Start([Start Day / วันใหม่]) --> Phase1[Phase 1: Narrative & Event Phase<br>รับเหตุการณ์สุ่มรายวัน / พ่อค้ามาเยือน / สัตว์บุก]
-    
-    Phase1 --> Phase2[Phase 2: Care & QTE Action Phase<br>ใช้ Energy ทำกิจกรรม: Feed / Clean / Train / Heal]
-    
-    Phase2 --> CheckEnergy{Energy หมด หรือ<br>เดินไปเตียง + Space สิ้นสุดวัน?}
-    CheckEnergy -->|ยังไม่หมด| Phase2
-    CheckEnergy -->|หมด หรือ นอนที่เตียง| Phase3[Phase 3: Defense & Resolution Phase<br>ต่อสู้รับมือภัยคุกคาม / ป้องกันฐาน]
-    
-    Phase3 --> CheckSurvive{สัตว์เลี้ยง<br>HP เหลือ 0 หรือไม่?}
-    CheckSurvive -->|HP = 0| RevivePrompt[กู้ชีพฉุกเฉินคุณหมอ จ่าย 250G<br>ฟื้นฟูกลับมา HP = 1]
-    RevivePrompt --> Phase4
-    CheckSurvive -->|รอดชีวิต| Phase4[Phase 4: Progression & Save Phase<br>หักค่าสเตตัสรายวัน / สรุปผล / เซฟเกม]
-    
-    Phase4 -->|เข้าสู่วันถัดไป| Start
-```
+![core-loop-day](diagrams/core-loop-day.png)
+
+> Draw.io: [diagrams/core-loop-day.drawio](diagrams/core-loop-day.drawio) (เปิดด้วย VS Code Draw.io Integration)
 
 ---
 
 ### Core Loop ตาม Figma (05 · Game Loop)
 
-```mermaid
-flowchart TD
-    Base[ศูนย์กลางห้องพักพิง<br>Habitat Base] -->|คลิ๊กที่สัตว์| Care[เลือกหัวข้อการดูแล<br>Feed / Clean / Train / Heal]
-    Care -->|ใช้ 1 AP| QTE[เล่น QTE วงล้อ 10 จังหวะ]
-    QTE --> Reward[สะสม Progress bar ของสัตว์<br>และ EXP bar ของผู้เล่น]
-    Reward --> Base
-    Base -->|เปิดประตู Day 2+| Event{Event สุ่ม 3 แบบ}
-    Event --> NewPet[เจอสัตว์ตัวใหม่]
-    Event --> Merchant[เจอพ่อค้า]
-    Event --> Disaster[เจอภัยธรรมชาติ]
-    Base -->|สมุด| Book[pet discovery / Disaster]
-    Base -->|Upgrade icon| Upg[Upgrade: QTE / Progress / Energy]
-    Base -->|คลิ๊กหมอ| Doc[Doctor: ชุบชีวิตสัตว์ HP = 0]
-    Base -->|End day| NewDay[วันใหม่: Stomach & Clean ลดลง]
-    NewDay --> Base
-```
+![core-loop-base](diagrams/core-loop-base.png)
+
+> Draw.io: [diagrams/core-loop-base.drawio](diagrams/core-loop-base.drawio) (เปิดด้วย VS Code Draw.io Integration)
 
 > ลำดับจริงใน Figma: ผู้เล่นกด **End day** ได้ทุกเมื่อ → ขึ้นวันใหม่ (ค่า Stomach และ Clean ลดลง เพื่อกันการ skip day โดยไม่ทำอะไร) → ตั้งแต่ Day 2 ประตูจะมี "Knock Knock !!" ให้คลิ๊กเปิดรับ Event
 

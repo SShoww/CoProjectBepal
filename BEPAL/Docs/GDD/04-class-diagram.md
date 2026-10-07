@@ -20,20 +20,9 @@ Project: `BEPAL/Bepal_Game/Bepal/` — MonoGame DesktopGL 3.8.4, .NET 8, 1280x72
 
 ## Scenes
 
-```mermaid
-flowchart LR
-    MainMenu --> ChooseStarter --> Base
-    Base -->|Space ที่สัตว์| CareSelect --> Qte --> Base
-    Base -->|เตียง| Night --> Base
-    Base --> Upgrade & Doctor & Notebook
-    Base -->|Esc| Paused[Pause: Resume / Main Menu]
-    Base -->|ประตู| DayEvents
-    DayEvents -->|Day 2| Fight
-    DayEvents -->|Day 3| Shop
-    DayEvents -->|Day 4| Storm[Storm: Clean -50 ทุกตัว + ฝน]
-    DayEvents -->|Day 5| Fight --> ToBeContinued
-    Fight -->|แพ้ Toothless| GameOver --> ChooseStarter
-```
+![scene-flow](diagrams/scene-flow.png)
+
+> Draw.io: [diagrams/scene-flow.drawio](diagrams/scene-flow.drawio) (เปิดด้วย VS Code Draw.io Integration)
 
 | Class | Figma Scene |
 | --- | --- |
