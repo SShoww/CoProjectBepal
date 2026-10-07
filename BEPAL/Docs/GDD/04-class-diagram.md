@@ -1,12 +1,12 @@
 ---
 type: gdd-class-diagram
-version: 2.2
-date: 2026-09-28
+version: 2.3
+date: 2026-10-07
 ---
 
 # Class Diagram — BePal Architecture (Prototype)
 
-Project: `BEPAL/Bepal_Game/Bepal/` — MonoGame DesktopGL 3.8.4, .NET 8, 1280x720. ภาพทั้งหมดยังเป็น placeholder ที่วาดจากรูปทรง (ไม่มีไฟล์ภาพ)
+Project: `BEPAL/Bepal_Game/Bepal/` — MonoGame DesktopGL 3.8.4, .NET 8, 1280x720. ภาพส่วนใหญ่ยังเป็น placeholder ที่วาดจากรูปทรง; asset จริงมีเฉพาะ parallax 5 ชั้น, `fg_jungle`, `player.png` (สถานะเต็มดู [05-asset-list.md](05-asset-list.md))
 
 ## โครงสร้างโฟลเดอร์
 
@@ -26,9 +26,11 @@ flowchart LR
     Base -->|Space ที่สัตว์| CareSelect --> Qte --> Base
     Base -->|เตียง| Night --> Base
     Base --> Upgrade & Doctor & Notebook
+    Base -->|Esc| Paused[Pause: Resume / Main Menu]
     Base -->|ประตู| DayEvents
     DayEvents -->|Day 2| Fight
     DayEvents -->|Day 3| Shop
+    DayEvents -->|Day 4| Storm[Storm: Clean -50 ทุกตัว + ฝน]
     DayEvents -->|Day 5| Fight --> ToBeContinued
     Fight -->|แพ้ Toothless| GameOver --> ChooseStarter
 ```
@@ -45,6 +47,8 @@ flowchart LR
 | `DoctorScene` | 13 |
 | `DayEvents` + `DialogueScene` / `ChoiceScene` | 14–16, 20 |
 | `FightScene` | 18 |
+| `Wheel` (`Wheel.cs`: เข็มหมุน + `Zone`, ใช้ร่วมใน CareSelect / Qte / Fight; `Evaluate()` → `Hit.Miss/Great/Perfect`) | 4–8, 18 |
+| `ChoiceScene` "Paused" (Esc ใน `BaseScene`: Resume / Main Menu) | เพิ่มใน slice |
 | `ShopScene`, `NightScene`, `GameOverScene`, `ToBeContinuedScene` | เพิ่มใน slice |
 
 ## หลักการ
@@ -52,3 +56,4 @@ flowchart LR
 - **Scene stack:** หน้าต่างซ้อน (`Overlay = true`) วาดทับฉากด้านล่าง แต่มีแค่ scene บนสุดที่ `Update` — เปิดหน้าใหม่ด้วย `M.Push`, ปิดด้วย `M.Remove(this)` แล้วค่อยเรียก callback
 - **ตัวเลขอยู่ที่ `Balance` ที่เดียว** — ปรับบาลานซ์ได้โดยไม่ต้องแก้ logic
 - **Passive ของสัตว์:** `Pet.Passive` (ข้อความ) + `Pet.PassiveUnlocked` (Lv ≥ `Balance.PassiveLevel` = 2); ผลทำงานใน `FightScene` — Mossling heal 1% MaxHp/attack, Toothless พิษ (ศัตรูรับ +25% / ตี −25%, ไม่ stack), Blinkbun วาร์ปเข็มไป 12 นาฬิกา; Nibbleclaw combo (attack โดนติดกัน +50% ของดาเมจฐานต่อครั้ง รีเซ็ตเมื่อกดพลาด/เปลี่ยนตัว)
+- **Lv3:** แสดงข้อความ "learned a new move!" (coming soon) — ยังไม่มีกลไกท่าใหม่
