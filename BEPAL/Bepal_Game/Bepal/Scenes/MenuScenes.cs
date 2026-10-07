@@ -126,6 +126,7 @@ public class NightScene : Scene
     System.Collections.Generic.List<string> _report = new();
 
     public override bool Overlay => true;
+    public override bool OpenAnim => false;   // drives its own fade
 
     public NightScene(BaseScene b)
     {

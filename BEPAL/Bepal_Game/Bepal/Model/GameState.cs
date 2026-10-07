@@ -17,6 +17,34 @@ public static class Balance
     public const float PerfectPitch = 0f;
     /// <summary>Volume of the QTE Perfect chime, 0..1.</summary>
     public const float PerfectVolume = 0.8f;
+
+    // ---- Movement feel (presentation only; no gameplay impact) ----
+    public const float PlayerMaxSpeed = 330, PlayerAccel = 2200, PlayerDecel = 2800, PlayerTurnAccel = 4500;
+    /// <summary>Below this speed (px/s) the footstep loop stays silent.</summary>
+    public const float FootstepMinSpeed = 40;
+    /// <summary>Smoothing rate of the visual facing (x-scale) after a turn.</summary>
+    public const float FaceDamp = 18;
+    public const float WalkBobPx = 4;
+    /// <summary>Hold Shift to run: top speed (px/s); accel/decel are shared with walking.</summary>
+    public const float PlayerRunSpeed = 560;
+    /// <summary>SpriteMotion (single-image character): stride rate (rad/s at walk speed), lean/sway (rad), squash/stretch amounts.</summary>
+    public const float StrideRate = 12, WalkLeanRad = 0.06f, RunLeanRad = 0.12f, StrideSwayRad = 0.03f;
+    public const float BreathScale = 0.02f, StepSquash = 0.04f, StartStopSquash = 0.08f;
+    public const int DustMax = 32;
+    public const float DustLife = 0.35f, DustMinSpeed = 0.4f;
+    /// <summary>Camera: look-ahead = clamp(vel * Scale, +-Max) smoothed by LookK; deadzone half-width; follow rate.</summary>
+    public const float CamLookScale = 0.35f, CamLookMax = 110, CamLookK = 4, CamDeadzone = 60, CamFollowK = 5;
+    /// <summary>Soft wall: within this distance (px) of the wall, speed into it tapers to half.</summary>
+    public const float WallSoftDist = 120;
+    public const float PetWalkSpeed = 55, PetEaseMul = 1.6f, PetHopPx = 5, PetHopLen = 45;
+    /// <summary>Display smoothing rate for HUD / pet bars.</summary>
+    public const float BarSmoothK = 8;
+    public const float PromptFadeTime = 0.15f;
+    /// <summary>Longest frame step used by scenes in normal play (guards against hitches).</summary>
+    public const float MaxDt = 1 / 20f;
+    public const float FadeSpeed = 2.5f;
+    public const float OverlayOpenTime = 0.18f, OverlayOpenScale = 0.94f;
+    public const float ButtonHoverK = 18, ButtonLiftPx = 2;
     public const int StartCoin = 150;
     public const int DailyCoin = 100;
     public const int ToothlessReward = 200;

@@ -3,6 +3,9 @@
 ล่าสุด 10 งาน งานละ 3 บรรทัด เขียนผ่าน `tools/context/log-edit.py` เท่านั้น — รายการเก่าอยู่ที่ [archive/edit-log/](archive/edit-log/)
 
 <!-- entries -->
+- **2026-10-07 12:39 · Q-20261007-movement-system** — ระบบ movement: accel/decel + วิ่ง Shift, กล้อง look-ahead/deadzone, overlay/ปุ่ม/bar easing, SpriteMotion สำหรับ sprite รูปเดียว + player.png, แก้สัตว์เลี้ยงกระตุก
+  - Files: BEPAL/Bepal_Game/Bepal/Core/**, Scenes/BaseScene.cs, World/Art.cs, World/SpriteMotion.cs, Model/GameState.cs, Content/Sprites/player.png
+  - Validation: build 0 warn; autoplay + --refuse ผ่าน; shots 23 ภาพ; ยังไม่ได้เล่นมือเต็ม
 - **2026-10-07 10:47 · Q-20261007-fight-dodge-after-hit** — Fight wheel สลับเฟส Attack -> Dodge หลัง Attack โดน; Attack กว้างเท่า Dodge และหดได้; ย้ายตัวเลข Fight ทั้งหมด (zone/damage/enemy/visual) เข้า Balance แบ่งหมวด
   - Files: BEPAL/Bepal_Game/Bepal/Scenes/FightScene.cs, BEPAL/Bepal_Game/Bepal/Model/GameState.cs, BEPAL/Bepal_Game/Bepal/Model/Pet.cs, Context/quests/Q-20261007-fight-dodge-after-hit.md
   - Validation: build ผ่าน; --autoplay ได้ reached To be continued; --shots 08/09 ปกติ; ผู้ใช้เล่นมือแล้วผ่าน; ไม่ได้รัน --autoplay --refuse รอบสุดท้าย

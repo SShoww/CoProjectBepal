@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -37,6 +38,8 @@ public class Button
         Label = label;
     }
 
+    float _hover;   // 0..1, eased toward the hover state in Draw
+
     public bool Hover => Enabled && Rect.Contains(Input.Mouse);
 
     /// <summary>Returns true when clicked this frame.</summary>
@@ -49,16 +52,24 @@ public class Button
 
     public void Draw(SpriteBatch sb)
     {
-        var bg = !Enabled ? new Color(40, 36, 40) : Hover ? Color.Lerp(Palette.Panel, Accent, 0.35f) : Palette.Panel;
-        Gfx.Rect(sb, Rect, bg * 0.95f);
-        Gfx.Outline(sb, Rect, Enabled ? Accent : new Color(80, 70, 70), Hover ? 3 : 2);
+        _hover = Ease.Damp(_hover, Hover ? 1 : 0, Balance.ButtonHoverK, Ui.Dt);
+        var r = Rect;
+        r.Y -= (int)MathF.Round(Balance.ButtonLiftPx * _hover);
+        var bg = !Enabled ? new Color(40, 36, 40) : Color.Lerp(Palette.Panel, Accent, 0.35f * _hover);
+        Gfx.Rect(sb, r, bg * 0.95f);
+        Gfx.Outline(sb, r, Enabled ? Color.Lerp(Accent, Palette.Warm, 0.4f * _hover) : new Color(80, 70, 70), 2 + (int)MathF.Round(_hover));
         var size = Gfx.Font.MeasureString(Label);
-        Gfx.Text(sb, Gfx.Font, Label, new Vector2(Rect.Center.X, Rect.Center.Y - size.Y / 2), Enabled ? Palette.Text : Palette.Dim, 0.5f);
+        Gfx.Text(sb, Gfx.Font, Label, new Vector2(r.Center.X, r.Center.Y - size.Y / 2), Enabled ? Palette.Text : Palette.Dim, 0.5f);
     }
 }
 
 public static class Ui
 {
+    /// <summary>Frame step of the current update, set once per frame by SceneManager (Button tween reads it).</summary>
+    public static float Dt = 1 / 60f;
+    /// <summary>0..1 fade-in of the overlay currently being drawn (1 = fully open); scales <see cref="Dim"/>.</summary>
+    public static float OpenAlpha = 1f;
+
     public static void Panel(SpriteBatch sb, Rectangle r, float alpha = 0.95f)
     {
         Gfx.Rect(sb, r, Palette.Panel * alpha);
@@ -74,7 +85,8 @@ public static class Ui
             Gfx.Text(sb, Gfx.Small, label, new Vector2(r.X + 6, r.Y + (r.Height - Gfx.Small.LineSpacing) / 2f), Palette.Text);
     }
 
-    public static void Dim(SpriteBatch sb, float a = 0.6f) => Gfx.Rect(sb, 0, 0, Gfx.W, Gfx.H, Color.Black * a);
+    // Oversized so it still covers the screen while an overlay is scaled down during its open animation
+    public static void Dim(SpriteBatch sb, float a = 0.6f) => Gfx.Rect(sb, -100, -100, Gfx.W + 200, Gfx.H + 200, Color.Black * (a * OpenAlpha));
 
     public static void Hint(SpriteBatch sb, string text) =>
         Gfx.Text(sb, Gfx.Small, text, new Vector2(Gfx.W / 2f, Gfx.H - 30), Palette.Dim, 0.5f);

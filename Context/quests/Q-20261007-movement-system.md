@@ -1,0 +1,11 @@
+### 2026-10-07 — Q-20261007-movement-system — ระบบ movement (ตัวละคร / ฉาก / UI)
+- Status: ready-to-close
+- Owner: Claude Code (Manager) — Researcher + Coder เป็น sub-agent ตามคำสั่งผู้ใช้ 2026-10-07
+- Goal: เพิ่มความลื่นไหลของการเคลื่อนไหวโดยไม่เปลี่ยน gameplay/Balance เดิม · ตรวจรับ: build 0 warning, `--autoplay` (ปกติ + `--refuse`) = `RESULT: reached To be continued`, `--shots` ทุกภาพ render ปกติ
+  - ตัวละคร: ผู้เล่นเร่ง/เบรก (accel/decel) แทนความเร็วคงที่, หันตัวนุ่ม, idle/walk bob; สัตว์เลี้ยงเดินแบบ ease
+  - ฉาก: กล้อง look-ahead + deadzone, ขอบโลก/กำแพงนุ่ม, transition ระหว่างฉากมี easing (ไม่ใช่แค่ fade ดำ)
+  - UI: ease-in/out ตอนเปิด-ปิด panel/overlay, button hover tween, prompt ลอย, bar เลื่อนนุ่ม
+- Files: BEPAL/Bepal_Game/Bepal/Core/**, BEPAL/Bepal_Game/Bepal/Scenes/BaseScene.cs, BEPAL/Bepal_Game/Bepal/Scenes/BaseMenus.cs, BEPAL/Bepal_Game/Bepal/Scenes/DialogScenes.cs, BEPAL/Bepal_Game/Bepal/Model/GameState.cs (เฉพาะ Balance), BEPAL/Bepal_Game/Bepal/World/Art.cs, BEPAL/Bepal_Game/Bepal/DevTools/** (ถ้าจำเป็น), BEPAL/Docs/GDD/04-class-diagram.md (ถ้าเพิ่มไฟล์)
+- Context: [CLAUDE.md](../../CLAUDE.md), [Gitflow.md](../Gitflow.md) · branch `feature/movement-system`
+- Validation: 2026-10-07 ก่อน ship: `dotnet build Bepal_Game.slnx` 0 warn/0 err; --autoplay 197.8s และ --refuse 195.9s = reached To be continued; --shots 23 ภาพ exit 0. เพิ่มเติม: วิ่ง Shift 560 px/s, SpriteMotion + sprite player.png (หันซ้าย/ขวา), แก้สัตว์เลี้ยงกระตุก. ยังไม่ได้เล่นมือเต็ม; ไม่ได้เทียบเวลา autoplay กับก่อนแก้
+- Next action: รอผู้ใช้ยืนยันปิด (ย้ายไป archive/quests/); ปรับ feel ผ่าน Balance "Movement feel"; sprite เดินข้างจริงถ้ามีภาพเพิ่ม
