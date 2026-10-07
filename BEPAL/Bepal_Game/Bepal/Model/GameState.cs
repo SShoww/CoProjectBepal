@@ -34,8 +34,6 @@ public static class Balance
     public const float DustLife = 0.35f, DustMinSpeed = 0.4f;
     /// <summary>Camera: look-ahead = clamp(vel * Scale, +-Max) smoothed by LookK; deadzone half-width; follow rate.</summary>
     public const float CamLookScale = 0.35f, CamLookMax = 110, CamLookK = 4, CamDeadzone = 60, CamFollowK = 5;
-    /// <summary>Soft wall: within this distance (px) of the wall, speed into it tapers to half.</summary>
-    public const float WallSoftDist = 120;
     public const float PetWalkSpeed = 55, PetEaseMul = 1.6f, PetHopPx = 5, PetHopLen = 45;
     /// <summary>Display smoothing rate for HUD / pet bars.</summary>
     public const float BarSmoothK = 8;

@@ -17,7 +17,10 @@ public class BaseScene : Scene
 
     public const float WorldW = 3840;
     public const float GroundY = 600;
-    const float WallLeft = 120, WallRight = 3560;
+    // Hard walls stop the player; speed into a wall tapers to half between the soft line and the wall
+    const float WallLeft = 120, SoftLeft = 630, SoftRight = 3400, WallRight = 3730;
+    // The player's centre stops half a sprite width short of each wall so the sprite never pokes through
+    static readonly float MinX = WallLeft + Art.PlayerHalfWidth, MaxX = WallRight - Art.PlayerHalfWidth;
     // Big windows: centres 630 + 520*i, between the hanging lamps; last one ends ~160px short of the door
     const int WindowCount = 6;
     const float WindowW = 320, WindowH = 160, WindowTop = GroundY - 210;
@@ -41,6 +44,7 @@ public class BaseScene : Scene
     float _camX, _look;
     float _time;
     float _knockT;
+    bool _debug;          // F3: position overlay
     public float Night;   // driven by NightScene
 
     // Prompt: fades in when the nearest spot changes
@@ -134,16 +138,16 @@ public class BaseScene : Scene
         float accel = move == 0 ? Balance.PlayerDecel
             : MathF.Sign(_vel) == -move ? Balance.PlayerTurnAccel : Balance.PlayerAccel;
         _vel = Ease.MoveToward(_vel, move * top, accel * dt);
-        // Soft left wall: speed into it tapers to half over the last WallSoftDist px (the 60..WorldW-60 range is unchanged).
-        // No taper on the right: the red door sits beyond WallRight and must stay at full speed.
         if (_vel < 0)
-            _vel = MathF.Max(_vel, -WallCap(top, (_playerX - WallLeft) / Balance.WallSoftDist));
+            _vel = MathF.Max(_vel, -WallCap(top, (_playerX - MinX) / (SoftLeft - MinX)));
+        else if (_vel > 0)
+            _vel = MathF.Min(_vel, WallCap(top, (MaxX - _playerX) / (MaxX - SoftRight)));
         if (move != 0) _facing = move;
         _faceVis = Ease.Damp(_faceVis, _facing, Balance.FaceDamp, dt);
         _playerX += _vel * dt;
-        if (_playerX < 60 || _playerX > WorldW - 60)
+        if (_playerX < MinX || _playerX > MaxX)
         {
-            _playerX = MathHelper.Clamp(_playerX, 60, WorldW - 60);
+            _playerX = MathHelper.Clamp(_playerX, MinX, MaxX);
             _vel = 0;
         }
         float speed = MathF.Abs(_vel) / Balance.PlayerMaxSpeed;   // 0..1 walking, up to ~1.7 running
@@ -212,6 +216,7 @@ public class BaseScene : Scene
         if (_gs.PlayerExp < _expShown.Value) _expShown.Snap(_gs.PlayerExp);   // level-up wrapped the bar
         _expShown.Update(_gs.PlayerExp, Balance.BarSmoothK, dt);
 
+        if (Input.Pressed(Keys.F3)) _debug = !_debug;
         if (Input.Pressed(Keys.Space) && _near != null) Interact(_near);
         if (Input.Back)
         {
@@ -369,6 +374,38 @@ public class BaseScene : Scene
         }
 
         DrawHud(sb);
+        if (_debug) DrawDebug(sb);
+    }
+
+    /// <summary>F3 overlay: player/camera numbers plus world-space markers for walls, spots and interaction range.</summary>
+    void DrawDebug(SpriteBatch sb)
+    {
+        void VLine(float worldX, Color c, float w = 2) => Gfx.Rect(sb, Sx(worldX) - w / 2, 0, w, Gfx.H, c);
+        VLine(WallLeft, Color.Red * 0.6f);
+        VLine(WallRight, Color.Red * 0.6f);
+        VLine(MinX, Color.Yellow * 0.6f, 1);   // where the player's centre actually stops
+        VLine(MaxX, Color.Yellow * 0.6f, 1);
+        VLine(SoftLeft, Color.Orange * 0.6f);
+        VLine(SoftRight, Color.Orange * 0.6f);
+        foreach (var s in Spots())
+        {
+            float r = s.Kind == Kind.Pet ? 80 : 90;   // pets: 60 reach + 20 bonus (see _near)
+            Gfx.Rect(sb, Sx(s.X - r), GroundY + 20, r * 2, 6, (s == _near ? Color.Lime : Color.Cyan) * 0.5f);
+            VLine(s.X, Color.Cyan * 0.5f, 1);
+        }
+        VLine(_playerX, Color.Magenta * 0.8f);
+
+        string[] lines =
+        {
+            $"PlayerX {_playerX:0.0}  vel {_vel:0.0}  face {_facing}",
+            $"CamX {_camX:0.0}  look {_look:0.0}  screenX {Sx(_playerX):0.0}",
+            $"Near {(_near == null ? "-" : _near.Kind + " @ " + _near.X.ToString("0"))}",
+            $"World {WorldW:0}  wall {WallLeft:0}..{WallRight:0}  soft {SoftLeft:0}/{SoftRight:0}",
+        };
+        var box = new Rectangle(10, 10, 560, 20 + lines.Length * 22);
+        Gfx.Rect(sb, box, Color.Black * 0.7f);
+        for (int i = 0; i < lines.Length; i++)
+            Gfx.Text(sb, Gfx.Small, lines[i], new Vector2(box.X + 10, box.Y + 10 + i * 22), Color.White, 0f);
     }
 
     void EdgeDark(SpriteBatch sb, float edgeX, int dir)

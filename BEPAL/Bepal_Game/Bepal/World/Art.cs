@@ -106,6 +106,8 @@ public static class Art
     /// <summary>Opaque area inside player.png (the file has transparent padding); drawn at <see cref="PlayerSpriteHeight"/> px tall (3x = crisp pixels).</summary>
     public static readonly Rectangle PlayerSpriteSrc = new(21, 9, 17, 33);
     public const float PlayerSpriteHeight = 99;
+    /// <summary>Half of the drawn sprite width (px), so a wall can stop the sprite's edge instead of its centre.</summary>
+    public static readonly float PlayerHalfWidth = PlayerSpriteSrc.Width * PlayerSpriteHeight / PlayerSpriteSrc.Height / 2;
 
     public static void LoadPlayer(ContentManager content) => PlayerSprite = content.Load<Texture2D>("Sprites/player");
 
