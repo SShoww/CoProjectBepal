@@ -4,6 +4,8 @@ This directory serves as the raw staging landing zone for external, free, or new
 
 Non-programmer team members (**Dear** for 2D Art, **Pooh** for Audio/SFX) should place raw candidates here before pipeline integration.
 
+Asset inventory, status and file names: [05-asset-list.md](../../Docs/GDD/05-asset-list.md) (art) and [14-audio-fonts-list.md](../../Docs/GDD/14-audio-fonts-list.md) (SFX/BGM/fonts). Code architecture: [CLAUDE.md](../../../CLAUDE.md).
+
 ---
 
 ## Directory Structure
@@ -67,5 +69,5 @@ flowchart LR
 4. **Register in MGCB**: Add asset reference into `Content/Content.mgcb` with appropriate importer and processor settings (`dotnet mgcb-editor` from `BEPAL/Bepal_Game/Bepal/`).
 5. **Compile & Commit**: Build pipeline compiles `.xnb` artifacts, verified via `dotnet build` and `dotnet run -- --autoplay` (see [CLAUDE.md](../../../CLAUDE.md)).
 
-> **Current state (2026-10-07):** only image assets are the 5 parallax backdrop layers in `Content/Sprites/` (`bg_parallax_sky|clouds|hills|mid|near.png`, copies of `sprites/Hexagon/hexagon_5..1.png`, 320x180 drawn at 4x by `World/Backdrop.cs`, `TextureImporter`/`TextureProcessor` with `PremultiplyAlpha=True`); characters etc. are still drawn from primitives (`Gfx`, `World/Art.cs`). `Content/` holds the three SpriteFonts plus 18 SFX in `Content/Sfx/` (WAV 16-bit PCM, `WavImporter` + `SoundEffectProcessor`, `Quality=Best`), played through `Core/Audio.cs` (`Sfx` name constants). To add an SFX: drop the WAV in `sfx/`, copy to `Content/Sfx/`, register in `Content.mgcb`, add the name to `Sfx.All`. Music (`music/`) is not wired yet.
+> **Current state (2026-10-07):** 7 PNGs in `Content/Sprites/` — `bg_parallax_{sky,clouds,hills,mid,near}.png` (copies of `sprites/Hexagon/hexagon_5..1.png`, 320x180 drawn at 4x by `World/Backdrop.cs`), `fg_jungle.png` and `player.png` (all `TextureImporter`/`TextureProcessor`, `PremultiplyAlpha=True`) — plus 17 SFX in `Content/Sfx/` (WAV 16-bit PCM, `WavImporter` + `SoundEffectProcessor`, `Quality=Best`), played through `Core/Audio.cs` (`Sfx` name constants). Everything else is still drawn from primitives; music (`music/`) is not wired yet. Inventory and status: [05-asset-list.md](../../Docs/GDD/05-asset-list.md); architecture: [CLAUDE.md](../../../CLAUDE.md). To add an SFX: drop the WAV in `sfx/`, copy to `Content/Sfx/`, register in `Content.mgcb`, add the name to `Sfx.All`.
 > **SFX format decision:** WAV only. The source pack also had aiff/flac/m4a/mp3/ogg copies of each sound; they are not kept in the repo (SFX are short, WAV has the lowest latency and no codec risk on DesktopGL).

@@ -1,7 +1,7 @@
 ---
 type: asset-list
-version: 3.0
-date: 2026-09-28
+version: 3.1
+date: 2026-10-07
 project: BePal
 ---
 
@@ -9,7 +9,9 @@ project: BePal
 
 รายการ Asset ทั้งหมดของ BePal — **ภาพ 2D สำหรับ ธัญญรัตน์ (เดียร์)**, **เสียง SFX & BGM สำหรับ ปีย์ตะวัน (ซุง) และ ภูมิพัฒน์ (ภูมิ)**, และ**ฟอนต์สำหรับ ภูมิพัฒน์ (ภูมิ)**
 
-อ้างอิงขอบเขตจาก [06-vertical-slice.md](06-vertical-slice.md) (Day 1–5, side-scroller สไตล์ Kingdom: Classic), ชื่อสัตว์จาก [00-concept.md](00-concept.md) และ Art ต่อ scene จาก [01-core-loop.md](01-core-loop.md) (Scene 1–20 ใน Figma)
+อ้างอิงขอบเขตจาก [06-vertical-slice.md](06-vertical-slice.md) (Day 1–5, side-scroller สไตล์ Kingdom: Classic), ชื่อสัตว์จาก [11-narrative-world.md](11-narrative-world.md) และ Art ต่อ scene จาก [13-scene-breakdown.md](13-scene-breakdown.md) (Scene 1–20 ใน Figma)
+
+> **หมายเหตุ:** รายการเสียง (SFX/BGM) และฟอนต์ (§2–§3) ย้ายไป [14-audio-fonts-list.md](14-audio-fonts-list.md) เมื่อ 2026-10-07 — ไฟล์นี้เก็บเฉพาะ §1 ภาพ และ §4 Pipeline
 
 ### Priority
 
@@ -19,7 +21,16 @@ project: BePal
 | **P1** | มีแล้วดีใน Prototype — อยู่ในฉากที่อาจโดนตัด (สมุด → Upgrade → ร้านค้า → หมอ ตาม 06 §6) |
 | **Later** | เกมเต็ม / นอกขอบเขต Prototype (06 §5) |
 
-> **สถานะปัจจุบัน:** ในโค้ดมีภาพ 5 ไฟล์ (`Content/Sprites/bg_parallax_sky|clouds|hills|mid|near.png`, 320x180 pixel art วาดที่ 4x) ใช้เป็นฉากหลัง parallax ใน `World/Backdrop.cs` — ตัวละครทั้งหมดยังวาดด้วยรูปทรงใน `World/Art.cs` · ฟอนต์ใช้ `Segoe UI` ชั่วคราว
+> **สถานะปัจจุบัน (2026-10-07):** ดูหัวข้อ "สถานะ" ด้านล่าง · ฟอนต์ใช้ `Segoe UI` ชั่วคราว
+
+### สถานะ (as-built, 2026-10-07)
+
+| สถานะ | รายการ |
+| --- | --- |
+| เสร็จ (อยู่ใน `Content/`) | parallax 5 ชั้น (`bg_parallax_{sky,clouds,hills,mid,near}.png`, 320x180 วาด 4x), `fg_jungle.png`, `player.png` (sprite ผู้เล่น), SFX 17 ไฟล์ (ตาราง §2.1 ใน [14-audio-fonts-list.md](14-audio-fonts-list.md)) |
+| ยังไม่ทำ | sprite สัตว์เลี้ยง / ศัตรู / NPC (ยังวาดด้วยรูปทรงใน `World/Art.cs`), เพลง/BGM (§2.2 ใน [14-audio-fonts-list.md](14-audio-fonts-list.md)), ฟอนต์จริงนอกเหนือ SpriteFont 3 ตัว (`Main`/`Big`/`Small` ใช้ `Segoe UI`) |
+
+ขั้นตอนนำ asset เข้าเกม: [_candidates/README.md](../../Assets/_candidates/README.md) · ชื่อ asset ใช้ตามตารางในไฟล์นี้ (เจ้าของหัวข้อ naming)
 
 ### ข้อกำหนดทั่วไปสำหรับภาพ
 
@@ -228,58 +239,13 @@ Prototype มีร้านค้า 3 ชิ้น (ซื้อแล้ว�
 
 ## 🔊 2. รายการเสียงสำหรับ ซุง & ภูมิ (Audio)
 
-### 2.1 Sound Effects (SFX — WAV 44.1kHz 16-bit PCM)
-
-| รหัส Audio | ชื่อไฟล์ | บริบทการเล่น | คำอธิบายอารมณ์เสียง | Priority |
-| --- | --- | --- | --- | --- |
-| **SFX-01** | `sfx/sfx_qte_perfect.wav` | กด Space โดน Perfect | ปิ๊งแก้วใสคมชัด น่าพึงพอใจ | P0 |
-| **SFX-02** | `sfx/sfx_qte_great.wav` | กด Space โดน Great | เคาะไม้ทุ้มปานกลาง | P0 |
-| **SFX-03** | `sfx/sfx_qte_miss.wav` | กดพลาด | Buzzer ทึบสั้นๆ | P0 |
-| **SFX-04** | `sfx/sfx_wheel_select.wav` | เลือก choice บนวงล้อ Care สำเร็จ (จอสั่น) | ตุ้บหนักแน่น | P1 |
-| **SFX-05** | `sfx/sfx_footstep.wav` | ผู้เล่นเดินในฐาน (สุ่ม pitch) | ก้าวเท้าเบาๆ บนพื้นดิน/ไม้ | P1 |
-| **SFX-06** | `sfx/sfx_interact.wav` | กด `Space` ใช้ของในฐาน | ป๊อปเบาๆ | P1 |
-| **SFX-07** | `sfx/sfx_ui_click.wav` | คลิกปุ่ม UI / ESC | คลิกนุ่ม | P0 |
-| **SFX-08** | `sfx/sfx_knock.wav` | "Knock Knock !!" ที่ประตูแดง | เคาะประตูเหล็กสองครั้ง ก้องๆ | P0 |
-| **SFX-09** | `sfx/sfx_door_open.wav` | เปิดประตูแดง | ประตูเหล็กหนักเลื่อนเปิด | P1 |
-| **SFX-10** | `sfx/sfx_sleep.wav` | End day ที่เตียง (เข้ากลางคืน) | ระฆังลมเบาๆ / เสียงผ้าห่ม | P1 |
-| **SFX-11** | `sfx/sfx_dodge_success.wav` | Dodge สำเร็จ | ลมวูบ (Whoosh) / Metallic Parry | P0 |
-| **SFX-12** | `sfx/sfx_attack_hit.wav` | Attack โดนศัตรู | กระแทกหนักแน่น | P0 |
-| **SFX-13** | `sfx/sfx_pet_hurt.wav` | สัตว์เราโดนโจมตี | ร้องเจ็บสั้นๆ แปลกๆ (uncanny) | P0 |
-| **SFX-14** | `sfx/sfx_acid_spit.wav` | Toothless ใช้ท่า Acid | ของเหลวเดือดสาดกระเซ็น (Sizzle Splat) | P1 |
-| **SFX-15** | `sfx/sfx_bigz_roar.wav` | Big Z ปรากฏ / โจมตี | คำรามต่ำ ทุ้มหนัก | P1 |
-| **SFX-16** | `sfx/sfx_coin.wav` | ได้/จ่าย coin (รายได้เช้า, ร้าน, หมอ, ขายสัตว์) | เหรียญกระทบกัน | P0 |
-| **SFX-17** | `sfx/sfx_level_up.wav` | Player LV up (+1 Point) | ไล่โน้ตขึ้นสดใส | P1 |
-| **SFX-18** | `sfx/sfx_new_pet.wav` | "You got new pet !!!" | Jingle สั้นเฉลิมฉลอง | P1 |
-| **SFX-19** | `sfx/sfx_thunder.wav` | หน้าข้อความพายุ Day 4 | ฟ้าผ่าเปรี้ยง + ฝน | P1 |
-| **SFX-20** | `sfx/sfx_eat.wav`, `sfx_bubble.wav` | QTE Feed (เคี้ยวกรุบกรอบ) / QTE Clean (หยดน้ำ/สบู่) | ตาม 00-concept | Later |
-| **SFX-21** | `sfx/sfx_typewriter_key.wav` | ตัวอักษรขึ้นใน dialogue | แป้นพิมพ์ดีดนุ่มๆ | Later |
-| **SFX-22** | `sfx/sfx_coin_gatling.wav`, `sfx_cane_strike.wav` | Merchant Boss Fight | — | Later |
-
-### 2.2 Background Music (BGM — OGG Looping)
-
-| รหัส Audio | ชื่อไฟล์ | บริบทของฉาก | สไตล์และอารมณ์ดนตรี | Priority |
-| --- | --- | --- | --- | --- |
-| **BGM-01** | `music/bgm_menu.ogg` | Main Menu / เลือกสัตว์ | เงียบ ลึกลับ อบอุ่น | P1 |
-| **BGM-02** | `music/bgm_base_cozy.ogg` | ฐาน (Day 1–5) + Care/QTE | อะคูสติกกีตาร์ + เปียโนไฟฟ้า Lo-Fi สบายๆ แต่มีโน้ตแปลกแทรก | P0 |
-| **BGM-03** | `music/bgm_fight.ogg` | Fight กับ Toothless (Day 2) | ตึงเครียด จังหวะเร็ว | P0 |
-| **BGM-04** | `music/bgm_merchant.ogg` | พ่อค้า + ร้านค้า (Day 3) | แจ๊ซหม่นๆ เจ้าเล่ห์ | P1 |
-| **BGM-05** | `music/bgm_thunderstorm.ogg` | หน้าพายุ (Day 4) | ambient ฝนตก ฟ้าร้อง | P1 |
-| **BGM-06** | `music/bgm_boss_bigz.ogg` | Fight กับ Big Z (Day 5) | หนักหน่วง สิ้นหวัง | P1 |
-| **BGM-07** | `music/bgm_to_be_continued.ogg` | หน้า "To be continued..." | เปียโนเดี่ยว ค้างคา | P1 |
-| **BGM-08** | `music/bgm_ending_bittersweet.ogg`, `bgm_ending_heroic.ogg` | ฉากจบ A/B ของ Merchant arc (เกมเต็ม) | — | Later |
-
-> MonoGame เล่น `Song` จาก `.ogg` / `.mp3` ได้ แต่แนะนำ `.ogg` สำหรับ DesktopGL
+→ ดู [14-audio-fonts-list.md](14-audio-fonts-list.md) (ย้ายไปไฟล์แยก 2026-10-07)
 
 ---
 
 ## 🔤 3. ฟอนต์สำหรับ ภูมิ
 
-ข้อความในเกมเป็นภาษาอังกฤษทั้งหมด — ไม่ต้องใช้ฟอนต์ไทย · ต้องเป็นฟอนต์ที่ **อนุญาตให้ใช้ในเกมได้** (เช่น Google Fonts / OFL)
-
-| รหัส Font | ไฟล์ | บริบทการใช้งาน | สไตล์ฟอนต์ | ปัจจุบันในโค้ด | Priority |
-| --- | --- | --- | --- | --- | --- |
-| **FNT-01** | `Fonts/fnt_title_display.ttf` → `Big.spritefont` (44 pt) | โลโก้, หัวข้อหน้าจอ, "Knock Knock !!", "To be continued...", Perfect/Great/Miss | ตัวหนา กึ่งลึกลับ มีเอกลักษณ์ | `Segoe UI` 44 | P1 |
-| **FNT-02** | `Fonts/fnt_ui_cozy.ttf` → `Main.spritefont` (18 pt) + `Small.spritefont` (14 pt) | Dialogue, ปุ่ม, HUD, คำอธิบายไอเทม | Sans-serif มน อบอุ่น อ่านง่าย | `Segoe UI` 18 / 14 | P1 |
+→ ดู [14-audio-fonts-list.md](14-audio-fonts-list.md) (ย้ายไปไฟล์แยก 2026-10-07)
 
 ---
 
@@ -287,7 +253,7 @@ Prototype มีร้านค้า 3 ชิ้น (ซื้อแล้ว�
 
 ```mermaid
 flowchart LR
-    A[Staging<br>docs/02_Assets/_candidates/] --> B[Review โดย ภูมิ + เดียร์]
+    A[Staging<br>BEPAL/Assets/_candidates/] --> B[Review โดย ภูมิ + เดียร์]
     B --> C[วางไฟล์ใน<br>BEPAL/Bepal_Game/Bepal/Content/]
     C --> D[เพิ่มใน Content.mgcb<br>MonoGame Content Builder]
     D --> E[Runtime<br>Content.Load&lt;T&gt;&#40;&#41;]

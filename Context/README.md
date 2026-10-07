@@ -23,6 +23,8 @@
 | Class diagram (ต้อง sync เมื่อเพิ่ม/เปลี่ยนชื่อ scene) | [../BEPAL/Docs/GDD/04-class-diagram.md](../BEPAL/Docs/GDD/04-class-diagram.md) | เพิ่ม/เปลี่ยนชื่อ scene หรือโฟลเดอร์ |
 | Staging asset (sprite/SFX/music/font) + spec ไฟล์ + ขั้นตอนเข้า Content Pipeline | [../BEPAL/Assets/_candidates/README.md](../BEPAL/Assets/_candidates/README.md) | เพิ่ม/รับ asset รูป เสียง ฟอนต์ เช่นงาน audio |
 | Backlog / sprint ของทีม (งานของคน ไม่ใช่ Quest) | [../BEPAL/Docs/Agile/](../BEPAL/Docs/Agile/) | ถามเรื่องแผน sprint |
+| Template backlog / sprint plan / sprint backlog | [../BEPAL/Template/](../BEPAL/Template/) | สร้างเอกสาร Agile ใหม่ |
+| รายการ asset (สถานะ done/pending, ชื่อไฟล์) — ภาพ: 05, เสียง/ฟอนต์: [14](../BEPAL/Docs/GDD/14-audio-fonts-list.md) | [../BEPAL/Docs/GDD/05-asset-list.md](../BEPAL/Docs/GDD/05-asset-list.md) | ตรวจ/อัปเดตสถานะ asset |
 
 ## เครื่องมือ
 - `python tools/context/log-edit.py --quest Q-ID --files "a, b" --summary "..." --validation "..."` — เขียน [Edit-Log.md](Edit-Log.md) (รายละเอียดใน [Rules.md § Edit Log](Rules.md#edit-log))
