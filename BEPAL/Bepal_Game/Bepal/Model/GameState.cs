@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Xna.Framework;
 
 namespace Bepal;
 
@@ -37,10 +38,69 @@ public static class Balance
     // Pet passives (first pass, to be balanced)
     public const int PassiveLevel = 2;
     public const float MosslingHealPct = 0.01f;
-    /// <summary>Toothless poison: enemy takes +25% damage and deals -25% damage.</summary>
     /// <summary>Nibbleclaw combo: each consecutive Attack hit adds this fraction of base damage (10, 15, 20...).</summary>
     public const float NibbleComboStep = 0.5f;
+    /// <summary>Toothless poison: enemy takes +25% damage and deals -25% damage.</summary>
     public const float PoisonTakenMul = 1.25f, PoisonDealtMul = 0.75f;
+
+    // ================= FIGHT (Scenes/FightScene.cs) =================
+    // Zone sizes are half-widths in radians (full circle = 6.28); speeds are rad/s.
+
+    // --- Fight: wheel zones ---
+    /// <summary>Dodge Perfect half-width when it appears; the Attack zone starts at the same size.</summary>
+    public const float DodgeStart = 0.32f;
+    /// <summary>Same, for the next fight after drinking Sea Tea (+20%).</summary>
+    public const float DodgeStartSeaTea = 0.38f;
+    /// <summary>Dodge counts as "Too slow" (enemy hits) once it shrinks to this half-width.</summary>
+    public const float DodgeVanish = 0.012f;
+    /// <summary>Attack shrinks at this fraction of the enemy's DodgeShrink.</summary>
+    public const float AttackShrinkMul = 0.5f;
+    /// <summary>Attack Perfect never shrinks below this half-width.</summary>
+    public const float AttackMinPerfect = 0.06f;
+    /// <summary>Attack Great half-width = Perfect + this.</summary>
+    public const float AttackGreatBand = 0.16f;
+    /// <summary>Min distance (rad) from the needle / other zones when a new zone is placed.</summary>
+    public const float DodgeSpawnGap = 1.2f, AttackSpawnGap = 0.8f;
+
+    // --- Fight: damage ---
+    /// <summary>Share of ATK dealt by a Great hit (Perfect = 100%).</summary>
+    public const float AttackGreatDmgMul = 0.75f;
+
+    // --- Fight: enemies (Model/Pet.cs). DodgeShrink = rad/s the Dodge zone shrinks; NeedleSpeed = rad/s of the needle ---
+    public const int ToothlessHp = 120, ToothlessAtk = 15;
+    public const float ToothlessDodgeShrink = 0.1f, ToothlessNeedleSpeed = 2.4f;
+    public const int BigZHp = 9999, BigZAtk = 20;
+    public const float BigZDodgeShrink = 0.26f, BigZNeedleSpeed = 3.4f;
+
+    // --- Fight visual: layout (pixels, 1280x720) ---
+    public const float FightWheelY = 440f, FightWheelRadius = 150f, FightWheelThickness = 26f;
+    public const int FightFloorY = 560;
+    public const float FightPetX = 250f, FightEnemyX = 1010f, FightPetScale = 1.4f;
+    public const int FightPetBarW = 140, FightPetBarH = 16, FightPetBarY = 380, FightPetLabelY = 354;
+    public const int FightEnemyBarW = 400, FightEnemyBarH = 24, FightEnemyBarY = 60, FightEnemyMargin = 40, FightEnemyNameY = 24;
+    public const float FightTipY = 250f, FightEndTextY = 300f;
+
+    // --- Fight visual: popups (floating text positions) ---
+    public const float FightPopupCenterY = 250f;
+    public static readonly Vector2 FightPopupPet = new(300, 200), FightPopupPetSub = new(300, 260);
+    public static readonly Vector2 FightPopupEnemyDmg = new(1000, 150), FightPopupEnemyStatus = new(1000, 220);
+
+    // --- Fight visual: effects (screen shake = strength, seconds; fades = per second) ---
+    public const float FightHurtShake = 14f, FightHurtShakeTime = 0.35f;
+    public const float FightHitShake = 8f, FightHitShakeTime = 0.2f;
+    public const float FightFlashFade = 4f, FightLungeFade = 3f;
+    public const float FightPetLunge = 30f, FightEnemyLunge = 60f;
+    public const float FightPoisonTint = 0.25f;
+    /// <summary>Seconds the VICTORY / DEFEATED banner stays before leaving the fight, and its dim strength.</summary>
+    public const float FightEndDelay = 1.5f, FightEndDim = 0.4f;
+
+    // --- Fight visual: colors ---
+    public static readonly Color FightFloor = new(30, 22, 24), FightFloorEdge = new(80, 50, 44);
+    public static readonly Color FightRedTint = new(60, 0, 10);
+    public const float FightRedTintAlpha = 0.18f;
+    public static readonly Color FightPoisonColor = new(170, 90, 220);
+    /// <summary>Backdrop (night base seen through the door): world X and brightness.</summary>
+    public const float FightBackdropX = 3000f, FightBackdropLight = 0.85f;
 
     // Upgrade costs (Figma Scene 12)
     public const int QteCoin = 100, QtePoints = 1, QteMax = 3;
