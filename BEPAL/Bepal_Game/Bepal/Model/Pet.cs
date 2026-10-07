@@ -105,13 +105,13 @@ public class Enemy
 
     public static Enemy Toothless() => new()
     {
-        Name = "Toothless", AttackName = "Acid", MaxHp = 120, Hp = 120, Atk = 15, Color = new Color(52, 46, 64),
-        DodgeShrink = 0.05f, NeedleSpeed = 2f,
+        Name = "Toothless", AttackName = "Acid", MaxHp = Balance.ToothlessHp, Hp = Balance.ToothlessHp, Atk = Balance.ToothlessAtk, Color = new Color(52, 46, 64),
+        DodgeShrink = Balance.ToothlessDodgeShrink, NeedleSpeed = Balance.ToothlessNeedleSpeed,
     };
 
     public static Enemy BigZ() => new()
     {
-        Name = "Big Z", AttackName = "Crush", MaxHp = 9999, Hp = 9999, Atk = 20, Color = new Color(120, 24, 36),
-        Size = 1.7f, DodgeShrink = 0.26f, NeedleSpeed = 3.4f, IsBoss = true,
+        Name = "Big Z", AttackName = "Crush", MaxHp = Balance.BigZHp, Hp = Balance.BigZHp, Atk = Balance.BigZAtk, Color = new Color(120, 24, 36),
+        Size = 1.7f, DodgeShrink = Balance.BigZDodgeShrink, NeedleSpeed = Balance.BigZNeedleSpeed, IsBoss = true,
     };
 }
