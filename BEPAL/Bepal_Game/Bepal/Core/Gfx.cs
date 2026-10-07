@@ -32,6 +32,7 @@ public static class Gfx
         Big = content.Load<SpriteFont>("Fonts/Big");
         Small = content.Load<SpriteFont>("Fonts/Small");
         Backdrop.Load(content);
+        Art.LoadPlayer(content);
     }
 
     static Texture2D MakeCircle(GraphicsDevice gd, int size, bool soft)
@@ -68,9 +69,12 @@ public static class Gfx
         else _shakeOffset = Vector2.Zero;
     }
 
+    /// <summary>Extra view transform applied under the shake (set by SceneManager for overlay open animations).</summary>
+    public static Matrix ViewExtra = Matrix.Identity;
+
     public static void Begin(SpriteBatch sb, BlendState? blend = null, SamplerState? sampler = null) =>
         sb.Begin(SpriteSortMode.Deferred, blend ?? BlendState.AlphaBlend, sampler ?? SamplerState.LinearClamp, null, null, null,
-            Matrix.CreateTranslation(_shakeOffset.X, _shakeOffset.Y, 0));
+            ViewExtra * Matrix.CreateTranslation(_shakeOffset.X, _shakeOffset.Y, 0));
 
     /// <summary>Switch to additive blending (for light), then call <see cref="EndAdditive"/>.</summary>
     public static void BeginAdditive(SpriteBatch sb)

@@ -34,15 +34,30 @@ public class BaseScene : Scene
     float _playerX = HearthX - 150;
     int _facing = 1;
     float _walkT;
-    float _camX;
+    float _vel;          // px/s, signed; PlayerX stays the physics position
+    readonly SpriteMotion _motion = new();   // pose for the player image (single still or primitives)
+    float _faceVis = 1;  // smoothed facing for drawing only
+    int _lastStep;
+    float _camX, _look;
     float _time;
     float _knockT;
     public float Night;   // driven by NightScene
 
+    // Prompt: fades in when the nearest spot changes
+    (Kind, Pet?) _promptKey;
+    float _promptT;
+    Smoothed _expShown;
+
+    struct Dust { public Vector2 Pos, Vel; public float Age; }
+    readonly Dust[] _dust = new Dust[Balance.DustMax];
+    int _dustNext;
+
     class PetActor
     {
-        public float X, Target, Wait;
+        public float X, Start, Target, Wait, T, Dur, Hop, Phase;   // Phase: fixed per-pet offset so idle bobs aren't in sync
+        public bool Moving;
         public int Facing = 1;
+        public Smoothed Hp;
     }
 
     readonly Dictionary<Pet, PetActor> _actors = new();
@@ -57,7 +72,12 @@ public class BaseScene : Scene
     public float PlayerX => _playerX;
     public float PetX(Pet p) => Actor(p).X;
 
-    public BaseScene(GameState gs) => _gs = gs;
+    public BaseScene(GameState gs)
+    {
+        _gs = gs;
+        _expShown.Snap(gs.PlayerExp);
+        for (int i = 0; i < _dust.Length; i++) _dust[i].Age = Balance.DustLife;   // all slots start expired
+    }
 
     /// <summary>Spawn position override (used by the screenshot tool).</summary>
     public float StartX
@@ -75,8 +95,9 @@ public class BaseScene : Scene
     {
         if (!_actors.TryGetValue(p, out var a))
         {
-            a = new PetActor { X = HearthX + _rng.Next(-300, 300) };
-            a.Target = a.X;
+            a = new PetActor { X = HearthX + _rng.Next(-300, 300), Phase = (float)_rng.NextDouble() * 6.28f };
+            a.Target = a.Start = a.X;
+            a.Hp.Snap(p.Hp);
             _actors[p] = a;
         }
         return a;
@@ -106,35 +127,70 @@ public class BaseScene : Scene
             _knockT = Balance.KnockInterval;
         }
 
-        // Walking
+        // Walking: accelerate toward the input direction, brake when released, turn around faster than a plain start
         int move = (Input.Down(Keys.D) || Input.Down(Keys.Right) ? 1 : 0) - (Input.Down(Keys.A) || Input.Down(Keys.Left) ? 1 : 0);
-        if (move != 0)
+        bool run = Input.Down(Keys.LeftShift) || Input.Down(Keys.RightShift);
+        float top = run ? Balance.PlayerRunSpeed : Balance.PlayerMaxSpeed;
+        float accel = move == 0 ? Balance.PlayerDecel
+            : MathF.Sign(_vel) == -move ? Balance.PlayerTurnAccel : Balance.PlayerAccel;
+        _vel = Ease.MoveToward(_vel, move * top, accel * dt);
+        // Soft left wall: speed into it tapers to half over the last WallSoftDist px (the 60..WorldW-60 range is unchanged).
+        // No taper on the right: the red door sits beyond WallRight and must stay at full speed.
+        if (_vel < 0)
+            _vel = MathF.Max(_vel, -WallCap(top, (_playerX - WallLeft) / Balance.WallSoftDist));
+        if (move != 0) _facing = move;
+        _faceVis = Ease.Damp(_faceVis, _facing, Balance.FaceDamp, dt);
+        _playerX += _vel * dt;
+        if (_playerX < 60 || _playerX > WorldW - 60)
         {
-            _facing = move;
-            _playerX = MathHelper.Clamp(_playerX + move * 330 * dt, 60, WorldW - 60);
-            _walkT += dt;
-            Audio.Loop(Sfx.Footstep, 0.6f);
+            _playerX = MathHelper.Clamp(_playerX, 60, WorldW - 60);
+            _vel = 0;
         }
-        _camX = MathHelper.Lerp(_camX, MathHelper.Clamp(_playerX - Gfx.W / 2f, 0, WorldW - Gfx.W), 1 - MathF.Exp(-dt * 6));
+        float speed = MathF.Abs(_vel) / Balance.PlayerMaxSpeed;   // 0..1 walking, up to ~1.7 running
+        _walkT += dt * speed;
+        _motion.Update(dt, _vel, _facing);
+        if (MathF.Abs(_vel) > Balance.FootstepMinSpeed) Audio.Loop(Sfx.Footstep, 0.6f);
+        UpdateDust(dt, speed);
 
-        // Pets wander around the hearth light
+        // Camera: look ahead of the motion, and only follow once the focus leaves the deadzone
+        _look = Ease.Damp(_look, MathHelper.Clamp(_vel * Balance.CamLookScale, -Balance.CamLookMax, Balance.CamLookMax), Balance.CamLookK, dt);
+        float focus = _playerX + _look;
+        float off = focus - (_camX + Gfx.W / 2f);
+        float want = off > Balance.CamDeadzone ? focus - Balance.CamDeadzone - Gfx.W / 2f
+            : off < -Balance.CamDeadzone ? focus + Balance.CamDeadzone - Gfx.W / 2f : _camX;
+        _camX = MathHelper.Clamp(Ease.Damp(_camX, want, Balance.CamFollowK, dt), 0, WorldW - Gfx.W);
+
+        // Pets wander around the hearth light, easing between spots
         foreach (var p in _gs.Pets)
         {
             var a = Actor(p);
+            a.Hp.Update(p.Hp, Balance.BarSmoothK, dt);
             if (p.Dead) continue;
-            if (MathF.Abs(a.Target - a.X) < 4)
+            if (a.Moving)
+            {
+                a.T += dt;
+                float u = a.Dur <= 0 ? 1 : MathF.Min(a.T / a.Dur, 1);
+                a.X = MathHelper.Lerp(a.Start, a.Target, Ease.InOutSine(u));
+                // One hop per PetHopLen px actually travelled, so hops slow to a stop with the ease instead of fighting it
+                a.Hop = MathF.Abs(MathF.Sin(MathF.PI * MathF.Abs(a.X - a.Start) / Balance.PetHopLen)) * Balance.PetHopPx * MathF.Sin(MathF.PI * u);
+                if (u >= 1) { a.X = a.Target; a.Moving = false; a.Hop = 0; }
+            }
+            else
             {
                 a.Wait -= dt;
                 if (a.Wait <= 0)
                 {
                     a.Target = HearthX + _rng.Next(-420, 420);
                     a.Wait = 1.5f + (float)_rng.NextDouble() * 3;
+                    if (MathF.Abs(a.Target - a.X) >= 4)
+                    {
+                        a.Start = a.X;
+                        a.T = 0;
+                        a.Dur = MathF.Abs(a.Target - a.X) / Balance.PetWalkSpeed * Balance.PetEaseMul;
+                        a.Facing = Math.Sign(a.Target - a.X);
+                        a.Moving = true;
+                    }
                 }
-            }
-            else
-            {
-                a.Facing = Math.Sign(a.Target - a.X);
-                a.X += a.Facing * 55 * dt;
             }
         }
         foreach (var gone in _actors.Keys.Where(k => !_gs.Pets.Contains(k)).ToList()) _actors.Remove(gone);
@@ -147,17 +203,65 @@ public class BaseScene : Scene
             .Select(t => t.s)
             .FirstOrDefault();
 
+        // Prompt fade-in restarts whenever the nearest spot changes (pets move, so compare identity, not X)
+        var key = (_near?.Kind ?? Kind.Pet, _near?.Pet);
+        if (_near == null || key != _promptKey) _promptT = 0;
+        _promptKey = key;
+        _promptT += dt;
+
+        if (_gs.PlayerExp < _expShown.Value) _expShown.Snap(_gs.PlayerExp);   // level-up wrapped the bar
+        _expShown.Update(_gs.PlayerExp, Balance.BarSmoothK, dt);
+
         if (Input.Pressed(Keys.Space) && _near != null) Interact(_near);
         if (Input.Back)
+        {
+            _vel = 0;
             M.Push(new ChoiceScene("Paused", new[]
             {
                 new Option("Resume", () => { }),
                 new Option("Main Menu", () => M.Reset(new MainMenuScene())),
             }, cancellable: true));
+        }
+    }
+
+    static float WallCap(float top, float dist) => top * (0.5f + 0.5f * Ease.Smoothstep(dist));
+
+    void UpdateDust(float dt, float speed)
+    {
+        for (int i = 0; i < _dust.Length; i++)
+        {
+            if (_dust[i].Age >= Balance.DustLife) continue;
+            _dust[i].Age += dt;
+            _dust[i].Pos += _dust[i].Vel * dt;
+            _dust[i].Vel *= 1 - MathF.Min(1, 4 * dt);
+        }
+        // One puff per foot-down (each half of the walk cycle) once moving fast enough
+        int step = (int)MathF.Floor(_walkT * 12f / MathF.PI);
+        if (step == _lastStep) return;
+        _lastStep = step;
+        if (speed <= Balance.DustMinSpeed) return;
+        int dir = MathF.Sign(_vel) < 0 ? 1 : -1;   // kicked up behind the feet
+        _dust[_dustNext] = new Dust
+        {
+            Pos = new Vector2(_playerX + (step % 2 == 0 ? -6 : 6), GroundY + 4),
+            Vel = new Vector2(dir * (18 + 6 * (step % 3)), -(14 + 4 * (step % 4))),
+        };
+        _dustNext = (_dustNext + 1) % _dust.Length;
+    }
+
+    void DrawDust(SpriteBatch sb)
+    {
+        foreach (var d in _dust)
+        {
+            if (d.Age >= Balance.DustLife) continue;
+            float t = d.Age / Balance.DustLife;
+            Gfx.Circle(sb, new Vector2(Sx(d.Pos.X), d.Pos.Y), 3 + 4 * t, new Color(150, 124, 104) * (0.4f * (1 - t)));
+        }
     }
 
     void Interact(Spot s)
     {
+        _vel = 0;
         Audio.Play(Sfx.Interact);
         switch (s.Kind)
         {
@@ -224,14 +328,22 @@ public class BaseScene : Scene
         foreach (var p in _gs.Pets)
         {
             var a = Actor(p);
-            var feet = new Vector2(Sx(a.X), GroundY + 6);
+            var feet = new Vector2(Sx(a.X), GroundY + 6 - a.Hop);
             bool hl = _near?.Pet == p;
-            Art.Pet(sb, p.Species, p.Color, feet, 0.8f, _time + a.X, playerHead, 1f, p.Dead, hl);
+            Art.Pet(sb, p.Species, p.Color, feet, 0.8f, _time + a.Phase, playerHead, 1f, p.Dead, hl);
             if (hl) Gfx.Text(sb, Gfx.Small, p.Name, new Vector2(feet.X, feet.Y - 132), Palette.Warm, 0.5f);
-            Ui.Bar(sb, new Rectangle((int)feet.X - 30, (int)feet.Y - 86, 60, 8), p.Hp, p.MaxHp, Palette.Hp);
+            Ui.Bar(sb, new Rectangle((int)feet.X - 30, (int)GroundY + 6 - 86, 60, 8), a.Hp.Value, p.MaxHp, Palette.Hp);
         }
 
-        Art.Player(sb, new Vector2(Sx(_playerX), GroundY + 6), _facing, _walkT);
+        DrawDust(sb);
+        var feetP = new Vector2(Sx(_playerX), GroundY + 6);
+        var pose = _motion.Pose;
+        if (Art.PlayerSprite != null)
+            Art.PlayerImage(sb, feetP, pose, _motion.Face);
+        else
+            Art.Player(sb, feetP, _facing, _walkT,
+                lean: pose.Rot * 92f, bob: -pose.Offset.Y, faceScale: _motion.Face,
+                breath: (pose.Scale.Y - 1) * 32f);
 
         // Ground, then the sprite foreground (parallax 1.3) in front of everything
         Gfx.Rect(sb, 0, GroundY, Gfx.W, Gfx.H - GroundY, Gfx.Lerp(new Color(58, 40, 34), new Color(24, 18, 22), night));
@@ -247,11 +359,12 @@ public class BaseScene : Scene
         // Interaction prompt
         if (_near != null && M.Top == this)
         {
-            var pos = new Vector2(Sx(_near.X), GroundY - (_near.Kind == Kind.Pet ? 150 : 200));
+            float fade = Ease.OutCubic(_promptT / Balance.PromptFadeTime);
+            var pos = new Vector2(Sx(_near.X), GroundY - (_near.Kind == Kind.Pet ? 150 : 200) + MathF.Sin(_time * 3.2f) * 4);
             string text = $"[Space] {_near.Label}";
             var size = Gfx.Small.MeasureString(text);
-            Gfx.Rect(sb, pos.X - size.X / 2 - 10, pos.Y - 4, size.X + 20, size.Y + 8, Color.Black * 0.6f);
-            Gfx.Text(sb, Gfx.Small, text, new Vector2(pos.X, pos.Y), Palette.Warm, 0.5f);
+            Gfx.Rect(sb, pos.X - size.X / 2 - 10, pos.Y - 4, size.X + 20, size.Y + 8, Color.Black * (0.6f * fade));
+            Gfx.Text(sb, Gfx.Small, text, new Vector2(pos.X, pos.Y), Palette.Warm * fade, 0.5f);
             if (_near.Pet is { } np) CareSelectScene.PetStats(sb, np, new Rectangle(20, 470, 250, 210));
         }
 
@@ -370,9 +483,9 @@ public class BaseScene : Scene
         for (int i = 0; i < _gs.MaxEnergy; i++)
             Gfx.Rect(sb, r.X + 96 + i * 20, r.Y + 41, 14, 14, i < _gs.Energy ? new Color(120, 240, 140) : new Color(50, 60, 50));
         Gfx.Text(sb, Gfx.Font, $"Player LV. {_gs.PlayerLevel}", new Vector2(r.X + 240, r.Y + 8), Palette.Text);
-        Ui.Bar(sb, new Rectangle(r.X + 240, r.Y + 40, 180, 14), _gs.PlayerExp, _gs.PlayerMaxExp, Palette.Progress);
+        Ui.Bar(sb, new Rectangle(r.X + 240, r.Y + 40, 180, 14), _expShown.Value, _gs.PlayerMaxExp, Palette.Progress);
         Gfx.Text(sb, Gfx.Small, $"Points {_gs.Points}", new Vector2(r.X + 432, r.Y + 36), Palette.Dim);
 
-        if (_near == null && M.Top == this) Ui.Hint(sb, "A / D  Walk     SPACE  Interact     ESC  Pause");
+        if (_near == null && M.Top == this) Ui.Hint(sb, "A / D  Walk     SHIFT  Run     SPACE  Interact     ESC  Pause");
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace Bepal;
@@ -100,18 +101,40 @@ public static class Art
         Gfx.Ellipse(sb, body + new Vector2(0, 50) * s, 44 * s, 10 * s, Color.Black);
     }
 
-    /// <summary>The Lone Sanctuarist — a quiet humanoid in a hooded cloak.</summary>
-    public static void Player(SpriteBatch sb, Vector2 feet, int facing, float walkT)
+    /// <summary>The player's still image (null = draw the primitive character instead). Origin = bottom centre of <see cref="PlayerSpriteSrc"/>.</summary>
+    public static Texture2D? PlayerSprite;
+    /// <summary>Opaque area inside player.png (the file has transparent padding); drawn at <see cref="PlayerSpriteHeight"/> px tall (3x = crisp pixels).</summary>
+    public static readonly Rectangle PlayerSpriteSrc = new(21, 9, 17, 33);
+    public const float PlayerSpriteHeight = 99;
+
+    public static void LoadPlayer(ContentManager content) => PlayerSprite = content.Load<Texture2D>("Sprites/player");
+
+    public static void PlayerImage(SpriteBatch sb, Vector2 feet, Pose pose, float face)
     {
+        Gfx.Ellipse(sb, feet + new Vector2(0, -2), 26, 6, Color.Black * 0.35f);
+        SpriteMotion.Draw(sb, PlayerSprite!, PlayerSpriteSrc, feet, PlayerSpriteHeight, pose, face);
+    }
+
+    /// <summary>The Lone Sanctuarist — a quiet humanoid in a hooded cloak.</summary>
+    /// <param name="lean">Horizontal sway (px) of the head relative to the feet; lower parts shift proportionally.</param>
+    /// <param name="bob">Upper body lift (px) while walking; the legs stay planted.</param>
+    /// <param name="faceScale">Smoothed facing in -1..1 (defaults to <paramref name="facing"/>) so the face slides through a turn.</param>
+    /// <param name="breath">Idle breathing, +-px on the cloak height.</param>
+    public static void Player(SpriteBatch sb, Vector2 feet, int facing, float walkT,
+        float lean = 0, float bob = 0, float? faceScale = null, float breath = 0)
+    {
+        float fx = faceScale ?? facing;
         float step = MathF.Sin(walkT * 12f);
+        Vector2 U(float h) => feet + new Vector2(lean * h / 92f, -h - bob);   // point on the upper body at height h
         Gfx.Ellipse(sb, feet + new Vector2(0, -2), 26, 6, Color.Black * 0.35f);
         Gfx.Rect(sb, feet.X - 10 + step * 4, feet.Y - 26, 7, 26, new Color(40, 30, 36));
         Gfx.Rect(sb, feet.X + 3 - step * 4, feet.Y - 26, 7, 26, new Color(40, 30, 36));
-        Gfx.Ellipse(sb, feet + new Vector2(0, -52), 20, 32, new Color(92, 110, 130));          // cloak
-        Gfx.Circle(sb, feet + new Vector2(0, -92), 16, new Color(92, 110, 130));                // hood
-        Gfx.Circle(sb, feet + new Vector2(5 * facing, -90), 10, new Color(20, 18, 26));          // face shadow
-        Gfx.Circle(sb, feet + new Vector2(9 * facing, -92), 2.5f, Palette.Warm);                 // glowing eye
-        Gfx.Rect(sb, feet.X - 14, feet.Y - 60, 28, 5, new Color(214, 150, 88));                  // scarf
+        Gfx.Ellipse(sb, U(52), 20, 32 + breath, new Color(92, 110, 130));                       // cloak
+        Gfx.Circle(sb, U(92 + breath * 0.5f), 16, new Color(92, 110, 130));                     // hood
+        Gfx.Circle(sb, U(90 + breath * 0.5f) + new Vector2(5 * fx, 0), 10, new Color(20, 18, 26));   // face shadow
+        Gfx.Circle(sb, U(92 + breath * 0.5f) + new Vector2(9 * fx, 0), 2.5f, Palette.Warm);           // glowing eye
+        var scarf = U(60);
+        Gfx.Rect(sb, scarf.X - 14, scarf.Y, 28, 5, new Color(214, 150, 88));                    // scarf
     }
 
     public static void Doctor(SpriteBatch sb, Vector2 feet, float time)
