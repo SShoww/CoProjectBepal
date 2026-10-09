@@ -128,7 +128,7 @@ public static class Balance
     /// <summary>Backdrop (night base seen through the door): world X and brightness.</summary>
     public const float FightBackdropX = 3000f, FightBackdropLight = 0.85f;
 
-    // Upgrade costs (Figma Scene 12)
+    // Upgrade costs
     public const int QteCoin = 100, QtePoints = 1, QteMax = 3;
     public const int EnergyCoin = 150, EnergyPoints = 3;
     public const int ProgressCoin = 20, ProgressPoints = 2, ProgressMax = 2;
@@ -164,8 +164,31 @@ public class GameState
 
     public GameState(Species starter) => Pets.Add(Pet.Create(starter));
 
+    /// <summary>Coin gained; <paramref name="source"/> labels it in telemetry.</summary>
+    public void AddCoin(int amount, string source)
+    {
+        Coin += amount;
+        Telemetry.Coin(amount, source, Coin);
+    }
+
+    /// <summary>Coin spent; <paramref name="sink"/> labels it in telemetry. Callers check affordability first.</summary>
+    public void SpendCoin(int amount, string sink)
+    {
+        Coin -= amount;
+        Telemetry.Coin(-amount, sink, Coin);
+    }
+
+    /// <summary>Changes Energy, clamped to [0, MaxEnergy]; returns the amount actually applied.</summary>
+    public int AddEnergy(int delta, string reason)
+    {
+        int before = Energy;
+        Energy = Math.Clamp(Energy + delta, 0, MaxEnergy);
+        Telemetry.Energy(Energy - before, reason, Energy, MaxEnergy);
+        return Energy - before;
+    }
+
     /// <summary>Returns true on player level up.</summary>
-    public bool AddExp(int amount)
+    public bool AddExp(int amount, string reason = "qte")
     {
         bool up = false;
         PlayerExp += amount;
@@ -176,6 +199,7 @@ public class GameState
             Points++;
             up = true;
         }
+        Telemetry.Exp(amount, reason, this, up);
         return up;
     }
 
@@ -187,7 +211,10 @@ public class GameState
         {
             if (p.Stomach <= 0)
             {
+                float hpBefore = p.Hp;
                 p.Hp -= Balance.StarveDamage;
+                Telemetry.Emit("starve", "pet", p.Name, "hpBefore", (int)MathF.Ceiling(hpBefore), "hpAfter", p.HpShown, "died", p.Dead);
+                if (p.Dead) Telemetry.PetDeath(p, "starve", hpBefore);
                 report.Add(p.Dead
                     ? $"{p.Name} starved and has fallen..."
                     : $"{p.Name} is starving! -{Balance.StarveDamage} HP");
@@ -195,8 +222,8 @@ public class GameState
         }
 
         Day++;
-        Coin += Balance.DailyCoin;
-        Energy = MaxEnergy;
+        AddCoin(Balance.DailyCoin, "daily");
+        AddEnergy(MaxEnergy - Energy, "daily_restore");
         DoorDone = false;
 
         foreach (var p in Pets.Where(p => !p.Dead))

@@ -65,7 +65,7 @@ public class BaseScene : Scene
     }
 
     readonly Dictionary<Pet, PetActor> _actors = new();
-    readonly Random _rng = new();
+    readonly Random _rng = RunSeed.Make(2);
 
     public enum Kind { Bed, Upgrade, Doctor, Book, Door, Pet }
 

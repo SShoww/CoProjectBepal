@@ -32,6 +32,9 @@ public class FightScene : Scene
     bool _poisoned;
     int _combo;   // Nibbleclaw: consecutive Attack hits
 
+    // Telemetry counters (fight_end)
+    int _tAtkHit, _tAtkMiss, _tDodgeOk, _tTooSlow, _tMissPress, _tDmgDealt, _tDmgTaken, _tPetsLost;
+
     public FightScene(GameState gs, Enemy enemy, Pet pet, Action<bool> onEnd)
     {
         _gs = gs;
@@ -39,8 +42,12 @@ public class FightScene : Scene
         _pet = pet;
         _onEnd = onEnd;
         _wheel.Speed = enemy.NeedleSpeed;
+        bool seaTea = gs.SeaTea;
         _dodgeStart = gs.SeaTea ? Balance.DodgeStartSeaTea : Balance.DodgeStart;   // Sea Tea: Dodge zone +20% for this fight
         gs.SeaTea = false;
+        Telemetry.Emit("fight_start", "enemy", enemy.Name, "pet", pet.Name, "petHp", pet.HpShown, "petMaxHp", pet.MaxHp, "petAtk", pet.Atk,
+            "seaTea", seaTea, "dodgeStart", _dodgeStart);
+        Telemetry.Snapshot(pet);
         if (enemy.IsBoss) Audio.Play(Sfx.FightBossRoar);
         _attack = new Zone { Color = Palette.Heal, Label = "Attack" };
         StartAttack();
@@ -65,11 +72,16 @@ public class FightScene : Scene
         _wheel.Zones.Add(_attack);
     }
 
-    void EnemyHits()
+    void EnemyHits(string cause)
     {
         int dmg = (int)MathF.Round(_enemy.Atk * (_poisoned ? Balance.PoisonDealtMul : 1f));
+        float hpBefore = _pet.Hp;
         _pet.Hp -= dmg;
         _pet.ClampStats();
+        _tDmgTaken += dmg;
+        if (cause == "too_slow") _tTooSlow++; else _tMissPress++;
+        Telemetry.Emit("fight_hurt", "cause", cause, "dmgTaken", dmg, "hpLost", (int)MathF.Round(hpBefore - _pet.Hp), "petHp", _pet.HpShown, "pet", _pet.Name);
+        if (_pet.Dead) Telemetry.PetDeath(_pet, _enemy.IsBoss ? "boss" : "fight", hpBefore);
         _petFlash = 1;
         _lunge = 1;
         Audio.Play(Sfx.FightPetHurt);
@@ -81,6 +93,7 @@ public class FightScene : Scene
 
     void PetFell()
     {
+        _tPetsLost++;
         var alive = _gs.Alive.ToList();
         if (alive.Count == 0)
         {
@@ -91,6 +104,7 @@ public class FightScene : Scene
         _waitingForSwap = true;
         M.Push(new PetPickScene($"{_pet.Name} has fallen! Send another pet", alive, p =>
         {
+            Telemetry.Emit("fight_swap", "fromPet", _pet.Name, "toPet", p.Name);
             _pet = p;
             _combo = 0;
             _waitingForSwap = false;
@@ -111,6 +125,9 @@ public class FightScene : Scene
             _end -= dt;
             if (_end < 0)
             {
+                Telemetry.Emit("fight_end", "enemy", _enemy.Name, "won", _won, "rounds", _tAtkHit, "attackHits", _tAtkHit, "attackMiss", _tAtkMiss,
+                    "dodgeOk", _tDodgeOk, "tooSlow", _tTooSlow, "missPress", _tMissPress, "dmgDealt", _tDmgDealt, "dmgTaken", _tDmgTaken,
+                    "petsLost", _tPetsLost, "durationSim", _time);
                 M.Remove(this);
                 _onEnd(_won);
             }
@@ -130,7 +147,7 @@ public class FightScene : Scene
             if (_dodge.Perfect <= Balance.DodgeVanish)
             {
                 _popups.Add("Too slow!", Palette.Danger, CenterPopup);
-                EnemyHits();
+                EnemyHits("too_slow");
                 return;
             }
         }
@@ -139,6 +156,9 @@ public class FightScene : Scene
         var (hit, zone) = _wheel.Evaluate();
         if (zone != null && zone == _dodge)
         {
+            _tDodgeOk++;
+            Telemetry.Emit("fight_press", "kind", "dodge", "hit", hit.ToString(), "dmgDealt", 0, "combo", _combo, "petHp", _pet.HpShown,
+                "enemyHp", (int)_enemy.Hp, "poisoned", _poisoned);
             Audio.Play(Sfx.FightDodge);
             _popups.Add("Dodge!", Palette.Feed, Balance.FightPopupPet);
             StartAttack();
@@ -153,6 +173,10 @@ public class FightScene : Scene
                 if (_combo > 1) _popups.Add($"Combo x{_combo}", Palette.Coin, Balance.FightPopupPetSub);
             }
             _enemy.Hp = MathF.Max(0, _enemy.Hp - dmg);
+            _tAtkHit++;
+            _tDmgDealt += (int)dmg;
+            Telemetry.Emit("fight_press", "kind", "attack", "hit", hit.ToString(), "dmgDealt", (int)dmg, "combo", _combo, "petHp", _pet.HpShown,
+                "enemyHp", (int)_enemy.Hp, "poisoned", _poisoned);
             _enemyFlash = 1;
             Audio.Play(Sfx.FightPlayerAttack);
             Gfx.Shake(Balance.FightHitShake, Balance.FightHitShakeTime);
@@ -181,8 +205,11 @@ public class FightScene : Scene
         else
         {
             _popups.Add("Miss", Palette.Danger, CenterPopup);
+            if (_dodge == null) _tAtkMiss++;
+            Telemetry.Emit("fight_press", "kind", "miss", "hit", "Miss", "dmgDealt", 0, "combo", _combo, "petHp", _pet.HpShown,
+                "enemyHp", (int)_enemy.Hp, "poisoned", _poisoned);
             _combo = 0;
-            EnemyHits();
+            EnemyHits("miss_press");
         }
     }
 

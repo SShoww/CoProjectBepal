@@ -40,9 +40,11 @@ public static class DayEvents
     {
         m.Push(new ChoiceScene("Toothless is at the door. What will you do?", new[]
         {
-            new Option("Chase", () => m.Push(DialogueScene.Say("", null,
-                "You wave your arms and shout. Toothless hisses and slinks back into the dark. (No energy spent.)"))),
+            new Option("Chase", () => { Telemetry.DoorEvent("toothless", "chase"); m.Push(DialogueScene.Say("", null,
+                "You wave your arms and shout. Toothless hisses and slinks back into the dark. (No energy spent.)")); }),
             new Option("Tame", () => m.Push(new PetPickScene("Choose your pet", gs.Alive, pet =>
+            {
+                Telemetry.DoorEvent("toothless", "tame");
                 m.Push(new FightScene(gs, Enemy.Toothless(), pet, won =>
                 {
                     if (!won)
@@ -52,11 +54,13 @@ public static class DayEvents
                     }
                     var t = Pet.Create(Species.Toothless);
                     gs.Pets.Add(t);
-                    gs.Coin += Balance.ToothlessReward;
+                    Telemetry.Emit("pet_added", "pet", t.Name, "via", "toothless_tame");
+                    gs.AddCoin(Balance.ToothlessReward, "toothless_reward");
                     Audio.Play(Sfx.NewPet);
                     m.Push(DialogueScene.Say("", null, "You got new pet !!!",
                         $"Toothless curls up by the hearth. (+{Balance.ToothlessReward} coin from the sanctuary fund)"));
-                })), onCancel: () => ToothlessChoice(m, gs)))
+                }));
+            }, onCancel: () => ToothlessChoice(m, gs)))
             , gs.Alive.Any()),
         }));
     }
@@ -75,14 +79,20 @@ public static class DayEvents
         {
             new Option("Sell", () =>
             {
+                Telemetry.DoorEvent("merchant", "sell");
                 gs.Pets.Remove(target);
-                gs.Coin += Balance.MerchantOffer;
+                Telemetry.Emit("pet_removed", "pet", target.Name, "via", "merchant_sale");
+                gs.AddCoin(Balance.MerchantOffer, "merchant_sale");
                 Audio.Play(Sfx.UiCoin);
                 m.Push(DialogueScene.Say("Merchant", null, "A pleasure doing business. It'll be... well looked after.",
                     $"The cart rolls away. You can still hear {target.Name} crying long after it's gone."));
             }, gs.Pets.Count > 1),
-            new Option("Refuse", () => m.Push(DialogueScene.Say("Merchant", () => m.Push(new ShopScene(gs)),
-                "Hmph. Sentimental. Suit yourself.", "Then perhaps you'd like to buy something instead?"))),
+            new Option("Refuse", () =>
+            {
+                Telemetry.DoorEvent("merchant", "refuse");
+                m.Push(DialogueScene.Say("Merchant", () => m.Push(new ShopScene(gs)),
+                    "Hmph. Sentimental. Suit yourself.", "Then perhaps you'd like to buy something instead?"));
+            }),
         })), portrait));
     }
 
@@ -95,6 +105,7 @@ public static class DayEvents
             p.ClampStats();
         }
         gs.DisasterSeen = true;
+        Telemetry.DoorEvent("storm", "none");
         Audio.Play(Sfx.Storm);
         Gfx.Shake(18, 0.8f);
         Rain.Flash();
@@ -119,12 +130,16 @@ public static class DayEvents
         {
             if (!gs.Alive.Any())
             {
+                Telemetry.DoorEvent("bigz", "none");
                 m.Push(DialogueScene.Say("", End, "There is no one left to stand against Big Z."));
                 return;
             }
             m.Push(new PetPickScene("Choose your pet", gs.Alive, pet =>
+            {
+                Telemetry.DoorEvent("bigz", "fight");
                 m.Push(new FightScene(gs, Enemy.BigZ(), pet, _ =>
-                    m.Push(DialogueScene.Say("Big Z", End, "Pathetic. Keep your shelter warm for me, keeper."))))));
+                    m.Push(DialogueScene.Say("Big Z", End, "Pathetic. Keep your shelter warm for me, keeper."))));
+            }));
         }, portrait));
     }
 }

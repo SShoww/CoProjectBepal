@@ -11,6 +11,7 @@ namespace Bepal;
 public class UpgradeScene : Scene
 {
     readonly GameState _gs;
+    public GameState State => _gs;
     readonly Button[] _plus = new Button[3];
     readonly Popups _popups = new();
 
@@ -19,8 +20,11 @@ public class UpgradeScene : Scene
     public UpgradeScene(GameState gs)
     {
         _gs = gs;
-        for (int i = 0; i < 3; i++) _plus[i] = new Button(new Rectangle(880, 250 + i * 110, 64, 64), "+");
+        for (int i = 0; i < 3; i++) _plus[i] = new Button(PlusRect(i), "+");
     }
+
+    /// <summary>Hit box of the "+" button of row <paramref name="i"/> (also used by the autoplay bot).</summary>
+    public static Rectangle PlusRect(int i) => new(880, 250 + i * 110, 64, 64);
 
     (string name, string desc, int coin, int points, int level, int max)[] Rows =>
     new[]
@@ -41,15 +45,17 @@ public class UpgradeScene : Scene
             var r = rows[i];
             _plus[i].Enabled = r.level < r.max && _gs.Coin >= r.coin && _gs.Points >= r.points;
             if (!_plus[i].Update()) continue;
-            _gs.Coin -= r.coin;
+            _gs.SpendCoin(r.coin, "upgrade");
             _gs.Points -= r.points;
             Audio.Play(Sfx.UiCoin);
             switch (i)
             {
                 case 0: _gs.QteUpgrade++; break;
-                case 1: _gs.EnergyUpgrade++; _gs.Energy++; break;
+                case 1: _gs.EnergyUpgrade++; _gs.AddEnergy(1, "upgrade"); break;
                 case 2: _gs.ProgressUpgrade++; break;
             }
+            Telemetry.Emit("upgrade_buy", "name", i switch { 0 => "QTE", 1 => "Energy", _ => "Progress" }, "newLevel", r.level + 1,
+                "coinCost", r.coin, "pointCost", r.points, "coinAfter", _gs.Coin, "pointsAfter", _gs.Points);
             _popups.Add($"{r.name} upgraded!", Palette.Coin, new Vector2(Gfx.W / 2f, 140));
         }
         if (Input.Back) M.Remove(this);
@@ -84,6 +90,7 @@ public class UpgradeScene : Scene
 public class DoctorScene : Scene
 {
     readonly GameState _gs;
+    public GameState State => _gs;
     float _time;
 
     public override bool Overlay => true;
@@ -92,7 +99,7 @@ public class DoctorScene : Scene
 
     List<Pet> Fallen => _gs.Pets.Where(p => p.Dead).ToList();
 
-    Rectangle Card(int i, int n) => new(Gfx.W / 2 - (n * 230 + (n - 1) * 20) / 2 + i * 250, 220, 230, 300);
+    public static Rectangle Card(int i, int n) => new(Gfx.W / 2 - (n * 230 + (n - 1) * 20) / 2 + i * 250, 220, 230, 300);
 
     public override void Update(float dt)
     {
@@ -108,9 +115,10 @@ public class DoctorScene : Scene
                 {
                     new Option("Yes", () =>
                     {
-                        _gs.Coin -= Balance.ReviveCost;
+                        _gs.SpendCoin(Balance.ReviveCost, "revive");
                         Audio.Play(Sfx.UiCoin);
                         pet.Hp = 1;
+                        Telemetry.Revive(pet, Balance.ReviveCost);
                         M.Remove(this);
                         M.Push(DialogueScene.Say("Doctor", null, $"{pet.Name} is breathing again. Barely. Keep it fed and clean."));
                     }, afford),
@@ -250,6 +258,7 @@ public class ShopScene : Scene
     readonly GameState _gs;
     readonly Button[] _buy = new Button[3];
     readonly Button _leave = new(new Rectangle(Gfx.W / 2 - 100, 600, 200, 50), "Leave");
+    public GameState State => _gs;
     readonly Popups _popups = new();
     float _time;
 
@@ -260,28 +269,32 @@ public class ShopScene : Scene
     static readonly Item[] Items =
     {
         new("Crab Apple", 25, "One pet: +18 HP, +20 Stomach", new Color(220, 70, 60)),
-        new("Caffeine Tonic", 40, "+2 Energy today", new Color(230, 160, 60)),
+        new("Caffeine Tonic", 40, "+2 Energy today (up to max)", new Color(230, 160, 60)),
         new("Sea Tea", 18, "Dodge zone +20% in your next fight", new Color(90, 190, 220)),
     };
 
     public ShopScene(GameState gs)
     {
         _gs = gs;
-        for (int i = 0; i < 3; i++) _buy[i] = new Button(new Rectangle(250 + i * 280, 470, 220, 50), $"Buy  {Items[i].Price}");
+        for (int i = 0; i < 3; i++) _buy[i] = new Button(BuyRect(i), $"Buy  {Items[i].Price}");
     }
+
+    /// <summary>Hit box of the Buy button of item <paramref name="i"/> (also used by the autoplay bot).</summary>
+    public static Rectangle BuyRect(int i) => new(250 + i * 280, 470, 220, 50);
 
     public override void Update(float dt)
     {
         _time += dt;
         _popups.Update(dt);
         _buy[0].Enabled = _gs.Coin >= Items[0].Price && _gs.Alive.Any();
-        _buy[1].Enabled = _gs.Coin >= Items[1].Price;
+        _buy[1].Enabled = _gs.Coin >= Items[1].Price && _gs.Energy < _gs.MaxEnergy;
         _buy[2].Enabled = _gs.Coin >= Items[2].Price && !_gs.SeaTea;
 
         if (_buy[0].Update())
             M.Push(new PetPickScene("Who gets the Crab Apple?", _gs.Pets, p =>
             {
-                _gs.Coin -= Items[0].Price;
+                _gs.SpendCoin(Items[0].Price, "shop_apple");
+                Telemetry.Emit("shop_buy", "item", "Crab Apple", "price", Items[0].Price, "target", p.Name);
                 Audio.Play(Sfx.UiCoin);
                 p.Hp += 18;
                 p.Stomach += 20;
@@ -290,14 +303,16 @@ public class ShopScene : Scene
             }, onCancel: () => { }));
         if (_buy[1].Update())
         {
-            _gs.Coin -= Items[1].Price;
+            _gs.SpendCoin(Items[1].Price, "shop_tonic");
+            Telemetry.Emit("shop_buy", "item", "Caffeine Tonic", "price", Items[1].Price, "target", "");
             Audio.Play(Sfx.UiCoin);
-            _gs.Energy += 2;
-            _popups.Add("+2 Energy!", Palette.Heal, new Vector2(Gfx.W / 2f, 150));
+            int gained = _gs.AddEnergy(2, "tonic");
+            _popups.Add($"+{gained} Energy!", Palette.Heal, new Vector2(Gfx.W / 2f, 150));
         }
         if (_buy[2].Update())
         {
-            _gs.Coin -= Items[2].Price;
+            _gs.SpendCoin(Items[2].Price, "shop_tea");
+            Telemetry.Emit("shop_buy", "item", "Sea Tea", "price", Items[2].Price, "target", "");
             Audio.Play(Sfx.UiCoin);
             _gs.SeaTea = true;
             _popups.Add("Sea Tea ready for the next fight", Palette.Clean, new Vector2(Gfx.W / 2f, 150));

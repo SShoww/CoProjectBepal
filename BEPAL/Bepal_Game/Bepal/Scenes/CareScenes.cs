@@ -11,6 +11,7 @@ public class CareSelectScene : Scene
 {
     readonly GameState _gs;
     readonly Pet _pet;
+    public Pet Pet => _pet;
     public Wheel Wheel => _wheel;
     readonly Wheel _wheel = new(new Vector2(Gfx.W / 2f, 330), 170) { Speed = 2.2f };
     readonly Popups _popups = new();
@@ -60,14 +61,20 @@ public class CareSelectScene : Scene
 
         if (_gs.Energy <= 0)
         {
+            Telemetry.Emit("care_select", "pet", _pet.Name, "result", "noenergy", "care", "", "hit", "Miss", "energyAfter", _gs.Energy);
             _popups.Add("No energy left!", Palette.Danger, new Vector2(Gfx.W / 2f, 120));
             return;
         }
         var (hit, zone) = _wheel.Evaluate();
-        if (hit == Hit.Miss || zone == null) return;   // Figma: pressing a gap does nothing
+        if (hit == Hit.Miss || zone == null)   // Figma: pressing a gap does nothing
+        {
+            Telemetry.Emit("care_select", "pet", _pet.Name, "result", "gap", "care", "", "hit", "Miss", "energyAfter", _gs.Energy);
+            return;
+        }
 
         _chosen = Enum.Parse<Care>(zone.Label!);
-        _gs.Energy--;
+        _gs.AddEnergy(-1, "care");
+        Telemetry.Emit("care_select", "pet", _pet.Name, "result", "ok", "care", zone.Label, "hit", hit.ToString(), "energyAfter", _gs.Energy);
         Audio.Play(Sfx.QteSelect);
         Gfx.Shake(10, 0.3f);
         _popups.Add(zone.Label!, zone.Color, new Vector2(Gfx.W / 2f, 120));
@@ -133,11 +140,16 @@ public class QteScene : Scene
         _ => Palette.Heal,
     };
 
+    // Telemetry: pet stats at the start, to report deltas in qte_end
+    readonly float _t0Stomach, _t0Clean, _t0Hp;
+    float _progressGain;
+
     public QteScene(GameState gs, Pet pet, Care care)
     {
         _gs = gs;
         _pet = pet;
         _care = care;
+        (_t0Stomach, _t0Clean, _t0Hp) = (pet.Stomach, pet.Clean, pet.Hp);
         _wheel.Speed = care == Care.Train ? TrainSpeed : BaseSpeed;
 
         // Metabolic burn (GDD 03 §2.2): Train -10 Stomach, Clean/Heal -5.
@@ -199,6 +211,8 @@ public class QteScene : Scene
         var (hit, zone) = _wheel.Evaluate();
         _popups.Add(hit, new Vector2(Gfx.W / 2f, 150));
         Apply(hit, zone);
+        Telemetry.Emit("qte_press", "pet", _pet.Name, "care", _care.ToString(), "idx", Balance.Attempts - _attempts, "hit", hit.ToString(),
+            "expGain", hit == Hit.Miss ? 0 : 1);
         if (_attempts == 0) _finish = 0.9f;
     }
 
@@ -220,7 +234,9 @@ public class QteScene : Scene
         switch (_care)
         {
             case Care.Train:
-                _levelUps += _pet.AddProgress((perfect ? 10 : 5) * _gs.TrainGainMultiplier);
+                float gain = (perfect ? 10 : 5) * _gs.TrainGainMultiplier;
+                _progressGain += gain;
+                _levelUps += _pet.AddProgress(gain);
                 break;
             case Care.Feed:
                 _pet.Stomach += perfect ? 6 : 3;
@@ -241,6 +257,10 @@ public class QteScene : Scene
 
     void Close()
     {
+        Telemetry.Emit("qte_end", "pet", _pet.Name, "care", _care.ToString(), "perfect", _perfects, "great", _greats,
+            "miss", Balance.Attempts - _perfects - _greats, "attempts", Balance.Attempts, "progressDelta", _progressGain,
+            "stomachDelta", _pet.Stomach - _t0Stomach, "cleanDelta", _pet.Clean - _t0Clean, "hpDelta", _pet.Hp - _t0Hp,
+            "petLevelUps", _levelUps, "playerLevelUp", _playerLevelUp);
         M.Remove(this);
         if (_levelUps > 0 || _playerLevelUp) Audio.Play(Sfx.UiLevelUp);
         var lines = new System.Collections.Generic.List<string>

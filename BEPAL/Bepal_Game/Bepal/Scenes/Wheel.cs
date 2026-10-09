@@ -35,7 +35,7 @@ public class Wheel
     public float NeedleAlpha = 1f;
     public readonly List<Zone> Zones = new();
 
-    static readonly Random Rng = new();
+    static readonly Random Rng = RunSeed.Make(1);
 
     public Wheel(Vector2 center, float radius)
     {

@@ -90,7 +90,7 @@ deadline: 2026-09-30
 | ไอเทม | ราคา | ผล |
 | --- | --- | --- |
 | Crab Apple | 25 | สัตว์ 1 ตัว: +18 HP, +20 Stomach |
-| Caffeine Tonic | 40 | Energy +2 วันนี้ (บวกตรงๆ ไม่ clamp — เกิน MaxEnergy ได้; เริ่มวันใหม่รีเซ็ตเป็น MaxEnergy) |
+| Caffeine Tonic | 40 | Energy +2 วันนี้ แต่ไม่เกิน MaxEnergy (ปุ่มซื้อปิดเมื่อ Energy เต็ม; เปลี่ยน 2026-10-09 เดิมเกิน Max ได้) |
 | Sea Tea | 18 | Dodge zone กว้างขึ้น +20% ใน Fight ครั้งถัดไป |
 
 ### 3.5 กฎสเตตัส (ตาม Figma)
