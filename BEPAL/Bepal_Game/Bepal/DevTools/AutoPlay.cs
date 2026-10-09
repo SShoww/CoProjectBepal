@@ -278,6 +278,7 @@ public class AutoPlay
             if ((_shopMask & (1 << i)) != 0 || gs.Coin < price[i]) continue;
             if (i == 0 && !gs.Alive.Any()) continue;
             if (i == 2 && gs.SeaTea) continue;
+            if (i == 1 && gs.Energy >= gs.MaxEnergy) continue;   // Tonic is disabled at full Energy
             _shopMask |= 1 << i;
             if (Human && _prm.NextDouble() >= _shopP[i]) continue;
             _click = ShopScene.BuyRect(i).Center;

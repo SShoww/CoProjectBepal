@@ -269,7 +269,7 @@ public class ShopScene : Scene
     static readonly Item[] Items =
     {
         new("Crab Apple", 25, "One pet: +18 HP, +20 Stomach", new Color(220, 70, 60)),
-        new("Caffeine Tonic", 40, "+2 Energy today", new Color(230, 160, 60)),
+        new("Caffeine Tonic", 40, "+2 Energy today (up to max)", new Color(230, 160, 60)),
         new("Sea Tea", 18, "Dodge zone +20% in your next fight", new Color(90, 190, 220)),
     };
 
@@ -287,7 +287,7 @@ public class ShopScene : Scene
         _time += dt;
         _popups.Update(dt);
         _buy[0].Enabled = _gs.Coin >= Items[0].Price && _gs.Alive.Any();
-        _buy[1].Enabled = _gs.Coin >= Items[1].Price;
+        _buy[1].Enabled = _gs.Coin >= Items[1].Price && _gs.Energy < _gs.MaxEnergy;
         _buy[2].Enabled = _gs.Coin >= Items[2].Price && !_gs.SeaTea;
 
         if (_buy[0].Update())
@@ -306,8 +306,8 @@ public class ShopScene : Scene
             _gs.SpendCoin(Items[1].Price, "shop_tonic");
             Telemetry.Emit("shop_buy", "item", "Caffeine Tonic", "price", Items[1].Price, "target", "");
             Audio.Play(Sfx.UiCoin);
-            _gs.AddEnergy(2, "tonic");
-            _popups.Add("+2 Energy!", Palette.Heal, new Vector2(Gfx.W / 2f, 150));
+            int gained = _gs.AddEnergy(2, "tonic");
+            _popups.Add($"+{gained} Energy!", Palette.Heal, new Vector2(Gfx.W / 2f, 150));
         }
         if (_buy[2].Update())
         {

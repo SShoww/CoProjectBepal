@@ -128,7 +128,7 @@ public static class Balance
     /// <summary>Backdrop (night base seen through the door): world X and brightness.</summary>
     public const float FightBackdropX = 3000f, FightBackdropLight = 0.85f;
 
-    // Upgrade costs (Figma Scene 12)
+    // Upgrade costs
     public const int QteCoin = 100, QtePoints = 1, QteMax = 3;
     public const int EnergyCoin = 150, EnergyPoints = 3;
     public const int ProgressCoin = 20, ProgressPoints = 2, ProgressMax = 2;
@@ -178,10 +178,13 @@ public class GameState
         Telemetry.Coin(-amount, sink, Coin);
     }
 
-    public void AddEnergy(int delta, string reason)
+    /// <summary>Changes Energy, clamped to [0, MaxEnergy]; returns the amount actually applied.</summary>
+    public int AddEnergy(int delta, string reason)
     {
-        Energy += delta;
-        Telemetry.Energy(delta, reason, Energy, MaxEnergy);
+        int before = Energy;
+        Energy = Math.Clamp(Energy + delta, 0, MaxEnergy);
+        Telemetry.Energy(Energy - before, reason, Energy, MaxEnergy);
+        return Energy - before;
     }
 
     /// <summary>Returns true on player level up.</summary>
