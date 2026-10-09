@@ -23,6 +23,7 @@ dotnet run
 dotnet run -- --shots <dir>          # render every screen to <dir>/*.png, then exit (layout check without clicking)
 dotnet run -- --autoplay             # bot plays menu -> Day 5, writes %TEMP%/bepal_autoplay.log (prints path), then exits
 dotnet run -- --autoplay --refuse    # same, but refuses the Day 3 merchant and visits the shop
+dotnet run -- --autoplay --bot <profile> --seed <n> --telemetry <dir>   # profiles: perfect|sloppy|upgrade-first|careless|caring; writes <dir>/run_*.jsonl (events + run_summary); batch: BEPAL/Docs/Balance/tools/run-batch.ps1 (see telemetry-spec.md)
 dotnet mgcb-editor                   # edit Content/Content.mgcb
 ```
 

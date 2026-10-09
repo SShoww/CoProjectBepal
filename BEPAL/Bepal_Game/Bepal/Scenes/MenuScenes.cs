@@ -52,6 +52,7 @@ public class ChooseStarterScene : Scene
     {
         _picked = true;
         var gs = new GameState(pet.Species);
+        Telemetry.RunStart(gs, pet.Species);
         var baseScene = new BaseScene(gs);
         M.Reset(baseScene, DialogueScene.Say("", null,
             "At the edge of the universe, on a planet no one visits, there is a sanctuary. You are its only keeper.",
@@ -75,7 +76,11 @@ public class GameOverScene : Scene
     readonly string _reason;
     float _time;
 
-    public GameOverScene(string reason) => _reason = reason;
+    public GameOverScene(string reason)
+    {
+        _reason = reason;
+        Telemetry.End("game_over", reason);
+    }
 
     public override void Update(float dt)
     {
@@ -98,7 +103,11 @@ public class ToBeContinuedScene : Scene
     readonly int _days;
     float _time;
 
-    public ToBeContinuedScene(int days) => _days = days;
+    public ToBeContinuedScene(int days)
+    {
+        _days = days;
+        Telemetry.End("to_be_continued");
+    }
 
     public override void Update(float dt)
     {
@@ -141,6 +150,7 @@ public class NightScene : Scene
         else if (!_advanced)
         {
             _advanced = true;
+            Telemetry.DayEnd(_base.State);
             _report = _base.State.AdvanceDay();
         }
         else if (_t > 3.0f && _t < 4.5f) _base.Night = 1 - (_t - 3f) / 1.5f;

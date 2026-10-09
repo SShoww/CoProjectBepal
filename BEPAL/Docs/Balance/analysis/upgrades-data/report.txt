@@ -1,0 +1,228 @@
+
+### A. per profile: runs buying each upgrade / avg counts / points
+perfect        n=40 anyBuy=0 Q>0=0 E>0=0 P>0=0 avgPlv=5 avgPtsLeft=4 avgCoinOutUpg=0 over(game_over)=0
+sloppy         n=40 anyBuy=0 Q>0=0 E>0=0 P>0=0 avgPlv=3.65 avgPtsLeft=2.65 avgCoinOutUpg=0 over(game_over)=10
+upgrade-first  n=40 anyBuy=40 Q>0=40 E>0=0 P>0=0 avgPlv=5 avgPtsLeft=1 avgCoinOutUpg=300 over(game_over)=0
+caring         n=40 anyBuy=0 Q>0=0 E>0=0 P>0=0 avgPlv=5 avgPtsLeft=4 avgCoinOutUpg=0 over(game_over)=0
+human          n=40 anyBuy=37 Q>0=24 E>0=8 P>0=5 avgPlv=3.98 avgPtsLeft=0.35 avgCoinOutUpg=196.5 over(game_over)=2
+
+### B. buy timing (profile,name,level -> day counts)
+human, Energy, 1           n=8 d3:5 d4:3  avgCoinAfter=905.38 avgPtsAfter=0
+human, Progress, 1         n=5 d1:3 d3:2  avgCoinAfter=225.4 avgPtsAfter=0
+human, Progress, 2         n=3 d3:1 d4:2  avgCoinAfter=2090.67 avgPtsAfter=0
+human, QTE, 1              n=24 d1:22 d2:2  avgCoinAfter=66.67 avgPtsAfter=0
+human, QTE, 2              n=23 d2:18 d3:4 d4:1  avgCoinAfter=167.43 avgPtsAfter=0
+human, QTE, 3              n=18 d3:10 d4:8  avgCoinAfter=1567.44 avgPtsAfter=0
+upgrade-first, QTE, 1      n=40 d1:40  avgCoinAfter=50 avgPtsAfter=0
+upgrade-first, QTE, 2      n=40 d2:40  avgCoinAfter=250 avgPtsAfter=0
+upgrade-first, QTE, 3      n=40 d2:40  avgCoinAfter=150 avgPtsAfter=0
+
+### C. level-ups: day of reaching each level (profile)
+caring, 2              n=40 d1:40
+caring, 3              n=40 d1:40
+caring, 4              n=40 d2:40
+caring, 5              n=40 d4:40
+human, 2               n=39 d1:35 d2:4
+human, 3               n=38 d1:4 d2:24 d3:7 d4:3
+human, 4               n=30 d2:1 d3:20 d4:9
+human, 5               n=12 d3:1 d4:11
+perfect, 2             n=40 d1:40
+perfect, 3             n=40 d1:40
+perfect, 4             n=40 d2:40
+perfect, 5             n=40 d4:40
+sloppy, 2              n=40 d1:40
+sloppy, 3              n=30 d2:30
+sloppy, 4              n=30 d3:30
+sloppy, 5              n=6 d4:6
+upgrade-first, 2       n=40 d1:40
+upgrade-first, 3       n=40 d1:40
+upgrade-first, 4       n=40 d2:40
+upgrade-first, 5       n=40 d3:40
+
+### D. human: upgOrder x patient -> purchases
+Energy>Progress>QTE, False       n=5 Q=2.8 E=0 P=0 anyBuy=5
+Energy>Progress>QTE, True        n=4 Q=0 E=0.75 P=0 anyBuy=3
+Energy>QTE>Progress, False       n=4 Q=2.75 E=0 P=0 anyBuy=4
+Energy>QTE>Progress, True        n=6 Q=0 E=0.83 P=0 anyBuy=5
+Progress>Energy>QTE, False       n=1 Q=2 E=0 P=0 anyBuy=1
+Progress>Energy>QTE, True        n=1 Q=0 E=0 P=1 anyBuy=1
+Progress>QTE>Energy, False       n=1 Q=3 E=0 P=0 anyBuy=1
+Progress>QTE>Energy, True        n=4 Q=0 E=0 P=1.75 anyBuy=4
+QTE>Energy>Progress, False       n=4 Q=2.25 E=0 P=0 anyBuy=3
+QTE>Energy>Progress, True        n=3 Q=3 E=0 P=0 anyBuy=3
+QTE>Progress>Energy, False       n=4 Q=2 E=0 P=0 anyBuy=4
+QTE>Progress>Energy, True        n=3 Q=3 E=0 P=0 anyBuy=3
+
+### E. Train QTE results by qteUpgrade level at press time (per profile)
+caring, 0            n= 3200 P=86.0% G=14.0% M=0.0%
+human, 0             n=  500 P=86.8% G=9.6% M=3.6%
+human, 1             n=  160 P=98.1% G=0.6% M=1.3%
+human, 2             n=  170 P=92.4% G=1.8% M=5.9%
+human, 3             n=  150 P=92.7% G=1.3% M=6.0%
+perfect, 0           n= 4800 P=83.8% G=16.2% M=0.0%
+sloppy, 0            n= 2360 P=54.4% G=28.3% M=17.3%
+upgrade-first, 0     n=  400 P=100.0% G=0.0% M=0.0%
+upgrade-first, 1     n=  800 P=100.0% G=0.0% M=0.0%
+upgrade-first, 2     n= 1200 P=100.0% G=0.0% M=0.0%
+upgrade-first, 3     n= 3200 P=100.0% G=0.0% M=0.0%
+
+### E2. non-Train control by upgQ (human)
+upgQ=0 n= 1430 P=84.7% G=0.5% M=14.8%
+upgQ=1 n=  360 P=86.1% G=1.1% M=12.8%
+upgQ=2 n=  560 P=87.1% G=0.4% M=12.5%
+upgQ=3 n=  320 P=82.8% G=0.0% M=17.2%
+
+### E3. human Train: miss/perfect by skill tercile x upgQ>0
+skill[0.55-0.7) upg=0 n= 170 P=81.2% M=4.7% seeds=4
+skill[0.55-0.7) upg=1 n= 140 P=92.9% M=6.4% seeds=4
+skill[0.7-0.85) upg=0 n= 160 P=86.3% M=5.0% seeds=6
+skill[0.7-0.85) upg=1 n= 220 P=95.9% M=2.7% seeds=9
+skill[0.85-1.01) upg=0 n= 170 P=92.9% M=1.2% seeds=8
+skill[0.85-1.01) upg=1 n= 120 P=93.3% M=5.0% seeds=3
+
+### F. Train qte_end progressDelta per Perfect press by upgP (profile)
+caring, 0              sessions=320 perf=2753 great=447 totalProg=29765 prog/session=93.02 petLvlUps/session=0.5
+human, 0               sessions=84 perf=783 great=22 totalProg=7940 prog/session=94.52 petLvlUps/session=0.54
+human, 1               sessions=14 perf=104 great=32 totalProg=1800 prog/session=128.57 petLvlUps/session=0.57
+perfect, 0             sessions=480 perf=4024 great=776 totalProg=44120 prog/session=91.92 petLvlUps/session=0.42
+sloppy, 0              sessions=236 perf=1284 great=668 totalProg=16180 prog/session=68.56 petLvlUps/session=0.36
+upgrade-first, 0       sessions=560 perf=5600 great=0 totalProg=56000 prog/session=100 petLvlUps/session=0.43
+
+### G. energy: maxE / used / left per day_end by profile
+caring, 1          maxE=3 used=3 left=0
+caring, 2          maxE=3 used=3 left=0
+caring, 3          maxE=3 used=3 left=0
+caring, 4          maxE=3 used=3 left=0
+human, 1           maxE=3 used=2.05 left=0.95
+human, 2           maxE=3 used=2.05 left=0.95
+human, 3           maxE=3.13 used=3.18 left=0.95
+human, 4           maxE=3.21 used=2.21 left=1
+perfect, 1         maxE=3 used=3 left=0
+perfect, 2         maxE=3 used=3 left=0
+perfect, 3         maxE=3 used=3 left=0
+perfect, 4         maxE=3 used=3 left=0
+sloppy, 1          maxE=3 used=3 left=0
+sloppy, 2          maxE=3 used=3 left=0
+sloppy, 3          maxE=3 used=3 left=0
+sloppy, 4          maxE=3 used=3 left=0
+upgrade-first, 1   maxE=3 used=3 left=0
+upgrade-first, 2   maxE=3 used=3 left=0
+upgrade-first, 3   maxE=3 used=5 left=0
+upgrade-first, 4   maxE=3 used=3 left=0
+
+### H. human energy upgrade vs none: eUsed, final petLvlMax
+upgE=0 n=32 eUsed=8.44 petLvlMax=2.25 plv=3.81 bigz=228.19 toBTC=30 skill=0.76
+upgE=1 n=8 eUsed=11.88 petLvlMax=2.38 plv=4.62 bigz=185.88 toBTC=8 skill=0.82
+upgQ=0 n=16 eUsed=9.62 petLvlMax=2.5 plv=4.12 bigz=249.44 toBTC=15 skill=0.81
+upgQ=1 n=1 eUsed=3 petLvlMax=1 plv=2 bigz=n/a toBTC=0 skill=0.6
+upgQ=2 n=5 eUsed=5.2 petLvlMax=1.4 plv=3 bigz=224.6 toBTC=5 skill=0.85
+upgQ=3 n=18 eUsed=10.11 petLvlMax=2.39 plv=4.22 bigz=204.17 toBTC=18 skill=0.74
+upgP=0 n=35 eUsed=9 petLvlMax=2.09 plv=3.91 bigz=187.14 toBTC=33 skill=0.77
+upgP=1 n=2 eUsed=6 petLvlMax=3.5 plv=3.5 bigz=400 toBTC=2 skill=0.77
+upgP=2 n=3 eUsed=12.67 petLvlMax=3.67 plv=5 bigz=479.67 toBTC=3 skill=0.83
+
+### I. fights by profile/enemy: won, dmg, dodge
+caring, Big Z              n=40 won=0 dmgDealt=663 dmgTaken=167 tooSlow=6.7 missPress=1.65 petsLost=1
+caring, Toothless          n=40 won=40 dmgDealt=132 dmgTaken=0 tooSlow=0 missPress=0 petsLost=0
+human, Big Z               n=38 won=0 dmgDealt=231.29 dmgTaken=118.82 tooSlow=3.37 missPress=2.66 petsLost=1.26
+human, Toothless           n=20 won=18 dmgDealt=124.55 dmgTaken=38.25 tooSlow=0.85 missPress=1.7 petsLost=0.1
+perfect, Big Z             n=40 won=0 dmgDealt=388.12 dmgTaken=114.5 tooSlow=4.68 missPress=1.05 petsLost=1
+perfect, Toothless         n=40 won=40 dmgDealt=132 dmgTaken=0 tooSlow=0 missPress=0 petsLost=0
+sloppy, Big Z              n=29 won=0 dmgDealt=77.59 dmgTaken=72.41 tooSlow=2.03 missPress=1.59 petsLost=1
+sloppy, Toothless          n=40 won=30 dmgDealt=120.48 dmgTaken=78.38 tooSlow=1.9 missPress=3.32 petsLost=0.25
+upgrade-first, Big Z       n=40 won=0 dmgDealt=1330.2 dmgTaken=218.12 tooSlow=6.45 missPress=4.55 petsLost=2
+upgrade-first, Toothless   n=40 won=40 dmgDealt=132 dmgTaken=0 tooSlow=0 missPress=0 petsLost=0
+
+### I2. BigZ by upgQ at fight (upgrade-first=3 vs perfect=0)
+caring, 0              n=40 won=0 dmgDealt=663 dmgTaken=167 petsLost=1 atkHits=22.1
+human, 0               n=15 won=0 dmgDealt=266.07 dmgTaken=117.67 petsLost=1.2 atkHits=13.2
+human, 2               n=5 won=0 dmgDealt=224.6 dmgTaken=112 petsLost=1.2 atkHits=13.4
+human, 3               n=18 won=0 dmgDealt=204.17 dmgTaken=121.67 petsLost=1.33 atkHits=10.61
+perfect, 0             n=40 won=0 dmgDealt=388.12 dmgTaken=114.5 petsLost=1 atkHits=15.52
+sloppy, 0              n=29 won=0 dmgDealt=77.59 dmgTaken=72.41 petsLost=1 atkHits=3.79
+upgrade-first, 3       n=40 won=0 dmgDealt=1330.2 dmgTaken=218.12 petsLost=2 atkHits=59.78
+
+### J. shop buys (profile,item,day)
+human, Caffeine Tonic          n=19 d3:19
+human, Crab Apple              n=16 d3:16
+human, Sea Tea                 n=17 d3:17
+upgrade-first, Caffeine Tonic  n=40 d3:40
+upgrade-first, Crab Apple      n=40 d3:40
+upgrade-first, Sea Tea         n=40 d3:40
+
+### K. Sea Tea: fights with tea vs without (non-Toothless, human+upgrade-first)
+Big Z, False           n=21 dodgeStart=0.32 dodgeOk=4.57 tooSlow=3.81 missPress=1.95 dmgTaken=112.14 won=0
+Big Z, True            n=57 dodgeStart=0.38 dodgeOk=37.28 tooSlow=5.37 missPress=4.25 dmgTaken=190.96 won=0
+Toothless, False       n=60 dodgeStart=0.32 dodgeOk=4.77 tooSlow=0.28 missPress=0.57 dmgTaken=12.75 won=58
+
+### L. coin reachable: max coin on day_end by day and profile (no-spend profiles)
+caring, 1          coin=150 pts=2 plv=3
+caring, 2          coin=450 pts=3 plv=4
+caring, 3          coin=5550 pts=3 plv=4
+caring, 4          coin=5650 pts=4 plv=5
+perfect, 1         coin=150 pts=2 plv=3
+perfect, 2         coin=450 pts=3 plv=4
+perfect, 3         coin=5550 pts=3 plv=4
+perfect, 4         coin=5650 pts=4 plv=5
+
+### M. human QTE buyers: within-run Train Perfect/Miss rate before vs after first QTE buy (paired by run)
+
+seed skill nA nB pA   pB mA   mB
+---- ----- -- -- --   -- --   --
+11    0.63 10 10  1    1  0    0
+14    0.74 10 40  1    1  0    0
+40    0.79 10 40  1 0.93  0 0.07
+6     0.90 10 70  1 0.96  0 0.04
+32    0.94 10 30  1 0.83  0 0.10
+21    0.99 10 20  1    1  0    0
+
+
+paired runs=6  mean Perfect before=100.0% after=95.0%; mean Miss before=0.0% after=4.0%
+mean dPerfect=-5.0% dMiss=4.0% improved=0/6
+
+### N. per run: Train sessions, Train presses, petLvlMax by profile and (human) upgP / merchant
+caring, sell               n=40 trainSess=8 petLvlMax=5 plv=5
+human, n/a                 n=2 trainSess=0 petLvlMax=1 plv=1.5
+human, refuse              n=30 trainSess=2.17 petLvlMax=2.13 plv=4.07
+human, sell                n=8 trainSess=4.12 petLvlMax=3.12 plv=4.25
+perfect, sell              n=40 trainSess=12 petLvlMax=6 plv=5
+sloppy, n/a                n=10 trainSess=1.5 petLvlMax=1.4 plv=2
+sloppy, sell               n=30 trainSess=7.37 petLvlMax=3.7 plv=4.2
+upgrade-first, refuse      n=40 trainSess=14 petLvlMax=6.92 plv=5
+human upgP=0 n=35 trainSess=2.2 petLvlMax=2.09
+human upgP=1 n=2 trainSess=4 petLvlMax=3.5
+human upgP=2 n=3 trainSess=4.33 petLvlMax=3.67
+
+### O. Sea Tea in BigZ (human only, fights with/without tea) + dodge success
+tea=False n=21 dodgeOk=4.57 tooSlow=3.81 missPress=1.95 dodgeRate=44.2% dmgTaken=112.14 petsLost=1.19
+tea=True n=17 dodgeOk=10.24 tooSlow=2.82 missPress=3.53 dodgeRate=61.7% dmgTaken=127.06 petsLost=1.35
+caring, False              n=40 dodgeRate=62.2% dmgTakenPerDodge=7.6
+human, False               n=21 dodgeRate=44.2% dmgTakenPerDodge=10.9
+human, True                n=17 dodgeRate=61.7% dmgTakenPerDodge=7.7
+perfect, False             n=40 dodgeRate=63.1% dmgTakenPerDodge=7.4
+sloppy, False              n=29 dodgeRate=25.5% dmgTakenPerDodge=14.9
+upgrade-first, True        n=40 dodgeRate=81.6% dmgTakenPerDodge=3.6
+
+### P. human shop buyers vs coin when buying; human refusers who never shop
+merchant=n/a n=2 anyUpg=1 avgUpgSpend=50 finalCoin=200
+merchant=refuse n=30 anyUpg=29 avgUpgSpend=202.33 finalCoin=365.47
+merchant=sell n=8 anyUpg=7 avgUpgSpend=211.25 finalCoin=5538.75
+
+### Q. human: runs that never bought any upgrade - why (points? coin?)
+seed=24 outcome=game_over day=2 plv=1 ptsLeft=0 order=QTE>Energy>Progress patient=False merchant=n/a finalCoin=250
+seed=27 outcome=to_be_continued day=5 plv=3 ptsLeft=2 order=Energy>Progress>QTE patient=True merchant=sell finalCoin=5750
+seed=30 outcome=to_be_continued day=5 plv=3 ptsLeft=2 order=Energy>QTE>Progress patient=True merchant=refuse finalCoin=507
+
+### R. human: end-of-run unspent points / coin when ptsLeft>0
+seed=5 ptsLeft=1 order=Energy>QTE>Progress patient=True bought Q0 E1 P0 coin=560
+seed=6 ptsLeft=1 order=QTE>Progress>Energy patient=True bought Q3 E0 P0 coin=5450
+seed=7 ptsLeft=1 order=Progress>Energy>QTE patient=True bought Q0 E0 P1 coin=672
+seed=15 ptsLeft=1 order=Energy>QTE>Progress patient=False bought Q3 E0 P0 coin=225
+seed=18 ptsLeft=1 order=Energy>Progress>QTE patient=True bought Q0 E1 P0 coin=560
+seed=19 ptsLeft=1 order=Energy>QTE>Progress patient=True bought Q0 E1 P0 coin=317
+seed=26 ptsLeft=1 order=QTE>Progress>Energy patient=True bought Q3 E0 P0 coin=232
+seed=27 ptsLeft=2 order=Energy>Progress>QTE patient=True bought Q0 E0 P0 coin=5750
+seed=28 ptsLeft=1 order=Energy>Progress>QTE patient=True bought Q0 E1 P0 coin=400
+seed=30 ptsLeft=2 order=Energy>QTE>Progress patient=True bought Q0 E0 P0 coin=507
+seed=31 ptsLeft=1 order=Energy>QTE>Progress patient=True bought Q0 E1 P0 coin=5600
+seed=40 ptsLeft=1 order=QTE>Energy>Progress patient=True bought Q3 E0 P0 coin=192
