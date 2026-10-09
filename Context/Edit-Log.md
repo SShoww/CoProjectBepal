@@ -3,6 +3,9 @@
 ล่าสุด 10 งาน งานละ 3 บรรทัด เขียนผ่าน `tools/context/log-edit.py` เท่านั้น — รายการเก่าอยู่ที่ [archive/edit-log/](archive/edit-log/)
 
 <!-- entries -->
+- **2026-10-10 00:23 · Q-20261009-run-telemetry** — Run telemetry: per-run JSONL + bot profiles + balance report (round 1); round 2: --player, Gregorian run ids, build hash baked into exe, telemetry.txt auto-enable for tester exe, Aggregate players.md, Energy clamped to MaxEnergy (Tonic disabled at full Energy)
+  - Files: BEPAL/Bepal_Game/Bepal/{Core/Telemetry.cs, Game1.cs, Bepal.csproj, Model/GameState.cs, Scenes/BaseMenus.cs, DevTools/AutoPlay.cs}, BEPAL/Docs/Balance/{telemetry-spec.md, tools/Aggregate/Program.cs}, BEPAL/Docs/GDD/{06-vertical-slice, 10-economy-items}.md, CLAUDE.md, Context/quests/Q-20261009-run-telemetry.md
+  - Validation: build slnx 0/0; --autoplay and --autoplay --refuse reach To be continued; --shots 23 PNG; 200-run batch + validate.ps1 0 fail (round 1); 20 human-bot runs 0 energy over max; published exe + telemetry.txt writes data/*.jsonl with build hash
 - **2026-10-07 22:37 · Q-20261007-drawio-diagrams** — สร้าง .drawio 6 ไฟล์แทน mermaid GDD (เก็บ mermaid เดิม + ลิงก์)
   - Files: BEPAL/Docs/GDD/diagrams/*.drawio, BEPAL/Docs/GDD/01-core-loop.md, 03-mechanics.md, 04-class-diagram.md, 11-narrative-world.md, 13-scene-breakdown.md
   - Validation: Reviewer render/เทียบ XML ทุก edge PASS 6/6; ยังไม่ได้เปิดใน VS Code GUI
@@ -30,6 +33,3 @@
 - **2026-10-06 23:22 · Q-20261006-gitflow-doc** — เพิ่ม Gitflow.md (ปรับคำสั่งให้ตรง repo) และเริ่มใช้: สร้าง/push Develop จาก main, AGENTS.md ห้าม commit ตรงลง main/Develop
   - Files: Context/Gitflow.md, Context/README.md, Context/Status.md, AGENTS.md
   - Validation: ลิงก์ 0 เสีย; ls-remote เห็น Develop=main=0cb2715; ไม่ได้รัน build/gates
-- **2026-10-06 22:41 · Q-20261006-ai-setup** — ติดตั้งระบบ AI Setup: ทางเข้า README/AGENTS, Context (Rules/Status/Handoff/quests/archive), Edit Log tool; ไม่แตะโค้ดเกม
-  - Files: README.md, AGENTS.md, CLAUDE.md, .gitignore, Context/**, tools/context/log-edit.py
-  - Validation: ลิงก์ 0 เสีย, ไม่มี secret, log tool ผ่าน input/ซ้ำ/retention/concurrency/lock; ไม่ได้ build เกม
