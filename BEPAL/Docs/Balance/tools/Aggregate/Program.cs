@@ -44,6 +44,14 @@ foreach (var file in Directory.GetFiles(dir, "*.jsonl").OrderBy(f => f, StringCo
     }
     if (row == null) { skipped++; Console.Error.WriteLine("no run_summary (incomplete): " + Path.GetFileName(file)); continue; }
     row["file"] = Path.GetFileName(file);
+    var startLine = File.ReadLines(file).FirstOrDefault(l => l.Contains("\"run_start\""));
+    if (startLine != null)
+        try
+        {
+            using var doc = JsonDocument.Parse(startLine);
+            if (doc.RootElement.TryGetProperty("starter", out var st)) row["starter"] = st.ToString();
+        }
+        catch (JsonException) { }
     runs.Add(row);
 }
 
@@ -143,6 +151,75 @@ foreach (var g in runs.GroupBy(r => S(r, "profileKey")).OrderBy(g => g.Key, Stri
     md.AppendLine("Runs with a first pet death, by day: " + (firstDeaths.Count == 0 ? "none" : string.Join(", ", firstDeaths.Select(x => $"d{x.Key} = {x.Count()}"))));
 }
 File.WriteAllText(Path.Combine(outDir, "summary.md"), md.ToString());
+
+// ---- players.md (real play: one section per --player name, one column per run; no averaging) ----
+var played = runs.Where(r => S(r, "mode") == "play" || S(r, "player") != "").ToList();
+if (played.Count > 0)
+{
+    string P(double d) => (d * 100).ToString("0.0", inv) + "%";
+    string I(double d) => d.ToString("0.##", inv);
+    string Started(Dictionary<string, object> r)
+    {
+        var parts = S(r, "runId").Split('_');   // run_yyyyMMdd_HHmmss_...
+        return parts.Length > 2 && parts[1].Length == 8 && parts[2].Length == 6
+            ? $"{parts[1][..4]}-{parts[1][4..6]}-{parts[1][6..]} {parts[2][..2]}:{parts[2][2..4]}" : S(r, "runId");
+    }
+    string Qte(Dictionary<string, object> r, string care)
+    {
+        double p = N(r, "qteP_" + care), g = N(r, "qteG_" + care), m = N(r, "qteM_" + care);
+        return p + g + m == 0 ? "-" : $"{p:0} / {g:0} / {m:0}";
+    }
+    string Sources(Dictionary<string, object> r, string prefix) =>
+        string.Join(", ", r.Keys.Where(k => k.StartsWith(prefix)).OrderBy(k => k, StringComparer.Ordinal).Select(k => $"{k[prefix.Length..]} {N(r, k):0}")) is { Length: > 0 } s ? s : "-";
+    (string label, Func<Dictionary<string, object>, string> get)[] rows =
+    {
+        ("started", Started), ("build", r => S(r, "build")), ("starter", r => S(r, "starter")),
+        ("outcome", r => S(r, "outcome")), ("day reached", r => I(N(r, "dayReached"))),
+        ("first pet death (day)", r => N(r, "deathDay") > 0 ? I(N(r, "deathDay")) : "none"),
+        ("real time (min)", r => (N(r, "tRealSec") / 60).ToString("0.0", inv)),
+        ("presses total", r => I(N(r, "pressesTotal"))),
+        ("care select ok / presses", r => $"{N(r, "careSelect_ok"):0} / {N(r, "careSelectPresses"):0}"),
+        ("QTE Perfect / Great / Miss", r => $"{P(N(r, "qtePerfectRate"))} / {P(N(r, "qteGreatRate"))} / {P(N(r, "qteMissRate"))}"),
+        ("QTE Train P/G/M", r => Qte(r, "Train")), ("QTE Feed P/G/M", r => Qte(r, "Feed")),
+        ("QTE Clean P/G/M", r => Qte(r, "Clean")), ("QTE Heal P/G/M", r => Qte(r, "Heal")),
+        ("fight hit rate", r => P(N(r, "fightHitRate"))),
+        ("fight attack P / G", r => $"{N(r, "fightAtkP"):0} / {N(r, "fightAtkG"):0}"),
+        ("fight dodge ok / too slow / miss press", r => $"{N(r, "fightDodgeOk"):0} / {N(r, "fightTooSlow"):0} / {N(r, "fightMissPress"):0}"),
+        ("fight dmg dealt / taken", r => $"{N(r, "fightDmgDealt"):0} / {N(r, "fightDmgTaken"):0}"),
+        ("Toothless won", r => N(r, "toothlessWon") > 0 ? "yes" : "no"), ("Big Z dmg dealt", r => I(N(r, "bigzDmgDealt"))),
+        ("merchant", r => S(r, "merchantChoice")),
+        ("coin start / earned / spent / final", r => $"{N(r, "startCoin"):0} / {N(r, "coinEarnedTotal"):0} / {N(r, "coinSpentTotal"):0} / {N(r, "finalCoin"):0}"),
+        ("coin in", r => Sources(r, "coinIn_")), ("coin out", r => Sources(r, "coinOut_")),
+        ("energy used / left (total)", r => $"{N(r, "energyUsedTotal"):0} / {N(r, "energyLeftTotal"):0}"),
+        ("energy used per day d1..d5", r => string.Join(" ", Enumerable.Range(1, 5).Select(d => N(r, "energyUsed_d" + d).ToString("0", inv)))),
+        ("upgrades QTE / Energy / Progress", r => $"{N(r, "upgQte"):0} / {N(r, "upgEnergy"):0} / {N(r, "upgProgress"):0}"),
+        ("points spent / left", r => $"{N(r, "pointsSpent"):0} / {N(r, "pointsLeft"):0}"),
+        ("player level", r => I(N(r, "playerLevel"))), ("pet level max", r => I(N(r, "petLvlMax"))),
+        ("pets final / alive", r => $"{N(r, "petsFinal"):0} / {N(r, "petsAliveFinal"):0}"),
+        ("pet deaths / revives / starve", r => $"{N(r, "petDeaths"):0} / {N(r, "revives"):0} / {N(r, "starveEvents"):0}"),
+        ("final stomach / clean avg", r => $"{I(N(r, "finalStomachAvg"))} / {I(N(r, "finalCleanAvg"))}"),
+    };
+
+    var pm = new StringBuilder();
+    pm.AppendLine("# Telemetry per player");
+    pm.AppendLine();
+    pm.AppendLine($"Source: `{dir}` - {played.Count} real-play runs. One section per `--player` name, one column per run (oldest first); nothing is averaged. Generated by `BEPAL/Docs/Balance/tools/Aggregate`. QTE P/G/M = Perfect / Great / Miss presses.");
+    foreach (var g in played.GroupBy(r => S(r, "player") is { Length: > 0 } n ? n : "(no name)").OrderBy(g => g.Key, StringComparer.Ordinal))
+    {
+        var list = g.OrderBy(r => S(r, "runId"), StringComparer.Ordinal).ToList();
+        pm.AppendLine();
+        pm.AppendLine($"## {g.Key} ({list.Count} run{(list.Count == 1 ? "" : "s")}; reached To be continued {list.Count(r => S(r, "outcome") == "to_be_continued")}, game over {list.Count(r => S(r, "outcome") == "game_over")})");
+        pm.AppendLine();
+        pm.AppendLine("| | " + string.Join(" | ", list.Select((_, i) => $"run {i + 1}")) + " |");
+        pm.AppendLine("|---|" + string.Concat(list.Select(_ => "---|")));
+        foreach (var (label, get) in rows)
+            pm.AppendLine($"| {label} | " + string.Join(" | ", list.Select(get)) + " |");
+        pm.AppendLine();
+        pm.AppendLine("Files: " + string.Join(", ", list.Select((r, i) => $"run {i + 1} = `{S(r, "file")}`")));
+    }
+    File.WriteAllText(Path.Combine(outDir, "players.md"), pm.ToString());
+    Console.WriteLine($"{played.Count} real-play runs -> {Path.Combine(outDir, "players.md")}");
+}
 
 Console.WriteLine($"{runs.Count} runs -> {Path.Combine(outDir, "runs.csv")}, {Path.Combine(outDir, "summary.md")}");
 return 0;

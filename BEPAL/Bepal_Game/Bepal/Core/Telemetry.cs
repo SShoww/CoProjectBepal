@@ -30,7 +30,7 @@ public static class Telemetry
     /// <summary>Set by Game1 to report the top scene's type name.</summary>
     public static Func<string>? SceneProbe;
 
-    static string _dir = "", _profile = "", _mode = "", _runId = "", _path = "", _build = "";
+    static string _dir = "", _profile = "", _mode = "", _runId = "", _path = "", _build = "", _player = "";
     static bool _refuse, _started, _ended, _dirty;
     static float _t, _t0;
     static int _seq;
@@ -44,11 +44,13 @@ public static class Telemetry
     static readonly HashSet<int> DayRecorded = new();
     static readonly JsonSerializerOptions Json = new() { NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowNamedFloatingPointLiterals };
 
-    public static void Configure(string dir, string profile, string mode, bool refuse)
+    /// <param name="player">Tester name from <c>--player &lt;name&gt;</c> (real play); kept to letters/digits/-/_ so it fits a file name.</param>
+    public static void Configure(string dir, string profile, string mode, bool refuse, string player = "")
     {
         Enabled = true;
         _dir = dir;
         _profile = profile;
+        _player = new string(player.Where(c => char.IsLetterOrDigit(c) || c is '-' or '_').ToArray());
         _mode = mode;
         _refuse = refuse;
         AppDomain.CurrentDomain.ProcessExit += (_, _) => { End("quit"); Flush(); };
@@ -70,11 +72,11 @@ public static class Telemetry
         Sw.Start();
         _build = GitHash();
         var now = DateTime.Now;
-        _runId = $"run_{now:yyyyMMdd_HHmmss}_{_profile}{(_refuse ? "-refuse" : "")}_{RunSeed.Seed}";
+        _runId = $"run_{now.ToString("yyyyMMdd_HHmmss", System.Globalization.CultureInfo.InvariantCulture)}_{_profile}{(_player != "" ? "-" + _player : "")}{(_refuse ? "-refuse" : "")}_{RunSeed.Seed}";
         Directory.CreateDirectory(_dir);
         _path = Path.Combine(_dir, _runId + ".jsonl");
         Emit("run_start", "starter", starter.ToString(), "startCoin", gs.Coin, "startEnergy", gs.Energy,
-            "profile", _profile, "refuse", _refuse, "seed", RunSeed.Seed, "build", _build, "mode", _mode);
+            "profile", _profile, "player", _player, "refuse", _refuse, "seed", RunSeed.Seed, "build", _build, "mode", _mode);
     }
 
     public static void Emit(string type, params object?[] kv)
@@ -118,7 +120,7 @@ public static class Telemetry
         var gs = _gs!;
         var f = new List<object?>
         {
-            "profile", _profile, "refuse", _refuse, "seed", RunSeed.Seed, "build", _build, "mode", _mode, "outcome", outcome,
+            "profile", _profile, "player", _player, "refuse", _refuse, "seed", RunSeed.Seed, "build", _build, "mode", _mode, "outcome", outcome,
             "dayReached", gs.Day, "deathScene", deathScene,
             "tSimSec", Math.Round(_t - _t0, 3), "tRealSec", Math.Round(Sw.Elapsed.TotalSeconds, 3),
             "finalCoin", gs.Coin,
@@ -253,6 +255,12 @@ public static class Telemetry
 
     static string GitHash()
     {
+        // Baked in at build time by Bepal.csproj (SetSourceRevisionId); git at runtime is only the fallback.
+        var info = System.Reflection.Assembly.GetExecutingAssembly()
+            .GetCustomAttributes(typeof(System.Reflection.AssemblyInformationalVersionAttribute), false)
+            .OfType<System.Reflection.AssemblyInformationalVersionAttribute>().FirstOrDefault()?.InformationalVersion;
+        int plus = info?.IndexOf('+') ?? -1;
+        if (plus >= 0 && plus + 1 < info!.Length) return info[(plus + 1)..];
         try
         {
             var psi = new ProcessStartInfo("git", "rev-parse --short HEAD")
