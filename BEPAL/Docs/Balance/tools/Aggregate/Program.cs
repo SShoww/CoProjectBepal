@@ -179,6 +179,12 @@ if (played.Count > 0)
         ("real time (min)", r => (N(r, "tRealSec") / 60).ToString("0.0", inv)),
         ("presses total", r => I(N(r, "pressesTotal"))),
         ("care select ok / presses", r => $"{N(r, "careSelect_ok"):0} / {N(r, "careSelectPresses"):0}"),
+        ("QTE not missed (Perfect+Great) / presses", r =>
+        {
+            double hit = r.Where(kv => kv.Key.StartsWith("qteP_") || kv.Key.StartsWith("qteG_")).Sum(kv => N(r, kv.Key));
+            double miss = r.Where(kv => kv.Key.StartsWith("qteM_")).Sum(kv => N(r, kv.Key));
+            return $"{hit:0} / {hit + miss:0}";
+        }),
         ("QTE Perfect / Great / Miss", r => $"{P(N(r, "qtePerfectRate"))} / {P(N(r, "qteGreatRate"))} / {P(N(r, "qteMissRate"))}"),
         ("QTE Train P/G/M", r => Qte(r, "Train")), ("QTE Feed P/G/M", r => Qte(r, "Feed")),
         ("QTE Clean P/G/M", r => Qte(r, "Clean")), ("QTE Heal P/G/M", r => Qte(r, "Heal")),

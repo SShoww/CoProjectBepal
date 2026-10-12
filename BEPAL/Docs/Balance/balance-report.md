@@ -2,7 +2,9 @@
 
 สร้างโดย BALANCE-REPORTER จาก `analysis/run-stats.md`, `analysis/economy-energy.md`, `analysis/upgrades.md`, `data/summary.md`, `data/runs.csv`, `data/validation.md`, `telemetry-spec.md` sec 5 และ `Model/GameState.cs` (`Balance`). ไม่มีการแก้โค้ดเกม. build ที่วัด = `dab9037`.
 
-> **ข้อควรระวังเรื่องข้อมูล:** ข้อมูลทั้งหมดมาจาก **200 BOT runs** (40 seeds x perfect / sloppy / upgrade-first / caring / human) ไม่ใช่ผู้เล่นจริง. **ยังไม่มี telemetry จากคนจริง (mode=play) เลยแม้แต่ run เดียว.** `human` ใน CSV = bot ที่สุ่มพารามิเตอร์ต่อ seed (skill 0.55-1.0, appetite, ลำดับอัปเกรด) ไม่ใช่คน. เวลาทั้งหมดเป็น sim time, bot ไม่ลังเล/ไม่ idle จึงเป็นขอบล่างของเวลาคนจริง. `perfect`/`caring`/`upgrade-first` เป็น route เดียว (1 route/40 runs), seed ซ้ำข้าม profile (ไม่ independent).
+> **อัปเดต 2026-10-12:** มี telemetry คนจริงแล้ว 8 runs (build `15ac821`) — สรุปและผลต่อข้อเสนอ A/B/C อยู่ที่ **§7**. ตัวเลข §1-§6 ด้านล่างยังเป็นข้อมูล bot เดิม (ไม่ได้แก้).
+>
+> **ข้อควรระวังเรื่องข้อมูล (ส่วน §1-§6):** ข้อมูลทั้งหมดมาจาก **200 BOT runs** (40 seeds x perfect / sloppy / upgrade-first / caring / human) ไม่ใช่ผู้เล่นจริง. **ยังไม่มี telemetry จากคนจริง (mode=play) เลยแม้แต่ run เดียว.** `human` ใน CSV = bot ที่สุ่มพารามิเตอร์ต่อ seed (skill 0.55-1.0, appetite, ลำดับอัปเกรด) ไม่ใช่คน. เวลาทั้งหมดเป็น sim time, bot ไม่ลังเล/ไม่ idle จึงเป็นขอบล่างของเวลาคนจริง. `perfect`/`caring`/`upgrade-first` เป็น route เดียว (1 route/40 runs), seed ซ้ำข้าม profile (ไม่ independent).
 
 ## 1. TL;DR
 
@@ -205,3 +207,64 @@ Coin: Refuse path = StartCoin 150 + `DailyCoin` 100 x4 + `ToothlessReward` 200 =
 8. Merchant human: sell 8 / refuse 30 / n/a 2; finalCoin sell 5538.75 vs refuse 365.5; bigz dmg 176.1 vs 246.0 ตรง economy; human upgrade combos (Q3 18, E1 8, Q2 5, P2 3, P1 2, Q1 1, none 3) ตรง upgrades sec 3.
 9. Raw jsonl `human_25`: coin chain 150 + 600 - 365 = 385 = `finalCoin`; energy used 2/2/4/2/0 = 10; ตรง `run_summary`. Raw `sloppy_30`: สัตว์ตาย starve D4 ขณะ coin 5650 แล้วเกมไปต่อถึงบอส (ยืนยัน R5).
 10. โค้ด: `DayEvents.cs` L52 `GameOverScene` ไม่ตรวจ coin vs `MenuScenes.cs` L162 ตรวจ `Coin < Balance.ReviveCost`; `BaseMenus.cs` ShopScene Tonic ไม่มี cap/stock; `PlayerMaxExp = 10 + (PlayerLevel - 1) * 10` (`GameState.cs` L156); `CareScenes.cs` zone Train 0.07/0.16 vs อื่น 0.12/0.27; ค่า `Balance` (`MerchantOffer` 5000, `ReviveCost` 250, `StarveDamage` 20, `ToothlessHp/Atk` 120/15, `BigZHp` 9999, `EnergyPoints` 3 ฯลฯ) ตรงกับที่อ้าง.
+
+## 7. ข้อมูลผู้เล่นจริง (8 runs, 2026-10-12)
+
+ที่มา: `data-human/*.jsonl` (8 ไฟล์ จาก 8 คน, `mode=play`, build `15ac821`; **ไฟล์ดิบอยู่ในเครื่องเท่านั้น — `data-human/` และ `data-human-raw/` ถูก gitignore เพราะมีชื่อผู้เล่น**; สร้าง `analysis/human/` ซ้ำได้ด้วย `tools/Aggregate` เมื่อมีไฟล์ดิบ) -> `analysis/human/{runs.csv,summary.md,players.md,validation.md}`. **n=8 คนละ 1 run = ทิศทาง ไม่ใช่ค่าเฉลี่ยที่เชื่อได้**; ยังไม่ถึง 15-20 runs ตามข้อ 7 ของ §5. Starter: Nibbleclaw 4 / Mossling 2 / Blinkbun 2.
+
+### 7.1 คุณภาพข้อมูล
+
+- `validate.ps1`: ก่อนซ่อม 7/8 runs ผ่าน; **Boom_121 fail 8 ข้อ** (I01, I02, I05, I06, I08, I09, I10, I11). สาเหตุ = bug ใน telemetry ไม่ใช่ข้อมูลเกม: `Telemetry.RunStart` ผูก `_gs` กับ `GameState` แรกเท่านั้น (`if (!Enabled || _started) return;`) ผู้เล่นกด Main Menu แล้วเริ่มเกมใหม่ (**ยืนยันโดยผู้ใช้ 2026-10-12**) ทำให้ field `day`, `dayReached`, `petDeaths_d*`, snapshot ท้าย run และฟิลด์สรุปที่อ่านจาก `GameState` (finalCoin, level, upg*, pets*) อ่านจากเกมแรกที่ค้าง Day 1. ช่วง 138 s ก่อน event แรกคือเกมแรกที่ถูกทิ้ง.
+- **ซ่อมแล้ว (2026-10-12):** `data-human/…Boom_121….jsonl` ถูกสร้างใหม่จากต้นฉบับ (เก็บไว้ที่ `data-human-raw/` ในเครื่อง ไม่อยู่ใน git) — (1) `day` = 1 + จำนวน `day_end` ก่อนหน้า (ตรวจ: door_event toothless/merchant/storm/bigz ตกวัน 2/3/4/5 ตรงเป๊ะ), (2) snapshot ท้าย run ที่มาจากเกมเก่าถูกแทนด้วยสัตว์ 2 ตัวจริง = snapshot ล่าสุดของแต่ละตัว + `hp=0, dead=true` (**ค่า stomach/clean ของ Toothless เป็นค่าล่าสุดที่ log ไว้ตอน day_end วัน 4 จึงประมาณ**), (3) `run_end`/`run_summary` ฟิลด์ที่อ่านจาก state (dayReached 5, deathDay 5, finalCoin 482, level 5/exp 27/points 1, upg QTE1+Progress1, pets 2/0 alive, energyUsed/Left_d1..d5) คำนวณใหม่จาก events; เพิ่มฟิลด์ `repaired` ใน `run_summary`. หลังซ่อม Aggregate+validate: **8/8 ผ่านทั้ง 15 invariant**. อย่าใช้ค่า stomach/clean ท้าย run ของ Boom เป็นหลักฐานละเอียด.
+- `First_151` = outcome `quit` ที่ Day 3 (ไม่ถึงบอส) — เลือก Chase ที่ Toothless จึงไม่มี fight; ใช้ได้เฉพาะส่วนก่อนหน้า.
+- `validate.ps1` ต้องแก้ก่อนรันกับ data คนจริงได้โดยตรง (path ฝังที่ `data/raw`; ไม่รู้จักคอลัมน์ `starter` -> crash ที่ `N()`); ผลรอบนี้รันจากสำเนาชั่วคราวที่ชี้ path ใหม่และข้าม `starter`. ดู C8/C9.
+
+### 7.2 คนจริง vs bot `human` (bot = ตาราง §2.1)
+
+| metric | คนจริง (n=8) | bot `human` (n=40) | ตีความ |
+|---|---|---|---|
+| ถึง Day 5 / to_be_continued | 7/8 (1 quit D3) | 38/40 | game over 0/8 |
+| เวลาเล่นจนจบ (นาที, 7 runs ที่จบ) | 7.4-16.4, median 12.3 | ~4.6 (sim) | คนใช้เวลา ~2.7x ของ bot |
+| QTE Perfect / Great / Miss | 48.7 / 31.9 / 19.5 % (n=1120) | 86.0 / 1.7 / 12.3 % | คนใช้ Great เยอะกว่า bot มาก; Perfect ต่ำกว่า |
+| Miss ต่อ care: Train / Feed / Clean / Heal | 28 / 10 / 17 / 25 % (n=400/300/340/80) | 4.0 / 10.5 / 15.9 / 17.9 % | **Train ยากสุดสำหรับคน** (bot เห็นง่ายสุด) |
+| care ที่เลือก (ok) | Train 40 / Clean 34 / Feed 30 / Heal 8 | ส่วนใหญ่ Train | คนดูแล Feed/Clean จริง |
+| energy ใช้ทั้ง run | mean 14 (D1-D4 = 3/วัน เกือบทุกวัน) | 9.1 | คนใช้ Energy เต็ม -> เพดานจริง (ตอบ R1) |
+| `care_select` ที่โดน `noenergy` | 21 ครั้ง / 8 runs | 0 | คนกดเลือกสัตว์ทั้งที่ energy หมด — UX/feedback |
+| fight hit rate | mean 71.3% / median 80% | 83.5% | ใกล้ sloppy-human |
+| Toothless ชนะ (ผู้เล่นที่ Tame) | 7/7, **dmgTaken 0 ทุกครั้ง** (dealt 120-135, 6-7 rounds ยกเว้น Boom 3) | แพ้ 2/40 | ไม่มีใครเสี่ยงตายที่ D2 |
+| Big Z dmg dealt (ชนะ 0/7) | 61-483 (median 204) | median 151, max 1100 | อยู่ในช่วงเดียวกับ bot `human` |
+| สัตว์ตายที่บอสทุก run | 7/7 | — | `to_be_continued` = แพ้บอสเสมอ |
+| Merchant | Sell 4 / Refuse 4 | sell 8 / refuse 30 | คนขายครึ่งหนึ่ง; Sell จบ 5450-5750 coin ไม่ได้ใช้ |
+| Upgrade | QTE ซื้อก่อนเสมอ (7/7 คนที่ซื้อ; Just ไม่ซื้อ); QTE x3 = 4 คน; **Energy 0/8**; Progress 2 | QTE x3 18/40, Energy 8/40 | ไม่มีใครเลือก Energy |
+| Tonic | 3 คนซื้อ (Nava x1, Boom x2, Zunk x2), ทุกครั้งที่ energy = 0 | 19/19 ซื้อครั้งเดียว | clamp ที่ MaxEnergy ทำงาน (delta +2 แล้ว +1) |
+
+### 7.3 ผลต่อข้อเสนอเดิม
+
+| ข้อ | สถานะหลังเห็นคนจริง | เหตุผล / ข้อมูล |
+|---|---|---|
+| A1 Tonic cap | **ลดความเร่งด่วน** | clamp แก้ไปแล้ว (round 2); ซื้อ Tonic ได้ตอน energy ไม่เต็มเท่านั้น (+1..+2 ต่อขวด). ยังไม่มีใครซื้อ >2 ขวด/วัน. ตัดสินว่าจะ cap ต่อวันหรือไม่ ขึ้นกับว่าทีมอยากให้ coin->Energy ไม่จำกัดหรือเปล่า |
+| A2 `ToothlessAtk` 15->12 | **ไม่แนะนำตอนนี้** | คนจริง 7/7 ชนะโดยไม่เสีย Hp เลย; ปัญหา game over 25% มาจาก bot `sloppy` เท่านั้น. ปรับลงอีกอาจทำให้ Day 2 ไม่มีแรงกดดันเลย. (ข้อมูลคนที่เสียรอบ: n=0, ต้องการ playtester ที่ไม่เก่ง) |
+| A3 `EnergyPoints` 3->2 | **ยังไม่มีหลักฐานสนับสนุนจากคน** | ไม่มีใครซื้อ Energy (0/8); points เหลือ 0-3. คนใช้ Energy เต็มทุกวัน แต่เลือก QTE ก่อน -> ปัญหาอาจเป็นว่า Energy upgrade ไม่น่าซื้อ ไม่ใช่แพงเกินไป |
+| A4 `StarveDamage` | ไม่มีข้อมูลใหม่ | starve 1 event (Zunk) ใน 8 runs |
+| A5 ลดความยาก Clean/Heal | **ข้อสมมติฐานเดิมกลับด้าน** | ใน bot Train ง่ายสุด; ในคน Train miss 28% สูงสุด (zone แคบ Perfect 0.07/Great 0.16) และถูกเลือกมากสุด (40). ถ้าจะปรับ ให้ดู `TrainScale`/zone ของ Train ก่อน; Heal n=80 น้อยเกินสรุป |
+| B1 Big Z | **ยืนยันซ้ำ** | 0/7, dmg 61-483 จาก 9999. สัตว์ตายที่บอสทุก run (รวม 10 ตัว) |
+| B2 Merchant/sink | **ยืนยัน** | Sell 4/4 จบ 5450-5750 coin; Refuse 4 คนใช้ 268-400 coin กับ shop/upgrade. ผู้เล่น Sell ไม่มีอะไรให้ซื้อ |
+| B3-B4 Revive/safety net | **ไม่เกิดกับคนจริงใน sample นี้** | game over 0/8, Toothless dmgTaken 0. ยังเป็นความเสี่ยงเชิงทฤษฎี (สัตว์เดียว + ผู้เล่นพลาด) ไม่ใช่ปัญหาที่เห็น |
+| B5 Point economy | **ยืนยันบางส่วน** | QTE lv3 ถูกซื้อก่อนเสมอ; Energy ไม่ถูกเลือก; points เหลือ 0-3 |
+| C1 เก็บ telemetry คนจริง | **เริ่มแล้ว (8 runs)** | เป้า >= 15-20 runs; ควรมีผู้เล่นที่ไม่คุ้นเกมแนวนี้ |
+| R1 Energy เป็นคอขวดไหม | **ตอบแล้ว: ใช่สำหรับคนจริง** | energy ใช้ 3/3 ทุกวัน D1-D4; 21 ครั้งที่กดทั้งที่หมด |
+| R4 Clean/Heal ยากกว่า Train | **กลับด้านในคน** | ดู A5 |
+
+### 7.4 ข้อสังเกตเชิงคุณภาพที่ telemetry บอกได้
+
+- ทุกคนเห็นบอสแล้วแพ้ (dmg median 204 / HP 9999): ผู้เล่นรู้ตัวหรือไม่ว่านี่คือ "ฉากจบที่ตั้งใจ" — ควรถามผู้เล่น (`to_be_continued` ปรากฏหลังสัตว์ตายหมด).
+- เวลา ~12 นาทีต่อ run (median 12.3); ผู้เล่นเปิดประตู Day 2 (Toothless) ที่ t = 134-425 s; ไฟต์บอสใช้ 10-41 s.
+- `noenergy` 21 ครั้ง: ผู้เล่นพยายามดูแลสัตว์ตอน energy หมด — พิจารณา feedback บน UI (ดู C9) ไม่ใช่เรื่อง balance.
+
+### 7.5 งานต่อ (เพิ่มในกลุ่ม C)
+
+| # | งาน | ทำไม |
+|---|---|---|
+| C9 | แก้ `Telemetry.RunStart`/`_gs` ให้รองรับเริ่มเกมใหม่ในเซสชันเดียว (rebind `_gs` หรือจบ run เก่าด้วย `quit` แล้วเปิดไฟล์ใหม่) | Boom_121: `day`/summary ผิด (ซ่อมข้อมูลแล้ว; **แก้โค้ดแล้ว 2026-10-12** ใน Q-20261012-telemetry-restart — run หลัง build นี้ที่กด Main Menu แล้วเริ่มใหม่จะได้ไฟล์แยกต่อเกม; build `15ac821` ที่ผู้เล่น 8 คนใช้ยังมีบั๊กนี้) |
+| C10 | `validate.ps1`: รับ path เป็นพารามิเตอร์ (`-Raw`, `-Csv`, `-Out`), รู้จักคอลัมน์ `starter`/`player`, ใช้ `Get-Date` แบบ invariant (ตอนนี้ออกปี 2569) | ขัดกับ C8 เดิม ต้องแก้ก่อนรันกับ data รอบถัดไป |
+| C11 | ถามผู้เล่น: เคยเล่นเกมแนวนี้ไหม, รู้ไหมว่าบอสชนะไม่ได้, ทำไมไม่ซื้อ Energy upgrade | telemetry ไม่เก็บเหตุผล |

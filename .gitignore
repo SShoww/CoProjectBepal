@@ -418,3 +418,5 @@ temp_gdd_pages/
 ## --- AI Context tooling ---
 Context/.edit-log.lock
 BEPAL/Docs/Balance/data/raw/
+BEPAL/Docs/Balance/data-human/
+BEPAL/Docs/Balance/data-human-raw/

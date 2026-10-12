@@ -3,6 +3,12 @@
 ล่าสุด 10 งาน งานละ 3 บรรทัด เขียนผ่าน `tools/context/log-edit.py` เท่านั้น — รายการเก่าอยู่ที่ [archive/edit-log/](archive/edit-log/)
 
 <!-- entries -->
+- **2026-10-12 20:02 · Q-20261012-human-telemetry** — วิเคราะห์ telemetry คนจริง 8 runs (Aggregate+validate, balance-report §7, ซ่อม Boom_121, แถว QTE not missed ใน players.md); jsonl ดิบ gitignore เพราะมีชื่อผู้เล่น ไม่ push
+  - Files: .gitignore, BEPAL/Docs/Balance/analysis/human, BEPAL/Docs/Balance/balance-report.md, BEPAL/Docs/Balance/tools/Aggregate/Program.cs
+  - Validation: validate 8/8 ผ่านหลังซ่อม; Aggregate build/รันผ่าน; ไม่ได้แก้โค้ดเกมใน branch นี้ จึงไม่ได้รัน build/autoplay ของเกม
+- **2026-10-12 19:54 · Q-20261012-telemetry-restart** — C9: Telemetry.RunStart รองรับเริ่มเกมใหม่ในเซสชันเดียว (ปิด run เก่าด้วย quit, reset state, ไฟล์ใหม่ต่อเกม) เพื่อแก้บั๊ก day/summary ผิดแบบ Boom_121
+  - Files: BEPAL/Bepal_Game/Bepal/Core/Telemetry.cs, BEPAL/Docs/Balance/telemetry-spec.md, BEPAL/Docs/Balance/balance-report.md
+  - Validation: build 0/0; --autoplay และ --refuse reached To be continued; harness ชั่วคราวผ่าน; ยังไม่ได้ทดสอบกด Main Menu ใน GUI จริง
 - **2026-10-10 00:23 · Q-20261009-run-telemetry** — Run telemetry: per-run JSONL + bot profiles + balance report (round 1); round 2: --player, Gregorian run ids, build hash baked into exe, telemetry.txt auto-enable for tester exe, Aggregate players.md, Energy clamped to MaxEnergy (Tonic disabled at full Energy)
   - Files: BEPAL/Bepal_Game/Bepal/{Core/Telemetry.cs, Game1.cs, Bepal.csproj, Model/GameState.cs, Scenes/BaseMenus.cs, DevTools/AutoPlay.cs}, BEPAL/Docs/Balance/{telemetry-spec.md, tools/Aggregate/Program.cs}, BEPAL/Docs/GDD/{06-vertical-slice, 10-economy-items}.md, CLAUDE.md, Context/quests/Q-20261009-run-telemetry.md
   - Validation: build slnx 0/0; --autoplay and --autoplay --refuse reach To be continued; --shots 23 PNG; 200-run batch + validate.ps1 0 fail (round 1); 20 human-bot runs 0 energy over max; published exe + telemetry.txt writes data/*.jsonl with build hash
@@ -27,9 +33,3 @@
 - **2026-10-07 02:55 · Q-20261007-parallax** — เพิ่ม sprite parallax 5 ชั้น, หน้าต่างใหญ่ 6 บานในบ้าน (ห่างประตู), foreground jungle 2x; อัปเดต CLAUDE.md/monogame skill ว่ามี image assets
   - Files: BEPAL/Bepal_Game/Bepal/World/Backdrop.cs, BEPAL/Bepal_Game/Bepal/Scenes/BaseScene.cs, BEPAL/Bepal_Game/Bepal/Core/Gfx.cs, BEPAL/Bepal_Game/Bepal/Content, CLAUDE.md, .claude/skills/monogame/SKILL.md
   - Validation: build 0 warn, autoplay ปกติ/--refuse ผ่าน, ดู --shots แล้ว; ไม่ผ่าน PR ตามคำสั่งผู้ใช้; ยังไม่ได้เล่นจริง
-- **2026-10-07 01:59 · Q-20261007-audio-sfx** — เพิ่ม Audio/Sfx: SFX 17 ไฟล์ WAV + synth (QtePerfect, Typewriter), เคาะประตูวนจนเปิด; ปิด Quest
-  - Files: BEPAL/Bepal_Game/Bepal/Core/Audio.cs, BEPAL/Bepal_Game/Bepal/Content/Sfx, BEPAL/Bepal_Game/Bepal/Scenes, BEPAL/Assets/_candidates
-  - Validation: build 0 warn, autoplay ปกติ/--refuse ผ่าน; ผู้ใช้ฟังเสียงจริงและยืนยัน 2026-10-07
-- **2026-10-06 23:22 · Q-20261006-gitflow-doc** — เพิ่ม Gitflow.md (ปรับคำสั่งให้ตรง repo) และเริ่มใช้: สร้าง/push Develop จาก main, AGENTS.md ห้าม commit ตรงลง main/Develop
-  - Files: Context/Gitflow.md, Context/README.md, Context/Status.md, AGENTS.md
-  - Validation: ลิงก์ 0 เสีย; ls-remote เห็น Develop=main=0cb2715; ไม่ได้รัน build/gates
