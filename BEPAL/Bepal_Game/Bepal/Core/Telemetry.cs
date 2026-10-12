@@ -20,7 +20,7 @@ public static class RunSeed
 
 /// <summary>
 /// Per-run telemetry (BEPAL/Docs/Balance/telemetry-spec.md). No-op unless <see cref="Configure"/> was called
-/// (<c>--telemetry &lt;dir&gt;</c>). Writes one JSONL file per process: one line per event (runId, seq, t = simulated
+/// (<c>--telemetry &lt;dir&gt;</c>). Writes one JSONL file per run (a new game in the same process starts a new file): one line per event (runId, seq, t = simulated
 /// seconds, tReal, type, day, scene + event fields) and a final <c>run_summary</c> row built from running counters.
 /// </summary>
 public static class Telemetry
@@ -65,15 +65,26 @@ public static class Telemetry
 
     public static void RunStart(GameState gs, Species starter)
     {
-        if (!Enabled || _started) return;
+        if (!Enabled) return;
+        if (_started)
+        {
+            if (ReferenceEquals(_gs, gs)) return;
+            // A new game in the same process (Main Menu -> start again, or restart after game over / To be continued):
+            // close the old run (an abandoned one that never did anything is dropped) and start a fresh file.
+            if (!_ended && _seq > 1) End("quit");
+            Lines.Clear(); C.Clear(); S.Clear(); DayRecorded.Clear();
+            _seq = 0; _energyToday = 0; _enemy = ""; _ended = false; _dirty = false;
+        }
         _started = true;
         _gs = gs;
         _t0 = _t;
-        Sw.Start();
+        Sw.Restart();
         _build = GitHash();
         var now = DateTime.Now;
-        _runId = $"run_{now.ToString("yyyyMMdd_HHmmss", System.Globalization.CultureInfo.InvariantCulture)}_{_profile}{(_player != "" ? "-" + _player : "")}{(_refuse ? "-refuse" : "")}_{RunSeed.Seed}";
+        string baseId = $"run_{now.ToString("yyyyMMdd_HHmmss", System.Globalization.CultureInfo.InvariantCulture)}_{_profile}{(_player != "" ? "-" + _player : "")}{(_refuse ? "-refuse" : "")}_{RunSeed.Seed}";
         Directory.CreateDirectory(_dir);
+        _runId = baseId;
+        for (int n = 2; File.Exists(Path.Combine(_dir, _runId + ".jsonl")); n++) _runId = baseId + "-" + n;   // same second + seed
         _path = Path.Combine(_dir, _runId + ".jsonl");
         Emit("run_start", "starter", starter.ToString(), "startCoin", gs.Coin, "startEnergy", gs.Energy,
             "profile", _profile, "player", _player, "refuse", _refuse, "seed", RunSeed.Seed, "build", _build, "mode", _mode);
