@@ -1,7 +1,7 @@
 ---
 type: gdd-references-art
-version: 1.0
-date: 2026-10-07
+version: 1.1
+date: 2026-10-13
 ---
 
 # BePal — Inspiration, Competitors & Art Direction
@@ -56,7 +56,8 @@ date: 2026-10-07
 
 **แนวทางหลัก (จาก Figma — 03 · Concept Design):** ทำให้บ้านรู้สึกอบอุ่น นุ่มนวล สบายตา แต่สัตว์เลี้ยงต้อง "แปลก" (*pet look normal but something wrong*) และสร้างความรู้สึกไม่สบายใจเล็กน้อยโดยไม่ตกไปเป็นสยองขวัญ — ความรู้สึกเป้าหมาย: อบอุ่น · น่ารัก · ลึกลับ · ปลอดภัย · สบายใจ
 
-- **Visual Style (แนะนำ):** **Soft Hand-drawn + Uncanny Details** — เส้นนุ่ม เงาสีอบอุ่น สัตว์วาดสไตล์เดียวกันแต่ใส่รายละเอียดผิดปกติเล็กน้อย (ตาใหญ่เกิน/ตาเยอะกว่าปกติ, ลายขนหรือสีที่ไม่สมเหตุสมผล, การเคลื่อนไหวช้าหรือแปลก) อารมณ์คล้าย Spiritfarer + Cozy Grove
+- **As built (2026-10-13):** สไตล์ที่เกมใช้จริงคือ **Soft Pixel Art** — parallax 320×180 วาด 4x ด้วย `PointClamp`, ผู้เล่นเป็น pixel sprite; สัตว์/ศัตรู/NPC ยังเป็นรูปทรง primitive จนกว่าจะมีไฟล์ `pet_<species>.png` ฯลฯ (ไม่มี sprite อารมณ์หลายท่า — มีภาพนิ่งเดียวต่อตัว)
+- **Visual Style (แนะนำ — แนวคิดเดิม):** **Soft Hand-drawn + Uncanny Details** — เส้นนุ่ม เงาสีอบอุ่น สัตว์วาดสไตล์เดียวกันแต่ใส่รายละเอียดผิดปกติเล็กน้อย (ตาใหญ่เกิน/ตาเยอะกว่าปกติ, ลายขนหรือสีที่ไม่สมเหตุสมผล, การเคลื่อนไหวช้าหรือแปลก) อารมณ์คล้าย Spiritfarer + Cozy Grove
   - *ทางเลือก:* Soft Pixel Art ความละเอียดกลาง-สูง (อ้างอิงบรรยากาศ Animal Well + ความอบอุ่น Stardew Valley)
   - ความละเอียด Backbuffer 1280x720
 - **Color Palette:** โทนอุ่นเป็นหลัก (ครีม น้ำตาลอ่อน เขียวมิ้นต์ แสงโคมไฟส้มอ่อน) + สีเย็นหรือเทาแทรกในตัวสัตว์ และสีแดงเตือนภัยจากประตูแดง — เน้นสว่าง โทนสีอบอุ่น (Mood Board)
@@ -64,5 +65,6 @@ date: 2026-10-07
 - **สิ่งที่ควรหลีกเลี่ยง:** สัตว์น่ารักเกินไปแบบ Animal Crossing (เสียความ uncanny), สไตล์มืดหรือเลือดสาด (เสียความ cozy), เส้นคมและสีสดจัดเกินไป
 - **Expressive Cues:** สัตว์เลี้ยงมี Sprite แสดงอารมณ์ละเอียด (Idle, Hungry, Distressed, Angry, Joyful) พร้อม Visual VFX บอกใบ้จังหวะ QTE
 - **Audio Direction:**
+  - **As built:** มี BGM 7 เพลงเล่นตาม scene แล้ว (`Core/MusicPlayer.cs`, ดู [14](14-audio-fonts-list.md)); เสียง Typewriter และ Perfect chime สังเคราะห์ตอนรัน; เสียงหยดน้ำ/สบู่ (Clean) และเคี้ยวกรุบกรอบ (Feed) **ยังไม่มี**
   - **Soundtrack:** Lo-Fi Acoustic Guitar / Warm Electric Piano สำหรับช่วงเวลาดูแลในห้องพัก และแปรเปลี่ยนเป็น Up-tempo Chiptune Synthwave ผสมจังหวะกลองเขย่าขวัญในฉากต่อสู้ Boss Fight
   - **SFX:** เสียง Typewriter เวลาอ่านข้อความ, เสียงหยดน้ำ/สบู่ในโหมด Clean, เสียงเคี้ยวกรุบกรอบในโหมด Feed, และเสียงสะท้อนโลหะ (Metallic Parry) เมื่อกด Dodge สำเร็จ
