@@ -96,7 +96,7 @@ public static class Audio
         if (Muted || !_ok || !_fx.TryGetValue(name, out var fx)) return;
         if (_last.TryGetValue(name, out var t) && _time - t < minGap) return;
         _last[name] = _time;
-        try { fx.Play(Math.Clamp(volume, 0f, 1f), Math.Clamp(pitch, -1f, 1f), 0f); }
+        try { fx.Play(Math.Clamp(volume * Settings.Sfx, 0f, 1f), Math.Clamp(pitch, -1f, 1f), 0f); }
         catch (Exception) { _ok = false; }
     }
 
@@ -113,7 +113,7 @@ public static class Audio
                 inst.IsLooped = true;
                 _loops[name] = inst;
             }
-            inst.Volume = volume;
+            inst.Volume = Math.Clamp(volume * Settings.Sfx, 0f, 1f);
             if (inst.State != SoundState.Playing) inst.Play();
         }
         catch (Exception) { _ok = false; }

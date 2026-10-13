@@ -48,7 +48,7 @@ project: BePal
 
 ### 2.2 Background Music (BGM — OGG Looping)
 
-> **As built (2026-10-13):** BGM-01..07 อยู่ใน `Content/Music/` (`OggImporter` + `SongProcessor`) และเล่นแล้วผ่าน `Core/MusicPlayer.cs` — loop, fade 0.8 s เมื่อเปลี่ยนเพลง, ระดับเสียง `Balance.MusicVolume` (0.5); scene ระบุเพลงด้วย `Scene.Music` / `MusicOverride` (ฐาน = cozy, Day 4 หลังเปิดประตู = thunderstorm, Fight = fight/boss, พ่อค้า+ร้าน = merchant, Menu/เลือกสัตว์ = menu, จบ = to_be_continued, GameOver = เงียบ) ยังไม่มีเมนู Option/ปรับ volume ในเกม และ BGM-08 ยังไม่ทำ
+> **As built (2026-10-13):** BGM-01..07 อยู่ใน `Content/Music/` (`OggImporter` + `SongProcessor`) และเล่นแล้วผ่าน `Core/MusicPlayer.cs` — loop, fade 0.8 s เมื่อเปลี่ยนเพลง, ระดับเสียง `Balance.MusicVolume` (0.5); scene ระบุเพลงด้วย `Scene.Music` / `MusicOverride` (ฐาน = cozy, Day 4 หลังเปิดประตู = thunderstorm, Fight = fight/boss, พ่อค้า+ร้าน = merchant, Menu/เลือกสัตว์ = menu, จบ = to_be_continued, GameOver = เงียบ) BGM-08 ยังไม่ทำ; ปรับ volume เพลง/SFX ได้ในเมนู Options (Main Menu และ Pause) ค่าเก็บใน `%APPDATA%/BePal/settings.txt` (`Core/Settings.cs`)
 
 | รหัส Audio | ชื่อไฟล์ | บริบทของฉาก | สไตล์และอารมณ์ดนตรี | Priority |
 | --- | --- | --- | --- | --- |

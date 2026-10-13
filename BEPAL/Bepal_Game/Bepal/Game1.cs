@@ -46,6 +46,8 @@ namespace Bepal
             string? botArg = Arg("--bot");
             bool auto = Has("--autoplay") || botArg != null;
             Audio.Muted = auto || Has("--shots");
+            Settings.Persist = !Audio.Muted;   // bots/shots must not read or overwrite the player's options
+            Settings.Load();
             Audio.Load(Content);
             MusicPlayer.Load(Content);
             if (int.TryParse(Arg("--seed"), out int seed)) RunSeed.Set(seed);

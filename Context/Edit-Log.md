@@ -3,6 +3,9 @@
 ล่าสุด 10 งาน งานละ 3 บรรทัด เขียนผ่าน `tools/context/log-edit.py` เท่านั้น — รายการเก่าอยู่ที่ [archive/edit-log/](archive/edit-log/)
 
 <!-- entries -->
+- **2026-10-13 19:45 · Q-20261013-options-menu** — เมนู Options ปรับ volume เพลง/SFX (slider เมาส์/คีย์), เก็บใน %APPDATA%/BePal/settings.txt, เปิดจาก Main Menu และ Pause
+  - Files: BEPAL/Bepal_Game/Bepal/Core/Settings.cs, Core/Ui.cs, Core/Audio.cs, Core/MusicPlayer.cs, Scenes/MenuScenes.cs, Scenes/BaseScene.cs, docs
+  - Validation: build 0 warn; ทดสอบ input จริงผ่าน harness ชั่วคราว; autoplay ไม่แตะ settings; ยังไม่ได้ฟัง/เปิดจาก Pause ด้วยมือ
 - **2026-10-13 19:21 · Q-20261013-bgm** — เชื่อม BGM 7 ไฟล์ผ่าน MusicPlayer: เลือกเพลงตาม Scene.Music, loop + fade, เงียบใน autoplay/shots
   - Files: BEPAL/Bepal_Game/Bepal/Core/MusicPlayer.cs, Core/SceneManager.cs, Game1.cs, Scenes/*, Content/Content.mgcb, Content/Music/, docs
   - Validation: build 0 warn; รันจริงเห็น state=Playing; ลำดับเพลงจาก autoplay ถูกต้อง; ยังไม่ได้ฟังด้วยหู
@@ -30,6 +33,3 @@
 - **2026-10-12 20:02 · Q-20261012-human-telemetry** — วิเคราะห์ telemetry คนจริง 8 runs (Aggregate+validate, balance-report §7, ซ่อม Boom_121, แถว QTE not missed ใน players.md); jsonl ดิบ gitignore เพราะมีชื่อผู้เล่น ไม่ push
   - Files: .gitignore, BEPAL/Docs/Balance/analysis/human, BEPAL/Docs/Balance/balance-report.md, BEPAL/Docs/Balance/tools/Aggregate/Program.cs
   - Validation: validate 8/8 ผ่านหลังซ่อม; Aggregate build/รันผ่าน; ไม่ได้แก้โค้ดเกมใน branch นี้ จึงไม่ได้รัน build/autoplay ของเกม
-- **2026-10-12 19:54 · Q-20261012-telemetry-restart** — C9: Telemetry.RunStart รองรับเริ่มเกมใหม่ในเซสชันเดียว (ปิด run เก่าด้วย quit, reset state, ไฟล์ใหม่ต่อเกม) เพื่อแก้บั๊ก day/summary ผิดแบบ Boom_121
-  - Files: BEPAL/Bepal_Game/Bepal/Core/Telemetry.cs, BEPAL/Docs/Balance/telemetry-spec.md, BEPAL/Docs/Balance/balance-report.md
-  - Validation: build 0/0; --autoplay และ --refuse reached To be continued; harness ชั่วคราวผ่าน; ยังไม่ได้ทดสอบกด Main Menu ใน GUI จริง

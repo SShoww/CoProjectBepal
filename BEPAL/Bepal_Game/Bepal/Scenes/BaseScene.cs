@@ -225,13 +225,17 @@ public class BaseScene : Scene
         if (Input.Back)
         {
             _vel = 0;
-            M.Push(new ChoiceScene("Paused", new[]
-            {
-                new Option("Resume", () => { }),
-                new Option("Main Menu", () => M.Reset(new MainMenuScene())),
-            }, cancellable: true));
+            OpenPause();
         }
     }
+
+    void OpenPause() =>
+        M.Push(new ChoiceScene("Paused", new[]
+        {
+            new Option("Resume", () => { }),
+            new Option("Options", () => M.Push(new OptionsScene(OpenPause))),
+            new Option("Main Menu", () => M.Reset(new MainMenuScene())),
+        }, cancellable: true));
 
     static float WallCap(float top, float dist) => top * (0.5f + 0.5f * Ease.Smoothstep(dist));
 

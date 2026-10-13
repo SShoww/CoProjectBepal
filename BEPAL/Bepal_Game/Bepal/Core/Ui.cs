@@ -63,6 +63,56 @@ public class Button
     }
 }
 
+/// <summary>Horizontal 0..1 slider: click or drag on the track; <see cref="Changed"/>/<see cref="Released"/> report this frame's events.</summary>
+public class Slider
+{
+    public Rectangle Rect;
+    public float Value;
+    public bool Changed, Released;
+    bool _drag;
+
+    public Slider(Rectangle rect, float value)
+    {
+        Rect = rect;
+        Value = value;
+    }
+
+    Rectangle Hit => new(Rect.X - 12, Rect.Y - 14, Rect.Width + 24, Rect.Height + 28);
+
+    public void Update()
+    {
+        Changed = Released = false;
+        if (Input.Click && Hit.Contains(Input.Mouse)) _drag = true;
+        if (!_drag) return;
+        if (Input.MouseHeld)
+        {
+            float v = MathHelper.Clamp((Input.Mouse.X - Rect.X) / (float)Rect.Width, 0, 1);
+            if (v != Value) { Value = v; Changed = true; }
+        }
+        else
+        {
+            _drag = false;
+            Released = true;
+        }
+    }
+
+    public void Nudge(float delta)
+    {
+        float v = MathHelper.Clamp(MathF.Round((Value + delta) * 100f) / 100f, 0, 1);
+        if (v == Value) return;
+        Value = v;
+        Changed = Released = true;
+    }
+
+    public void Draw(SpriteBatch sb, bool selected)
+    {
+        Gfx.Rect(sb, Rect.X, Rect.Center.Y - 4, Rect.Width, 8, new Color(60, 50, 56));
+        Gfx.Rect(sb, Rect.X, Rect.Center.Y - 4, (int)(Rect.Width * Value), 8, Palette.Warm);
+        var knob = new Vector2(Rect.X + Rect.Width * Value, Rect.Center.Y);
+        Gfx.Circle(sb, knob, selected || _drag ? 13 : 10, selected || _drag ? Palette.Text : Palette.Warm);
+    }
+}
+
 public static class Ui
 {
     /// <summary>Frame step of the current update, set once per frame by SceneManager (Button tween reads it).</summary>
