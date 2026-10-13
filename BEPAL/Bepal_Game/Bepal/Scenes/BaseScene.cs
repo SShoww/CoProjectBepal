@@ -526,7 +526,8 @@ public class BaseScene : Scene
             Gfx.Rect(sb, r.X + 96 + i * 20, r.Y + 41, 14, 14, i < _gs.Energy ? new Color(120, 240, 140) : new Color(50, 60, 50));
         Gfx.Text(sb, Gfx.Font, $"Player LV. {_gs.PlayerLevel}", new Vector2(r.X + 240, r.Y + 8), Palette.Text);
         Ui.Bar(sb, new Rectangle(r.X + 240, r.Y + 40, 180, 14), _expShown.Value, _gs.PlayerMaxExp, Palette.Progress);
-        Gfx.Text(sb, Gfx.Small, $"Points {_gs.Points}", new Vector2(r.X + 432, r.Y + 36), Palette.Dim);
+        Gfx.Text(sb, _gs.Points > 0 ? Gfx.Font : Gfx.Small, $"Points {_gs.Points}", new Vector2(r.X + 432, r.Y + (_gs.Points > 0 ? 28 : 36)),
+            _gs.Points > 0 ? Palette.Coin : Palette.Dim);
 
         if (_near == null && M.Top == this) Ui.Hint(sb, "A / D  Walk     SHIFT  Run     SPACE  Interact     ESC  Pause");
     }

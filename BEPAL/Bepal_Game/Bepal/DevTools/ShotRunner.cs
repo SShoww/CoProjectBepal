@@ -50,6 +50,7 @@ public class ShotRunner
         _shots.Add(("08_fight", () => { var g = Gs(); return With(new FightScene(g, Enemy.Toothless(), g.Pets[0], _ => { })); }, 0.8f));
         _shots.Add(("09_fight_bigz", () => { var g = Gs(5); return With(new FightScene(g, Enemy.BigZ(), g.Pets[1], _ => { })); }, 0.8f));
         _shots.Add(("10_upgrade", () => { var g = Gs(); return With(new BaseScene(g), new UpgradeScene(g)); }, 0.2f));
+        _shots.Add(("10b_upgrade_poor", () => { var g = Gs(); g.Points = 0; g.Coin = 60; return With(new BaseScene(g), new UpgradeScene(g)); }, 0.2f));
         _shots.Add(("11_doctor", () => { var g = Gs(); return With(new BaseScene(g), new DoctorScene(g)); }, 0.2f));
         _shots.Add(("12_notebook", () => { var g = Gs(); return With(new BaseScene(g), new NotebookScene(g)); }, 0.2f));
         _shots.Add(("12b_notebook_pet_lv1", () => { var g = Gs(); return With(new BaseScene(g), new NotebookScene(g, 0)); }, 0.2f));

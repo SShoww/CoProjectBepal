@@ -29,10 +29,10 @@ public class UpgradeScene : Scene
     (string name, string desc, int coin, int points, int level, int max)[] Rows =>
     new[]
     {
-        ("QTE", "Train dots get bigger", Balance.QteCoin, Balance.QtePoints, _gs.QteUpgrade, Balance.QteMax),
-        ("Energy", "+1 Energy every day", Balance.EnergyCoin, Balance.EnergyPoints, _gs.EnergyUpgrade,
+        ("QTE", "Train dots get bigger", Balance.QteCoin, Balance.PointCost(0, _gs.QteUpgrade), _gs.QteUpgrade, Balance.QteMax),
+        ("Energy", "+1 Energy every day", Balance.EnergyCoin, Balance.PointCost(1, _gs.EnergyUpgrade), _gs.EnergyUpgrade,
             Balance.MaxEnergyCap - Balance.BaseEnergy),
-        ("Progress Bar", "Train progress +10 -> +15", Balance.ProgressCoin, Balance.ProgressPoints, _gs.ProgressUpgrade,
+        ("Progress Bar", "Train progress +50% each", Balance.ProgressCoin, Balance.PointCost(2, _gs.ProgressUpgrade), _gs.ProgressUpgrade,
             Balance.ProgressMax),
     };
 
@@ -68,6 +68,8 @@ public class UpgradeScene : Scene
         Ui.Panel(sb, panel);
         Gfx.Text(sb, Gfx.Big, "Upgrade", new Vector2(panel.X + 30, panel.Y + 10), Palette.Warm);
         Gfx.Text(sb, Gfx.Font, $"Points : {_gs.Points}     Coin : {_gs.Coin}", new Vector2(panel.Right - 30, panel.Y + 30), Palette.Coin, 1f);
+        Gfx.Text(sb, Gfx.Small, "Points come from Player level-ups: keep caring for your pets (Train, Feed, Clean, Heal).",
+            new Vector2(panel.X + 30, panel.Y + 100), Palette.Dim);
         var rows = Rows;
         for (int i = 0; i < 3; i++)
         {
@@ -77,8 +79,14 @@ public class UpgradeScene : Scene
             Gfx.Text(sb, Gfx.Small, r.desc, new Vector2(320, y + 34), Palette.Dim);
             for (int k = 0; k < r.max; k++)
                 Gfx.Rect(sb, 600 + k * 26, y + 8, 20, 20, k < r.level ? Palette.Coin : new Color(60, 50, 56));
-            string req = r.level >= r.max ? "MAX" : $"REQ. {r.coin} coin . {r.points} points";
-            Gfx.Text(sb, Gfx.Small, req, new Vector2(600, y + 38), r.level >= r.max ? Palette.Coin : Palette.Dim);
+            bool maxed = r.level >= r.max;
+            string req = maxed ? "MAX" : $"REQ. {r.coin} coin . {r.points} {(r.points == 1 ? "point" : "points")}";
+            Gfx.Text(sb, Gfx.Small, req, new Vector2(600, y + 38), maxed ? Palette.Coin : Palette.Dim);
+            if (!maxed && (_gs.Points < r.points || _gs.Coin < r.coin))
+            {
+                string why = _gs.Points < r.points ? $"Need {r.points - _gs.Points} more {(r.points - _gs.Points == 1 ? "point" : "points")}" : $"Need {r.coin - _gs.Coin} more coin";
+                Gfx.Text(sb, Gfx.Small, why, new Vector2(600, y + 60), Palette.Danger);
+            }
             _plus[i].Draw(sb);
         }
         _popups.Draw(sb);

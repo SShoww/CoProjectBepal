@@ -166,9 +166,19 @@ public static class Balance
     public const int SeaTeaPrice = 18;
 
     // Upgrade costs
-    public const int QteCoin = 100, QtePoints = 1, QteMax = 3;
-    public const int EnergyCoin = 150, EnergyPoints = 3;
-    public const int ProgressCoin = 20, ProgressPoints = 2, ProgressMax = 2;
+    /// <summary>Coin per level and max level of each upgrade. Point cost depends on the level being bought (see <see cref="PointCost"/>).</summary>
+    public const int QteCoin = 100, QteMax = 3;
+    public const int EnergyCoin = 150;
+    public const int ProgressCoin = 20, ProgressMax = 3;
+    /// <summary>Points needed to buy level 1, 2, 3 of each upgrade.</summary>
+    public static readonly int[] QtePointCost = { 1, 1, 1 }, EnergyPointCost = { 1, 2, 4 }, ProgressPointCost = { 1, 2, 3 };
+
+    /// <summary>Points to buy the next level of upgrade <paramref name="row"/> (0 QTE, 1 Energy, 2 Progress) when currently at <paramref name="level"/>.</summary>
+    public static int PointCost(int row, int level)
+    {
+        int[] t = row == 0 ? QtePointCost : row == 1 ? EnergyPointCost : ProgressPointCost;
+        return t[Math.Min(level, t.Length - 1)];
+    }
 }
 
 public class GameState
@@ -188,6 +198,8 @@ public class GameState
     public bool DoorDone;
     public bool DisasterSeen;
     public bool SeaTea;
+    /// <summary>The "spend your point at the Upgrade station" hint was already shown.</summary>
+    public bool PointHintShown;
 
     public int MaxEnergy => Math.Min(Balance.BaseEnergy + EnergyUpgrade, Balance.MaxEnergyCap);
     public int PlayerMaxExp => Balance.PlayerExpBase + (PlayerLevel - 1) * Balance.PlayerExpPerLevel;
