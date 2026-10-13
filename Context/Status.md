@@ -14,7 +14,7 @@
 
 ## ค้าง / รอบถัดไป
 - ฟอนต์ OFL; release build (`dotnet publish -c Release -r win-x64 --self-contained`)
-- `validate.ps1` แก้แล้ว (C10): รับ `-Raw/-Csv/-Out`, รู้จัก `starter`, ราคา Point ใหม่ และมี invariant I16 สำหรับไอเทม — รันผ่าน 16/16 กับ batch 50 run หลังข้อ 6 (ยังไม่ได้ลองกับ data คนจริง เพราะไม่มีไฟล์ดิบในเครื่อง); ไม่มี CI; ShotRunner ไม่มี shot GameOver/Night/PetPick
+- `validate.ps1` แก้แล้ว (C10): รับ `-Raw/-Csv/-Out`, รู้จัก `starter`, ราคา Point ใหม่ และมี invariant I16 สำหรับไอเทม — รันผ่าน 16/16 กับ batch 50 run หลังข้อ 6 (ยังไม่ได้ลองกับ data คนจริง เพราะไม่มีไฟล์ดิบในเครื่อง); ไม่มี CI; ShotRunner ไม่มี shot GameOver/Night/PetPick; มี `--scene <name>` และ F2 กระโดดไป scene (SceneCatalog)
 - เก็บ telemetry คนจริงเพิ่ม (ปัจจุบัน 8 runs ก่อนแก้ข้อ 3/5/6; เป้า 15–20) เพื่อดูว่าซื้อ Energy/ใช้ของมากขึ้นไหม; `sprint-plan-02.md` ยังไม่มี
 - ท่า attack/hurt/happy ของ sprite ยังไม่ต่อโค้ด; ยังไม่ได้ดู popup "No energy", dialogue Sell→ร้าน, hint Point แรก ด้วยตา
 
