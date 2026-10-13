@@ -71,14 +71,14 @@ flowchart LR
 
 > **Current state (2026-10-07):** 7 PNGs in `Content/Sprites/` — `bg_parallax_{sky,clouds,hills,mid,near}.png` (copies of `sprites/Hexagon/hexagon_5..1.png`, 320x180 drawn at 4x by `World/Backdrop.cs`), `fg_jungle.png` and `player.png` (all `TextureImporter`/`TextureProcessor`, `PremultiplyAlpha=True`) — plus 17 SFX in `Content/Sfx/` (WAV 16-bit PCM, `WavImporter` + `SoundEffectProcessor`, `Quality=Best`), played through `Core/Audio.cs` (`Sfx` name constants). Everything else is still drawn from primitives; BGM (`music/*.ogg`) is wired: copies live in `Content/Music/` (`OggImporter` + `SongProcessor`) and play through `Core/MusicPlayer.cs`. Inventory and status: [05-asset-list.md](../../Docs/GDD/05-asset-list.md); architecture: [CLAUDE.md](../../../CLAUDE.md). To add an SFX: drop the WAV in `sfx/`, copy to `Content/Sfx/`, register in `Content.mgcb`, add the name to `Sfx.All`.
 > **Character sprites (wired 2026-10-13, `World/Art.cs`):** pets, enemies, the merchant and the doctor use a real image when one is registered, otherwise the primitive drawing. One still image each, facing **right** (the game mirrors it toward whatever it looks at), transparent PNG, any size (the opaque bounding box is found automatically, so crop padding does not matter; the bottom edge of the opaque pixels is the feet). Idle breathing/bob is procedural (`SpriteMotion` pose), drawn point-sampled like `player.png`. To add one: copy the approved PNG to `BEPAL/Bepal_Game/Bepal/Content/Sprites/<name>.png`, register it in `Content/Content.mgcb` (same `TextureImporter`/`TextureProcessor`/`PremultiplyAlpha=True` block as `player.png`), `dotnet build`, then check with `dotnet run -- --shots <dir>`.
->
-> | `<name>` | Replaces | Drawn height (px, `Art.cs` constants) |
-> |---|---|---|
-> | `pet_mossling`, `pet_nibbleclaw`, `pet_blinkbun`, `pet_toothless` | `Art.Pet` (every screen incl. fight; the idle pose of PET-01/05/09/13) | 90 x scale |
-> | `enemy_toothless` | Toothless as a fight enemy (falls back to `pet_toothless`, then the primitive) | 150 |
-> | `enemy_bigz` | Big Z (Day 5 fight + intro portrait) | 230 x `Enemy.Size` |
-> | `npc_merchant` | `Art.Merchant` | 220 |
-> | `npc_doctor` | `Art.Doctor` | 125 |
->
+
+| `<name>` | Replaces | Drawn height (px, `Art.cs` constants) |
+|---|---|---|
+| `pet_mossling`, `pet_nibbleclaw`, `pet_blinkbun`, `pet_toothless` | `Art.Pet` (every screen incl. fight; the idle pose of PET-01/05/09/13) | 90 x scale |
+| `enemy_toothless` | Toothless as a fight enemy (falls back to `pet_toothless`, then the primitive) | 150 |
+| `enemy_bigz` | Big Z (Day 5 fight + intro portrait) | 230 x `Enemy.Size` |
+| `npc_merchant` | `Art.Merchant` | 220 |
+| `npc_doctor` | `Art.Doctor` | 125 |
+
 > Only the idle image is used for now: attack/hurt/happy poses (PET-02..04 etc.) are not wired; a hurt flash tints the sprite red. If a sprite looks too big/small, change the height constants at the top of `Art.cs`.
 > **SFX format decision:** WAV only. The source pack also had aiff/flac/m4a/mp3/ogg copies of each sound; they are not kept in the repo (SFX are short, WAV has the lowest latency and no codec risk on DesktopGL).
