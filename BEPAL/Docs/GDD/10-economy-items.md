@@ -25,6 +25,8 @@ date: 2026-10-07
 
 ### 5.2 Item Catalog (สินค้าและไอเทมใช้งาน)
 
+> As built (2026-10-13): ซื้อแล้วเข้า inventory (Box ในฐาน) ใช้ทีหลังผ่าน `InventoryScene`; ถือได้ ≤ 3 ต่อชนิด; ร้านเปิดหลัง Sell/Refuse ของพ่อค้า Day 3 รายละเอียด effect ที่ implement แล้ว (Crab Apple, Tonic, Sea Tea, Cloudy Glasses, Ballet Shoes, Torn Notebook, Faded Ribbon) ดู [06-vertical-slice.md §3.4](06-vertical-slice.md) — Toy Knife ยังไม่ทำ; Sea Tea ใน build นี้ = Fight ครั้งถัดไป (ไม่ใช่ 1 วัน)
+
 | รายการสินค้า       | ราคา | ประเภท         | คุณสมบัติและการใช้งาน                                                                                |
 | ------------------ | ---- | -------------- | ---------------------------------------------------------------------------------------------------- |
 | **Crab Apple**     | 25 G | อาหารพิเศษ     | ฟื้นฟู +18 HP และเพิ่ม +20 Stomach ทันทีโดยไม่เสีย Energy (AP)                                       |

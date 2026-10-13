@@ -31,6 +31,7 @@ public class FightScene : Scene
     bool _waitingForSwap;
     bool _poisoned;
     int _combo;   // Nibbleclaw: consecutive Attack hits
+    int _shield;  // Cloudy Glasses hits left to block
 
     // Telemetry counters (fight_end)
     int _tAtkHit, _tAtkMiss, _tDodgeOk, _tTooSlow, _tMissPress, _tDmgDealt, _tDmgTaken, _tPetsLost;
@@ -45,6 +46,8 @@ public class FightScene : Scene
         bool seaTea = gs.SeaTea;
         _dodgeStart = gs.SeaTea ? Balance.DodgeStartSeaTea : Balance.DodgeStart;   // Sea Tea: Dodge zone +20% for this fight
         gs.SeaTea = false;
+        _shield = gs.GlassesShield;   // Cloudy Glasses: blocks this many hits in this fight only
+        gs.GlassesShield = 0;
         Telemetry.Emit("fight_start", "enemy", enemy.Name, "pet", pet.Name, "petHp", pet.HpShown, "petMaxHp", pet.MaxHp, "petAtk", pet.Atk,
             "seaTea", seaTea, "dodgeStart", _dodgeStart);
         Telemetry.Snapshot(pet);
@@ -74,6 +77,16 @@ public class FightScene : Scene
 
     void EnemyHits(string cause)
     {
+        if (_shield > 0)
+        {
+            _shield--;
+            if (cause == "too_slow") _tTooSlow++; else _tMissPress++;
+            Telemetry.Emit("fight_hurt", "cause", cause, "dmgTaken", 0, "hpLost", 0, "petHp", _pet.HpShown, "pet", _pet.Name, "shielded", true);
+            Audio.Play(Sfx.FightDodge);
+            _popups.Add($"Blocked! ({_shield} left)", Palette.Clean, Balance.FightPopupPet);
+            StartAttack();
+            return;
+        }
         int dmg = (int)MathF.Round(_enemy.Atk * (_poisoned ? Balance.PoisonDealtMul : 1f));
         float hpBefore = _pet.Hp;
         _pet.Hp -= dmg;

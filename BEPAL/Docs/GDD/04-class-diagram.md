@@ -38,7 +38,7 @@ Project: `BEPAL/Bepal_Game/Bepal/` — MonoGame DesktopGL 3.8.4, .NET 8, 1280x72
 | `FightScene` | 18 |
 | `Wheel` (`Wheel.cs`: เข็มหมุน + `Zone`, ใช้ร่วมใน CareSelect / Qte / Fight; `Evaluate()` → `Hit.Miss/Great/Perfect`) | 4–8, 18 |
 | `ChoiceScene` "Paused" (Esc ใน `BaseScene`: Resume / Main Menu) | เพิ่มใน slice |
-| `ShopScene`, `NightScene`, `GameOverScene`, `ToBeContinuedScene` | เพิ่มใน slice |
+| `ShopScene`, `InventoryScene` (กล่องไอเทมในฐาน, `Kind.Box`; แคตตาล็อกอยู่ `Model/Items.cs`), `NightScene`, `GameOverScene`, `ToBeContinuedScene` | เพิ่มใน slice |
 
 ## หลักการ
 

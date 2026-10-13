@@ -26,7 +26,8 @@ Ordering fields ทุก event: `seq` (int, เรียงใน run), `tReal`
 - `energy`: delta, reason(`care|daily_restore|tonic|upgrade`), energyAfter, maxEnergy
 - `exp`: delta, reason, level, exp, points, levelUp(bool) -> GameState.AddExp
 - `upgrade_buy`: name(QTE/Energy/Progress), newLevel, coinCost, pointCost, coinAfter, pointsAfter -> UpgradeScene (BaseMenus.cs L42-51)
-- `shop_buy`: item, price, target -> ShopScene (L277-303)
+- `shop_buy`: item, price, target (ว่างเสมอ; ของเข้า inventory ไม่มีเป้าหมาย) -> ShopScene; coin sink ชื่อ `shop_apple|tonic|tea|glasses|ballet|notebook|ribbon`
+- `item_use`: item, target (pet ของ Crab Apple, อื่น ๆ ว่าง), left (จำนวนที่เหลือ) -> InventoryScene via `Items.Apply`; `fight_hurt` มี `shielded:true` + dmgTaken 0 เมื่อ Cloudy Glasses กัน
 - `pet_death`: pet, cause(`starve|fight|boss`), hpBefore, deathCountTotal -> จุดที่ Hp ลดถึง 0 (AdvanceDay L~starve, FightScene.EnemyHits)
 - `pet_revive`: pet, cost, reviveCountTotal -> DoctorScene L111
 - `starve`: pet, hpBefore, hpAfter, died -> GameState.AdvanceDay

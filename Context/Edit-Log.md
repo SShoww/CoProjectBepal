@@ -3,6 +3,9 @@
 ล่าสุด 10 งาน งานละ 3 บรรทัด เขียนผ่าน `tools/context/log-edit.py` เท่านั้น — รายการเก่าอยู่ที่ [archive/edit-log/](archive/edit-log/)
 
 <!-- entries -->
+- **2026-10-13 18:48 · Q-20261013-inventory-items** — ร้านเปิดหลัง Sell/Refuse, ของเข้า Box ใช้ผ่าน InventoryScene, เพิ่ม Cloudy Glasses/Ballet Shoes/Torn Notebook/Faded Ribbon, bot ซื้อ/ใช้ไอเทม
+  - Files: BEPAL/Bepal_Game/Bepal/Model/Items.cs, Model/GameState.cs, Scenes/BaseMenus.cs, Scenes/BaseScene.cs, Scenes/FightScene.cs, Scenes/DayEvents.cs, DevTools/AutoPlay.cs, GDD docs, CLAUDE.md
+  - Validation: build 0 warn; autoplay+refuse ผ่าน; batch 50 run ไม่ timeout item_use ครบ 7 ชนิด; validate.ps1 ไม่ได้รัน
 - **2026-10-13 18:29 · Q-20261013-upgrade-points** — ราคา Point ต่อเลเวล (Energy 1/2/4, Progress 1/2/3 max 3, QTE 1/1/1) พร้อมข้อความ Upgrade/HUD/hint แรกให้ชัดว่าต้องใช้และได้ Point จากไหน
   - Files: BEPAL/Bepal_Game/Bepal/Model/GameState.cs, BEPAL/Bepal_Game/Bepal/Scenes/BaseMenus.cs, BEPAL/Bepal_Game/Bepal/Scenes/BaseScene.cs, BEPAL/Bepal_Game/Bepal/Scenes/CareScenes.cs, BEPAL/Bepal_Game/Bepal/DevTools/AutoPlay.cs, BEPAL/Docs/Balance/tools/validate.ps1, BEPAL/Docs/GDD/06-vertical-slice.md
   - Validation: build 0 warn; autoplay+refuse ผ่าน; batch 50 run ไม่ soft-lock, upgrade_buy cost ตรงตาราง; validate.ps1 ยังไม่ได้รัน
@@ -30,6 +33,3 @@
 - **2026-10-07 22:37 · Q-20261007-drawio-diagrams** — สร้าง .drawio 6 ไฟล์แทน mermaid GDD (เก็บ mermaid เดิม + ลิงก์)
   - Files: BEPAL/Docs/GDD/diagrams/*.drawio, BEPAL/Docs/GDD/01-core-loop.md, 03-mechanics.md, 04-class-diagram.md, 11-narrative-world.md, 13-scene-breakdown.md
   - Validation: Reviewer render/เทียบ XML ทุก edge PASS 6/6; ยังไม่ได้เปิดใน VS Code GUI
-- **2026-10-07 15:39 · Q-20261007-docs-restructure** — แยกหัวข้อ GDD ออกเป็นไฟล์ใหม่ 07-14 (pet-stats, care-qte, combat-encounters, economy-items, narrative-world, references-art-direction, scene-breakdown, audio-fonts-list) ย้ายข้อความคงเดิม + re-point ลิงก์
-  - Files: BEPAL/Docs/GDD/07..14-*.md (ใหม่), 00, 01, 03, 05 GDD, GDD README, CLAUDE.md
-  - Validation: link check 0 เสีย (Manager รันซ้ำ), บล็อกที่ย้ายไม่เหลือในไฟล์ต้นทาง, ไม่แก้ตัวเลข
