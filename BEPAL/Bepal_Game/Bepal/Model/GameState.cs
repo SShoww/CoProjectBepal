@@ -131,6 +131,8 @@ public static class Balance
     // ================= CARE (Scenes/CareScenes.cs) =================
     // Wheel speeds are rad/s; zone sizes are half-widths in radians.
     /// <summary>Care-select wheel: needle speed and the half-width of each of the 4 choices.</summary>
+    /// <summary>Alpha of a disabled (faded) wheel zone, e.g. Heal while HP is full.</summary>
+    public const float DisabledZoneAlpha = 0.25f;
     public const float CareSelectSpeed = 2.2f, CareSelectZone = 0.62f;
     /// <summary>Care QTE needle speeds (Train is faster than the rest).</summary>
     public const float QteBaseSpeed = 2.4f, QteTrainSpeed = 3.6f;

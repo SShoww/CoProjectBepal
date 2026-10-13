@@ -30,10 +30,14 @@ public class CareSelectScene : Scene
             (Care.Train, Palette.Train), (Care.Feed, Palette.Feed), (Care.Clean, Palette.Clean), (Care.Heal, Palette.Heal),
         };
         for (int i = 0; i < 4; i++)
+        {
+            bool healFull = choices[i].care == Care.Heal && _pet.Hp >= _pet.MaxHp;   // nothing to heal: faded, acts like a gap
             _wheel.Zones.Add(new Zone
             {
-                Center = i * MathHelper.PiOver2, Perfect = Balance.CareSelectZone, Great = 0, Color = choices[i].col, Label = choices[i].care.ToString(),
+                Center = i * MathHelper.PiOver2, Perfect = Balance.CareSelectZone, Great = 0, Color = choices[i].col,
+                Label = healFull ? "Heal (HP full)" : choices[i].care.ToString(), Disabled = healFull,
             });
+        }
     }
 
     public override void Update(float dt)
@@ -59,12 +63,7 @@ public class CareSelectScene : Scene
         }
         if (!Input.Confirm) return;
 
-        if (_gs.Energy <= 0)
-        {
-            Telemetry.Emit("care_select", "pet", _pet.Name, "result", "noenergy", "care", "", "hit", "Miss", "energyAfter", _gs.Energy);
-            _popups.Add("No energy left!", Palette.Danger, new Vector2(Gfx.W / 2f, 120));
-            return;
-        }
+        if (_gs.Energy <= 0) return;   // BaseScene doesn't open this scene without Energy; guard only
         var (hit, zone) = _wheel.Evaluate();
         if (hit == Hit.Miss || zone == null)   // Figma: pressing a gap does nothing
         {

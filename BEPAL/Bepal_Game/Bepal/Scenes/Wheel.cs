@@ -14,6 +14,8 @@ public class Zone
     public float Great;     // half-width in radians (>= Perfect, or 0 for perfect-only zones)
     public Color Color;
     public string? Label;
+    /// <summary>Drawn faded and ignored by <see cref="Wheel.Evaluate"/> (pressing it counts as a gap).</summary>
+    public bool Disabled;
 
     public Hit Test(float angle)
     {
@@ -52,6 +54,7 @@ public class Wheel
         Zone? zone = null;
         foreach (var z in Zones)
         {
+            if (z.Disabled) continue;
             var h = z.Test(Needle);
             if (h > best)
             {
@@ -86,9 +89,10 @@ public class Wheel
         {
             if (z.Great > z.Perfect)
                 Gfx.Arc(sb, Center, Radius, thickness, z.Center - z.Great, z.Center + z.Great, Color.Lerp(z.Color, Color.White, 0.1f) * 0.45f);
-            Gfx.Arc(sb, Center, Radius, thickness, z.Center - z.Perfect, z.Center + z.Perfect, z.Color);
+            Gfx.Arc(sb, Center, Radius, thickness, z.Center - z.Perfect, z.Center + z.Perfect, z.Disabled ? z.Color * Balance.DisabledZoneAlpha : z.Color);
             if (z.Label != null)
-                Gfx.Text(sb, Gfx.Font, z.Label, Gfx.OnWheel(Center, Radius + 44, z.Center) - new Vector2(0, 12), Palette.Text, 0.5f);
+                Gfx.Text(sb, Gfx.Font, z.Label, Gfx.OnWheel(Center, Radius + 44, z.Center) - new Vector2(0, 12),
+                    z.Disabled ? Palette.Dim : Palette.Text, 0.5f);
         }
         var tip = Gfx.OnWheel(Center, Radius + 22, Needle);
         Gfx.Line(sb, Center, tip, Color.White * NeedleAlpha, 5);

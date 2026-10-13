@@ -44,6 +44,7 @@ public class ShotRunner
         _shots.Add(("04_base_door", () => With(new BaseScene(Gs()) { StartX = 3450 }), 1.5f));
         _shots.Add(("05_base_bed_night", () => With(new BaseScene(Gs()) { StartX = 400, Night = 0.9f }), 1.5f));
         _shots.Add(("06_care", () => { var g = Gs(); return With(new BaseScene(g), new CareSelectScene(g, g.Pets[0])); }, 0.6f));
+        _shots.Add(("06b_care_hurt", () => { var g = Gs(); g.Pets[0].Hp -= 30; return With(new BaseScene(g), new CareSelectScene(g, g.Pets[0])); }, 0.6f));
         foreach (var c in Enum.GetValues<Care>())
             _shots.Add(($"07_qte_{c}", () => { var g = Gs(); return With(new BaseScene(g), new QteScene(g, g.Pets[0], c)); }, 0.7f));
         _shots.Add(("08_fight", () => { var g = Gs(); return With(new FightScene(g, Enemy.Toothless(), g.Pets[0], _ => { })); }, 0.8f));
