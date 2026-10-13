@@ -264,6 +264,11 @@ public class QteScene : Scene
         if (_pet.Level >= 3 && _levelUps > 0 && _pet.Level - _levelUps < 3)
             lines.Add($"{_pet.Name} learned a new move! (coming soon)");
         if (_playerLevelUp) lines.Add($"You reached Player LV {_gs.PlayerLevel}! +1 Point for upgrades.");
+        if (_playerLevelUp && !_gs.PointHintShown)
+        {
+            _gs.PointHintShown = true;
+            lines.Add("Spend it at the Upgrade station (the console on the left side of the base).");
+        }
         M.Push(DialogueScene.Say("", null, lines.ToArray()));
     }
 

@@ -79,9 +79,12 @@ deadline: 2026-09-30
 
 | สาย | ราคา | ผล |
 | --- | --- | --- |
-| QTE | 100 coin · 1 Point | choice ของ QTE Train ใหญ่ขึ้น |
-| Energy | 150 coin · 3 Points | Energy +1 ต่อวัน (และ +1 Energy ทันทีที่ซื้อ) |
-| Progress Bar | 20 coin · 2 Points | progress ต่อครั้งของ Train +10 → +15 (`TrainGainMultiplier` = 1 + 0.5 × level, max 2 level) |
+| QTE | 100 coin · 1 / 1 / 1 Point (เลเวล 1 / 2 / 3) | choice ของ QTE Train ใหญ่ขึ้น |
+| Energy | 150 coin · 1 / 2 / 4 Points | Energy +1 ต่อวัน (และ +1 Energy ทันทีที่ซื้อ) |
+| Progress Bar | 20 coin · 1 / 2 / 3 Points | progress ต่อครั้งของ Train +50% ต่อเลเวล (`TrainGainMultiplier` = 1 + 0.5 × level, max 3 level) |
+
+> ราคา Point ต่อเลเวลอยู่ใน `Balance.QtePointCost/EnergyPointCost/ProgressPointCost` (ตัดสินใจ 2026-10-13: Energy เดิม 3 Points แพงจนไม่มีใครซื้อ)
+> Upgrade scene บอกที่มาของ Point ("Points come from Player level-ups") และเหตุผลที่กดไม่ได้ ("Need N more points"); ครั้งแรกที่ได้ Point มีข้อความชี้ไป Upgrade station
 
 > QTE: ขนาด zone ×(1 + 0.2 × level) สูงสุด 3 level
 

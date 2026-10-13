@@ -45,7 +45,7 @@ runId,profile,seed,build,mode,outcome,dayReached,deathDay,deathScene,tRealSec,tS
 3. qte: perfect+great+miss == 10 (`Balance.Attempts`) ต่อ `qte_end`; count(`qte_press`)==10; Σqte presses == Σ(care_select ok) (ยกเว้นโดนตัดกลางคัน).
 4. care_select: ok count == Σ energy(care) deltas; gap/noenergy ไม่ลด energy.
 5. exp: Σ`exp.delta` (reason=qte) == #(qte_press hit≠Miss); points == playerLevel−1 − pointsSpent; pointsSpent == Σupgrade_buy.pointCost; exp < PlayerMaxExp.
-6. upgrades: upgQte≤3, upgProgress≤2, upgEnergy≤3; maxEnergy==min(3+upgEnergy,6); cost ต่อครั้งตรง Balance (100c/1p, 150c/3p, 20c/2p).
+6. upgrades: upgQte≤3, upgProgress≤3, upgEnergy≤3; maxEnergy==min(3+upgEnergy,6); cost ต่อครั้งตรง Balance (QTE 100c + 1/1/1 pt, Energy 150c + 1/2/4 pt, Progress 20c + 1/2/3 pt ตามเลเวลที่ซื้อ).
 7. fight: attackHits+attackMiss+dodgeOk+tooSlow(non-press)... presses = attackP+attackG+dodgeOk+missPress; dmgDealt == Σ fight_press.dmgDealt; won=true -> enemyHp==0; Toothless dmgDealt ≥ 120; petsLost ≤ #pets; dmgTaken == Σ hurt (ก่อน clamp Hp≥0 อาจน้อยกว่า, ใช้ min).
 8. pet: 0≤stomach,clean≤100; hp≤maxHp; progress<maxProgress; level ไม่ลดลง; death -> revive ก่อนจะ care ได้; reviveCount*250 == spent_revive; petDeaths ≥ revives.
 9. coin sources: daily == 100×(dayReached−1) (ถ้าไม่ตายก่อน); toothless ∈{0,200}; merchant ∈{0,5000}; merchant sell -> petsFinal ลด 1 และ shop_* == 0 ในวันนั้น.

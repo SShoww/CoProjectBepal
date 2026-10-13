@@ -167,13 +167,13 @@ foreach ($rid in $runs.Keys) {
   }
 
   # ---- I06 upgrades
-  $lvl = @{ QTE = 0; Energy = 0; Progress = 0 }; $cost = @{ QTE = @(100, 1); Energy = @(150, 3); Progress = @(20, 2) }; $mx = @{ QTE = 3; Energy = 3; Progress = 2 }
+  $lvl = @{ QTE = 0; Energy = 0; Progress = 0 }; $cost = @{ QTE = @(100, 1, 1, 1); Energy = @(150, 1, 2, 4); Progress = @(20, 1, 2, 3) }; $mx = @{ QTE = 3; Energy = 3; Progress = 3 }   # @(coin, pts L1, L2, L3)
   foreach ($u in $upg) {
     $n = $u['name']; if (-not $lvl.ContainsKey($n)) { Fail 'I06' $rid "unknown upgrade $n"; continue }
     $lvl[$n]++
     if ((N $u['newLevel']) -ne $lvl[$n]) { Fail 'I06' $rid "$n newLevel $($u['newLevel']) expected $($lvl[$n])" }
     if ($lvl[$n] -gt $mx[$n]) { Fail 'I06' $rid "$n above max" }
-    if ((N $u['coinCost']) -ne $cost[$n][0] -or (N $u['pointCost']) -ne $cost[$n][1]) { Fail 'I06' $rid "$n cost $($u['coinCost'])c/$($u['pointCost'])p" }
+    if ((N $u['coinCost']) -ne $cost[$n][0] -or (N $u['pointCost']) -ne $cost[$n][$lvl[$n]]) { Fail 'I06' $rid "$n cost $($u['coinCost'])c/$($u['pointCost'])p" }
   }
   if ((N $S['upgQte']) -ne $lvl.QTE -or (N $S['upgEnergy']) -ne $lvl.Energy -or (N $S['upgProgress']) -ne $lvl.Progress) { Fail 'I06' $rid 'summary upgrade levels != upgrade_buy counts' }
   foreach ($de in $dayEnds) { if ((N $de['maxEnergy']) -ne [math]::Min(3 + (N $de['upgEnergy']), 6)) { Fail 'I06' $rid "day_end $($de['day']) maxEnergy" } }

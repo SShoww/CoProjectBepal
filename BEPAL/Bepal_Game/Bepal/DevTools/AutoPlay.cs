@@ -248,6 +248,9 @@ public class AutoPlay
     static string WantedCare(Pet p) =>
         p.Stomach < 50 ? nameof(Care.Feed) : p.Clean < 50 ? nameof(Care.Clean) : p.Hp < p.MaxHp * 0.6f ? nameof(Care.Heal) : nameof(Care.Train);
 
+    static int UpgradeCoin(int row) => row == 0 ? Balance.QteCoin : row == 1 ? Balance.EnergyCoin : Balance.ProgressCoin;
+    static int UpgradeLevel(GameState gs, int row) => row == 0 ? gs.QteUpgrade : row == 1 ? gs.EnergyUpgrade : gs.ProgressUpgrade;
+
     /// <summary>Index of the upgrade row to buy next (QTE -> Energy -> Progress), or -1.</summary>
     int UpgradePick(GameState gs)
     {
@@ -258,14 +261,12 @@ public class AutoPlay
                 bool maxed = i == 0 ? gs.QteUpgrade >= Balance.QteMax
                     : i == 1 ? gs.EnergyUpgrade >= Balance.MaxEnergyCap - Balance.BaseEnergy : gs.ProgressUpgrade >= Balance.ProgressMax;
                 if (maxed) continue;
-                bool afford = i == 0 ? gs.Coin >= Balance.QteCoin && gs.Points >= Balance.QtePoints
-                    : i == 1 ? gs.Coin >= Balance.EnergyCoin && gs.Points >= Balance.EnergyPoints
-                    : gs.Coin >= Balance.ProgressCoin && gs.Points >= Balance.ProgressPoints;
+                bool afford = gs.Coin >= UpgradeCoin(i) && gs.Points >= Balance.PointCost(i, UpgradeLevel(gs, i));
                 return afford ? i : -1;   // top-priority upgrade not affordable yet: wait
             }
-            if (i == 0 && gs.QteUpgrade < Balance.QteMax && gs.Coin >= Balance.QteCoin && gs.Points >= Balance.QtePoints) return 0;
-            if (i == 1 && gs.EnergyUpgrade < Balance.MaxEnergyCap - Balance.BaseEnergy && gs.Coin >= Balance.EnergyCoin && gs.Points >= Balance.EnergyPoints) return 1;
-            if (i == 2 && gs.ProgressUpgrade < Balance.ProgressMax && gs.Coin >= Balance.ProgressCoin && gs.Points >= Balance.ProgressPoints) return 2;
+            bool open = i == 0 ? gs.QteUpgrade < Balance.QteMax
+                : i == 1 ? gs.EnergyUpgrade < Balance.MaxEnergyCap - Balance.BaseEnergy : gs.ProgressUpgrade < Balance.ProgressMax;
+            if (open && gs.Coin >= UpgradeCoin(i) && gs.Points >= Balance.PointCost(i, UpgradeLevel(gs, i))) return i;
         }
         return -1;
     }
