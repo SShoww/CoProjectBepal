@@ -3,6 +3,9 @@
 ล่าสุด 10 งาน งานละ 3 บรรทัด เขียนผ่าน `tools/context/log-edit.py` เท่านั้น — รายการเก่าอยู่ที่ [archive/edit-log/](archive/edit-log/)
 
 <!-- entries -->
+- **2026-10-13 19:07 · Q-20261013-context-housekeeping** — ผู้ใช้สั่งปิด Q-20261013 ทั้ง 7 ย้ายไป archive/quests และอัปเดต Status.md ให้ตรง Develop @ a05b7be
+  - Files: Context/archive/quests/, Context/Status.md
+  - Validation: ตรวจ path ต้นทาง/ปลายทาง (Context/quests -> Context/archive/quests) ไม่มีไฟล์ชน; แก้เอกสารล้วน ไม่ได้รัน build
 - **2026-10-13 19:06 · Q-20261013-art-pipeline** — Art.Pet/Enemy/Merchant/Doctor ใช้ texture optional ต่อ asset (null = primitive เดิม) วาดผ่าน SpriteMotion; เขียนขั้นตอนใส่ภาพใน README/asset-list
   - Files: BEPAL/Bepal_Game/Bepal/World/Art.cs, Core/Gfx.cs, Scenes/FightScene.cs, BEPAL/Assets/_candidates/README.md, BEPAL/Docs/GDD/05-asset-list.md
   - Validation: build 0 warn; ไม่มีไฟล์ -> shots+autoplay ผ่าน; ทดสอบด้วย PNG ชั่วคราวที่ไม่ commit
@@ -21,9 +24,6 @@
 - **2026-10-13 18:02 · Q-20261013-balance-migration** — ย้ายตัวเลข care QTE, ราคา/ผล shop, PlayerMaxExp และตัวคูณ upgrade เข้า Balance ค่าเดิมทุกตัว
   - Files: BEPAL/Bepal_Game/Bepal/Model/GameState.cs, BEPAL/Bepal_Game/Bepal/Scenes/CareScenes.cs, BEPAL/Bepal_Game/Bepal/Scenes/BaseMenus.cs, CLAUDE.md
   - Validation: build 0 warn; batch 50 run ก่อน/หลัง event stream เหมือนกัน; autoplay --refuse ผ่าน
-- **2026-10-13 17:54 · Q-20261013-context-housekeeping** — ย้าย 5 quest ready-to-close ไป archive และเขียน Status.md ใหม่ให้ตรง Develop @ 29a9060 พร้อมจุดอ่อนและการตัดสินใจของผู้ใช้
-  - Files: Context/Status.md, Context/quests/Q-20261013-context-housekeeping.md, Context/archive/quests/
-  - Validation: ตรวจ path ย้ายแล้ว ไม่ได้รัน build (แก้เฉพาะเอกสาร)
 - **2026-10-12 20:02 · Q-20261012-human-telemetry** — วิเคราะห์ telemetry คนจริง 8 runs (Aggregate+validate, balance-report §7, ซ่อม Boom_121, แถว QTE not missed ใน players.md); jsonl ดิบ gitignore เพราะมีชื่อผู้เล่น ไม่ push
   - Files: .gitignore, BEPAL/Docs/Balance/analysis/human, BEPAL/Docs/Balance/balance-report.md, BEPAL/Docs/Balance/tools/Aggregate/Program.cs
   - Validation: validate 8/8 ผ่านหลังซ่อม; Aggregate build/รันผ่าน; ไม่ได้แก้โค้ดเกมใน branch นี้ จึงไม่ได้รัน build/autoplay ของเกม
