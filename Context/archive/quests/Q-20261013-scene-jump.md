@@ -1,5 +1,5 @@
 ### 2026-10-13 — Q-20261013-scene-jump — ระบบกระโดดไป scene ใดก็ได้ไว้ test (--scene, F2)
-- Status: ready-to-close
+- Status: closed
 - Owner: Claude Code (ตามคำสั่งผู้ใช้ 2026-10-13)
 - Goal: เปิด/ย้ายไปแต่ละ scene ได้ทันทีโดยไม่ต้องเล่นผ่าน Day 1–N
 - Files: BEPAL/Bepal_Game/Bepal/DevTools/SceneCatalog.cs, BEPAL/Bepal_Game/Bepal/DevTools/SceneJumpScene.cs, BEPAL/Bepal_Game/Bepal/DevTools/ShotRunner.cs, BEPAL/Bepal_Game/Bepal/Game1.cs, CLAUDE.md, BEPAL/Docs/GDD/04-class-diagram.md
