@@ -1,7 +1,7 @@
 ---
 type: asset-list
-version: 1.0
-date: 2026-10-07
+version: 1.1
+date: 2026-10-13
 project: BePal
 ---
 
@@ -23,11 +23,11 @@ project: BePal
 
 | รหัส Audio | ชื่อไฟล์ | บริบทการเล่น | คำอธิบายอารมณ์เสียง | Priority | ไฟล์จริงใน `Content/Sfx/` |
 | --- | --- | --- | --- | --- | --- |
-| **SFX-01** | `sfx/sfx_qte_perfect.wav` | กด Space โดน Perfect | ปิ๊งแก้วใสคมชัด น่าพึงพอใจ | P0 | (synth ตอนรัน: `Sfx.QtePerfect`) |
+| **SFX-01** | `sfx/sfx_qte_perfect.wav` | กด Space โดน Perfect | ปิ๊งแก้วใสคมชัด น่าพึงพอใจ | P0 | (synth ตอนรัน: `Sfx.QtePerfect`; ไฟล์ `_candidates/sfx/sfx_qte_perfect.wav` ไม่ได้ถูกโหลด) |
 | **SFX-02** | `sfx/sfx_qte_great.wav` | กด Space โดน Great | เคาะไม้ทุ้มปานกลาง | P0 | `sfx_qte_great.wav` |
 | **SFX-03** | `sfx/sfx_qte_miss.wav` | กดพลาด | Buzzer ทึบสั้นๆ | P0 | `sfx_qte_miss.wav` |
 | **SFX-04** | `sfx/sfx_wheel_select.wav` | เลือก choice บนวงล้อ Care สำเร็จ (จอสั่น) | ตุ้บหนักแน่น | P1 | `sfx_qte_select.wav` |
-| **SFX-05** | `sfx/sfx_footstep.wav` | ผู้เล่นเดินในฐาน (สุ่ม pitch) | ก้าวเท้าเบาๆ บนพื้นดิน/ไม้ | P1 | `sfx_world_footstep.wav` |
+| **SFX-05** | `sfx/sfx_footstep.wav` | ผู้เล่นเดินในฐาน (As built: เล่นวนด้วย `Audio.Loop` ขณะเดินเร็วกว่า `Balance.FootstepMinSpeed` ไม่สุ่ม pitch) | ก้าวเท้าเบาๆ บนพื้นดิน/ไม้ | P1 | `sfx_world_footstep.wav` |
 | **SFX-06** | `sfx/sfx_interact.wav` | กด `Space` ใช้ของในฐาน | ป๊อปเบาๆ | P1 | `sfx_world_interact.wav` |
 | **SFX-07** | `sfx/sfx_ui_click.wav` | คลิกปุ่ม UI / ESC | คลิกนุ่ม | P0 | `sfx_ui_click.wav` |
 | **SFX-08** | `sfx/sfx_knock.wav` | "Knock Knock !!" ที่ประตูแดง | เคาะประตูเหล็กสองครั้ง ก้องๆ | P0 | `sfx_event_door_knock.wav` |
@@ -44,11 +44,11 @@ project: BePal
 | **SFX-19** | `sfx/sfx_thunder.wav` | หน้าข้อความพายุ Day 4 | ฟ้าผ่าเปรี้ยง + ฝน | P1 | `sfx_event_storm.wav` |
 | **SFX-20** | `sfx/sfx_eat.wav`, `sfx_bubble.wav` | QTE Feed (เคี้ยวกรุบกรอบ) / QTE Clean (หยดน้ำ/สบู่) | ตาม 00-concept | Later | — |
 | **SFX-21** | `sfx/sfx_typewriter_key.wav` | ตัวอักษรขึ้นใน dialogue | แป้นพิมพ์ดีดนุ่มๆ | Later | (synth ตอนรัน: `Sfx.Typewriter`) |
-| **SFX-22** | `sfx/sfx_coin_gatling.wav`, `sfx_cane_strike.wav` | Merchant Boss Fight | — | Later | — |
+| **SFX-22** | `sfx/sfx_coin_gatling.wav`, `sfx_cane_strike.wav` | Merchant Boss Fight (ไม่มีใน Prototype) | — | Later | — |
 
 ### 2.2 Background Music (BGM — OGG Looping)
 
-> **As built (2026-10-13):** BGM-01..07 อยู่ใน `Content/Music/` (`OggImporter` + `SongProcessor`) และเล่นแล้วผ่าน `Core/MusicPlayer.cs` — loop, fade 0.8 s เมื่อเปลี่ยนเพลง, ระดับเสียง `Balance.MusicVolume` (0.5); scene ระบุเพลงด้วย `Scene.Music` / `MusicOverride` (ฐาน = cozy, Day 4 หลังเปิดประตู = thunderstorm, Fight = fight/boss, พ่อค้า+ร้าน = merchant, Menu/เลือกสัตว์ = menu, จบ = to_be_continued, GameOver = เงียบ) BGM-08 ยังไม่ทำ; ปรับ volume เพลง/SFX ได้ในเมนู Options (Main Menu และ Pause) ค่าเก็บใน `%APPDATA%/BePal/settings.txt` (`Core/Settings.cs`)
+> **As built (2026-10-13):** BGM-01..07 อยู่ใน `Content/Music/` (`OggImporter` + `SongProcessor`) และเล่นแล้วผ่าน `Core/MusicPlayer.cs` — loop, fade 0.8 s เมื่อเปลี่ยนเพลง, ระดับเสียง `Balance.MusicVolume` (0.5); scene ระบุเพลงด้วย `Scene.Music` / `MusicOverride` (ฐาน = cozy, Day 4 หลังเปิดประตู = thunderstorm, Fight = fight/boss (เพลง Boss ครอบคลุม dialogue + เลือกสัตว์ Day 5 ด้วย), พ่อค้า+ร้าน = merchant, Menu/เลือกสัตว์ = menu, จบ = to_be_continued, GameOver = เงียบ) BGM-08 ยังไม่ทำ; ปรับ volume เพลง/SFX ได้ในเมนู Options (Main Menu และ Pause) ค่าเก็บใน `%APPDATA%/BePal/settings.txt` (`Core/Settings.cs`)
 
 | รหัส Audio | ชื่อไฟล์ | บริบทของฉาก | สไตล์และอารมณ์ดนตรี | Priority |
 | --- | --- | --- | --- | --- |
@@ -71,5 +71,5 @@ project: BePal
 
 | รหัส Font | ไฟล์ | บริบทการใช้งาน | สไตล์ฟอนต์ | ปัจจุบันในโค้ด | Priority |
 | --- | --- | --- | --- | --- | --- |
-| **FNT-01** | `Fonts/fnt_title_display.ttf` → `Big.spritefont` (44 pt) | โลโก้, หัวข้อหน้าจอ, "Knock Knock !!", "To be continued...", Perfect/Great/Miss | ตัวหนา กึ่งลึกลับ มีเอกลักษณ์ | `Segoe UI` 44 | P1 |
-| **FNT-02** | `Fonts/fnt_ui_cozy.ttf` → `Main.spritefont` (18 pt) + `Small.spritefont` (14 pt) | Dialogue, ปุ่ม, HUD, คำอธิบายไอเทม | Sans-serif มน อบอุ่น อ่านง่าย | `Segoe UI` 18 / 14 | P1 |
+| **FNT-01** | `Fonts/fnt_title_display.ttf` → `Big.spritefont` (44 pt) | โลโก้, หัวข้อหน้าจอ, "Knock Knock !!", "To be continued...", Perfect/Great/Miss | ตัวหนา กึ่งลึกลับ มีเอกลักษณ์ | `Segoe UI` 44 Bold | P1 |
+| **FNT-02** | `Fonts/fnt_ui_cozy.ttf` → `Main.spritefont` (18 pt) + `Small.spritefont` (14 pt) | Dialogue, ปุ่ม, HUD, คำอธิบายไอเทม | Sans-serif มน อบอุ่น อ่านง่าย | `Segoe UI` 18 Bold (Main) / 14 Regular (Small) | P1 |

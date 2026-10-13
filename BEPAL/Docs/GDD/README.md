@@ -1,8 +1,9 @@
 ---
 type: README
-version: 2.1
+version: 2.2
 date:
   - 2026-09-20
+  - 2026-10-13
 ---
 
 # [BePal] — Documentation Index (v2.1)
@@ -22,7 +23,7 @@ date:
 | [01-core-loop.md](01-core-loop.md) | 4-phase daily loop, timeline, controls mapping, and win/lose (Scene Breakdown แยกเป็น 13) | ✅ |
 | [02-scope-features.md](02-scope-features.md) | Scope, MoSCoW feature priorities, and risk mitigation | ✅ |
 | [03-mechanics.md](03-mechanics.md) | State machine, game architecture, and Sanctuary/Base systems (§0–1) — Pet stats, QTE, combat, economy แยกเป็น 07–10 | ✅ |
-| [04-class-diagram.md](04-class-diagram.md) | โครงสร้างโค้ด Prototype (Scenes / Model / Core) | ✅ |
+| [04-class-diagram.md](04-class-diagram.md) | โครงสร้างโค้ด Prototype (Scenes / Model / Core / World / DevTools) | ✅ |
 | [05-asset-list.md](05-asset-list.md) | Master 2D art & UI checklist and asset pipeline (เสียง/ฟอนต์ แยกเป็น 14) | ✅ |
 | [06-vertical-slice.md](06-vertical-slice.md) | **ขอบเขต Prototype (ส่ง 30 ก.ย.)** — Day 1–5, side-scroller, ตัวเลข, สิ่งที่ตัด (ยึดไฟล์นี้ก่อนไฟล์อื่น) | ✅ |
 | [07-pet-stats.md](07-pet-stats.md) | Pet stats, decay formulas, and sickness/negative status (03 §2) | ✅ |
@@ -50,7 +51,7 @@ date:
 
 **จุดที่ Figma กับ GDD เดิมขัดกัน (เลือกตาม Figma แล้ว):** Stomach = 0 เสีย 20 HP/วัน (เดิม 25%) · Clean ต่ำไม่ได้ "ปฏิเสธการสู้" แต่ลด ATK/Max HP · Energy เริ่มต้น 3 (เดิม 6) · Event สุ่ม 3 แบบหลัง End day (เดิมกำหนดตายตัวรายวัน — ยังใช้ลำดับ Day 2/3 สำหรับ Vertical Slice) · สัตว์ตายระหว่างสู้สลับตัวได้ ตายหมด = Game Over
 
-**ยังรอข้อมูลใน Figma:** หน้า Option, หน้า Disaster event, Scene 19–20 (Programmer/Art ยังเป็นข้อความทดสอบ), Lore & Concept for art (Starting Point / Narrative Goal / Art Keywords ยังว่าง)
+**ยังรอข้อมูลใน Figma (โค้ดทำแล้วโดยไม่รอบอร์ด — ดู [13](13-scene-breakdown.md)):** หน้า Option, หน้า Disaster event, Scene 19–20 (Programmer/Art ยังเป็นข้อความทดสอบ), Lore & Concept for art (Starting Point / Narrative Goal / Art Keywords ยังว่าง)
 
 ---
 
@@ -74,9 +75,9 @@ date:
 
 | Prefix | ประเภท | ตัวอย่าง |
 | --- | --- | --- |
-| `spr_` | Sprite / Texture | `spr_coco_idle.png`, `spr_merchant_boss.png` |
-| `sfx_` | Sound Effect | `sfx_qte_perfect.wav`, `sfx_acid_spit.wav` |
-| `bgm_` | Background Music | `bgm_base_shelter.mp3`, `bgm_merchant_boss.mp3` |
+| `spr_` | Sprite / Texture | `spr_coco_idle.png`, `spr_merchant_boss.png` (ชื่อส่งมอบจาก Art; ที่โค้ดโหลดจริงใน `Content/Sprites/`: `pet_<species>.png`, `enemy_*.png`, `npc_*.png`, `bg_parallax_*.png`, `fg_*.png`, `player.png`) |
+| `sfx_` | Sound Effect | `sfx_qte_perfect.wav`, `sfx_acid_spit.wav` (ไฟล์จริง: `sfx_<area>_<action>.wav` area = event/fight/qte/ui/world) |
+| `bgm_` | Background Music | `bgm_base_shelter.mp3`, `bgm_merchant_boss.mp3` (ไฟล์จริง: `bgm_*.ogg` เช่น `bgm_base_cozy.ogg`, `bgm_boss_bigz.ogg`) |
 | `fnt_` | Font | `fnt_title_horror.ttf`, `fnt_ui_cozy.ttf` |
 | `dat_` | Data / Config | `dat_pet_species.json`, `dat_shop_items.json` |
 
@@ -116,9 +117,10 @@ date:
 
 1. **สำหรับ Game Design & UI Lead (ภูมิ):**
    - ใช้ค่าตัวเลขและสูตรคำนวณใน `03-mechanics.md`, `07-pet-stats.md`, `08-care-qte.md`, `09-combat-encounters.md` และ `10-economy-items.md` เป็นฐานในการ Balance ตัวเลข
-   - สามารถขยายเนื้อเรื่องไปยัง Days 4–5 ได้ในอนาคตโดยใช้สถาปัตยกรรมลูป 4 เฟสใน `01-core-loop.md`
+   - Days 4–5 ทำใน Prototype แล้ว (พายุ + Big Z → To be continued — [06](06-vertical-slice.md)); เนื้อเรื่อง/ลูป Endless หลัง Day 5 ยังเป็น future ตาม `01-core-loop.md`
    - กำกับทิศทาง UI (HUD, Dialogue Frames, ฟอนต์) และตรวจงาน UI ร่วมกับเดียร์
 2. **สำหรับ Lead Programmers (โชว์):**
+   - Balance/telemetry: `BEPAL/Docs/Balance/telemetry-spec.md` · คู่มือโค้ดสำหรับ AI: `CLAUDE.md`
    - โค้ดอยู่ที่ `BEPAL/Bepal_Game/Bepal/` ดูโครงสร้างใน `04-class-diagram.md` และขอบเขตใน `06-vertical-slice.md`
    - ใช้ Scene Breakdown ใน `13-scene-breakdown.md` และสเปกใน `03-mechanics.md` / `07`–`10` เป็นแนวทางเขียนโค้ด
 3. **สำหรับ Flex & Audio Support (ซุง):**

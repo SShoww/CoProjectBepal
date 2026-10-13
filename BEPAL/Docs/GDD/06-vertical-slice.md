@@ -1,7 +1,7 @@
 ---
 type: gdd-vertical-slice
-version: 1.0
-date: 2026-09-28
+version: 1.1
+date: 2026-10-13
 deadline: 2026-09-30
 ---
 
@@ -117,6 +117,22 @@ deadline: 2026-09-30
 - Stomach ที่เผาผลาญตอนเริ่ม QTE: Train −10 · Clean/Heal −5 · Feed 0
 - Max HP = (BaseMaxHp + (Lv−1)×10) × (Clean ≤ 25 ? 0.8 : 1) · ATK = round((BaseAtk + (Lv−1)×5) × (Clean ≤ 50 ? 0.75 : 1))
 - MaxProgress = 100 + (Lv−1)×50 · PlayerMaxExp = 10 + (Lv−1)×10
+- Level-up ของสัตว์: +10 Max HP, +5 ATK (`HpPerLevel`, `AtkPerLevel`)
+
+**ความเร็วเข็ม / ขนาด zone (half-width เป็น radian, `Balance`):**
+
+| รายการ | ค่า |
+| --- | --- |
+| เข็ม Care select / ฐาน | 2.2 · zone Perfect 0.62 (ไม่มี Great) |
+| เข็ม QTE ปกติ | 2.4 (`QteBaseSpeed`) · Train **3.6** |
+| Zone Perfect / Great | Train 0.07 / 0.16 (หด −15% ต่อ Pet Level จนถึง Lv 3) · Feed/Clean/Heal 0.12 / 0.27 |
+| Feed | Perfect = เข็มเร็วขึ้น ×1.15 (สูงสุด 6) และกลับทิศ · Miss = รีเซ็ตเป็น 2.4 |
+| Clean | zone วิ่งหนี 4.8 rad/s |
+| Heal | เข็มจาง + zone หดและเกิดใหม่ |
+| Train | มี dot 3 จุดพร้อมกัน (โดนแล้วเกิดใหม่) |
+| Ballet Shoes | Perfect zone ×1.15 ทุก care QTE |
+
+**Fight (`FightScene`):** เริ่มด้วย Attack (เขียว) → ตีโดนแต่ไม่ตาย = สลับเป็น Dodge (เหลือง, Perfect เท่านั้น) → Dodge สำเร็จ = กลับ Attack · พลาดหรือ "Too slow" (zone หายที่ 0.012) = ศัตรูตี · Dodge เริ่ม 0.32 (Sea Tea 0.38) แล้วหดตามศัตรู · Attack หดครึ่งเดียวของ Dodge (Perfect ต่ำสุด 0.06, Great 0.16) · เข็มศัตรู Toothless 2.4 / Big Z 3.4 (DodgeShrink 0.10 / 0.26) · ดาเมจสัตว์ = ATK × (Perfect 1.0 / Great 0.75) · Toothless ATK 15 HP 120, Big Z ATK 20 HP 9999
 
 ---
 
@@ -133,7 +149,9 @@ deadline: 2026-09-30
 
 ## 5. Out of Scope (Prototype)
 
-Save/Load · Daily Summary Report Card · Burn / Infected · ไอเทมอีก 5 ชิ้นและกระเป๋า · Endless random event · Option (ปุ่มมีแต่ยังไม่ทำงาน)
+Save/Load · Daily Summary Report Card · Burn / Infected · Toy Knife (ไอเทมชิ้นที่ 8 ใน Figma/10-economy) · Endless random event · ท่าโจมตีใหม่ของสัตว์ Lv 3 · Combo Streak
+
+> เปลี่ยน 2026-10-13: ไอเทม 7 ชิ้น + กล่อง (§3.4) และหน้า Options (Music/SFX volume, เปิดจาก Main Menu และ Pause) **ทำแล้ว** จึงเอาออกจากรายการนี้
 
 ## 6. ลำดับการตัดถ้าเวลาไม่พอ
 

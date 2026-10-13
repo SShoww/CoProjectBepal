@@ -3,6 +3,9 @@
 ล่าสุด 10 งาน งานละ 3 บรรทัด เขียนผ่าน `tools/context/log-edit.py` เท่านั้น — รายการเก่าอยู่ที่ [archive/edit-log/](archive/edit-log/)
 
 <!-- entries -->
+- **2026-10-13 22:46 · Q-20261013-gdd-sync** — ปรับ GDD 01-14, README, telemetry-spec, CLAUDE.md ให้ตรงโค้ด (Day1-5 ตายตัว, ร้าน 7 ไอเทม+Box, Options/BGM, dev tools)
+  - Files: BEPAL/Docs/GDD/*.md, BEPAL/Docs/Balance/telemetry-spec.md, CLAUDE.md
+  - Validation: dotnet build ผ่าน, แก้เฉพาะเอกสาร, ไม่รัน autoplay, ไม่ได้ตรวจ drawio/00-concept
 - **2026-10-13 22:15 · Q-20261013-scene-jump** — เพิ่ม SceneCatalog + --scene <name> + เมนู F2 กระโดดไป scene ใดก็ได้ (dev); ShotRunner ใช้แคตตาล็อกร่วม
   - Files: DevTools/SceneCatalog.cs, DevTools/SceneJumpScene.cs, ShotRunner.cs, Game1.cs, CLAUDE.md, 04-class-diagram.md
   - Validation: build 0/0, --shots 28 PNG, --autoplay reached To be continued; F2 ยังไม่ได้ลองในเกมจริง
@@ -30,6 +33,3 @@
 - **2026-10-13 18:11 · Q-20261013-demo-ending** — ToBeContinuedScene เปลี่ยนข้อความเป็นจุดจบ demo (End of the BePal demo / Big Z can't be beaten yet / Thanks for playing)
   - Files: BEPAL/Bepal_Game/Bepal/Scenes/MenuScenes.cs
   - Validation: build 0 warn; autoplay+refuse ผ่าน; shot 16_tbc ตรวจแล้ว
-- **2026-10-13 18:10 · Q-20261013-energy-ux** — Energy 0 ไม่เปิด care (แจ้งให้ไปนอน); Heal จางและเป็น gap เมื่อ HP เต็ม; bot ไม่เลือก Heal ตอน HP เต็ม
-  - Files: BEPAL/Bepal_Game/Bepal/Scenes/BaseScene.cs, BEPAL/Bepal_Game/Bepal/Scenes/CareScenes.cs, BEPAL/Bepal_Game/Bepal/Scenes/Wheel.cs, BEPAL/Bepal_Game/Bepal/DevTools/AutoPlay.cs
-  - Validation: build 0 warn; autoplay+refuse ผ่าน; batch 50 run ผลเท่า baseline; shots ตรวจแล้ว

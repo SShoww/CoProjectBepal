@@ -1,11 +1,11 @@
 ---
 type: asset-list
-version: 3.1
-date: 2026-10-07
+version: 3.2
+date: 2026-10-13
 project: BePal
 ---
 
-# Asset List — BePal (Master Asset & Image Checklist v3.0)
+# Asset List — BePal (Master Asset & Image Checklist v3.2)
 
 รายการ Asset ทั้งหมดของ BePal — **ภาพ 2D สำหรับ ธัญญรัตน์ (เดียร์)**, **เสียง SFX & BGM สำหรับ ปีย์ตะวัน (ซุง) และ ภูมิพัฒน์ (ภูมิ)**, และ**ฟอนต์สำหรับ ภูมิพัฒน์ (ภูมิ)**
 
@@ -23,12 +23,14 @@ project: BePal
 
 > **สถานะปัจจุบัน (2026-10-07):** ดูหัวข้อ "สถานะ" ด้านล่าง · ฟอนต์ใช้ `Segoe UI` ชั่วคราว
 
-### สถานะ (as-built, 2026-10-07)
+### สถานะ (as-built, 2026-10-13)
 
 | สถานะ | รายการ |
 | --- | --- |
-| เสร็จ (อยู่ใน `Content/`) | parallax 5 ชั้น (`bg_parallax_{sky,clouds,hills,mid,near}.png`, 320x180 วาด 4x), `fg_jungle.png`, `player.png` (sprite ผู้เล่น), SFX 17 ไฟล์ (ตาราง §2.1 ใน [14-audio-fonts-list.md](14-audio-fonts-list.md)) |
-| ยังไม่ทำ | sprite สัตว์เลี้ยง / ศัตรู / NPC (ยังวาดด้วยรูปทรงใน `World/Art.cs`), เพลง/BGM (§2.2 ใน [14-audio-fonts-list.md](14-audio-fonts-list.md)), ฟอนต์จริงนอกเหนือ SpriteFont 3 ตัว (`Main`/`Big`/`Small` ใช้ `Segoe UI`) |
+| เสร็จ (อยู่ใน `Content/`) | parallax 5 ชั้น (`bg_parallax_{sky,clouds,hills,mid,near}.png`, 320x180 วาด 4x), `fg_jungle.png`, `player.png` (ภาพนิ่งเดียว + `SpriteMotion` ขยับด้วยโค้ด), SFX 17 ไฟล์, **BGM 7 ไฟล์ `.ogg`** (`Content/Music/`), SpriteFont 3 ตัว (`Fonts/Main\|Big\|Small`) — ตาราง §2 ใน [14-audio-fonts-list.md](14-audio-fonts-list.md) |
+| ยังไม่ทำ | sprite สัตว์เลี้ยง / ศัตรู / NPC (โค้ดรองรับแล้วแต่ยังไม่มีไฟล์; ตอนนี้วาดด้วยรูปทรงใน `World/Art.cs`), UI/ไอคอน/ไอเทมทั้งหมด (การ์ดไอเทมวาดด้วยโค้ด), ฟอนต์จริงนอกเหนือ SpriteFont 3 ตัว (`Segoe UI` ชั่วคราว) |
+
+> **หมายเหตุ as-built:** Content อยู่ในโฟลเดอร์แบน `Content/Sprites/`, `Content/Sfx/`, `Content/Music/`, `Content/Fonts/` — ชื่อโฟลเดอร์ย่อย (`player/`, `pet/`, `env/`, `ui/...`) และชื่อ `spr_*` ในตารางด้านล่างเป็นชื่อที่ส่งมอบจาก Art (จะ rename ตอนวางไฟล์เข้า `Content/Sprites/` ตามที่โค้ดคาดไว้ เช่น `pet_<species>.png`) · ไฟล์ orphan: `_candidates/sfx/sfx_qte_perfect.wav` (ไม่ได้โหลด — Perfect chime สังเคราะห์ตอนรัน)
 
 ขั้นตอนนำ asset เข้าเกม: [_candidates/README.md](../../Assets/_candidates/README.md) · ชื่อ asset ใช้ตามตารางในไฟล์นี้ (เจ้าของหัวข้อ naming)
 
@@ -105,10 +107,12 @@ project: BePal
 ฐานกว้างประมาณ **3 หน้าจอ (3840 px)** ประตูอยู่ขวาสุด (06 §2):
 
 ```
-[ขอบมืด] — เตียง (End day) — Upgrade — [Core Hearth + สัตว์เดินไปมา] — หมอ — สมุด — [ประตูแดง]
+[ขอบมืด] — เตียง (End day, x=300) — กล่อง/Box (600) — Upgrade (900) — [Core Hearth (1900) + สัตว์เดินไปมา] — หมอ (2650) — สมุด (3100) — [ประตูแดง (3640)]  · โลกกว้าง 3840
 ```
 
 **Parallax layers** (วาดแยก layer, PNG โปร่งใส ยกเว้นท้องฟ้า · ต้องต่อขอบซ้าย–ขวาได้ถ้าสั้นกว่า 3840):
+
+> **As built:** ENV-01..06 ถูกแทนด้วย parallax 5 ชั้น `bg_parallax_{sky,clouds,hills,mid,near}.png` (320×180 วาด 4x, factor 0.03/0.10/0.28/0.48/0.70, clouds drift 6 px/s) + `fg_jungle.png` (2x, factor 1.3) — กลางคืน = tint (60,70,130) ไม่ใช่รูปท้องฟ้าแยก; ฝน/ฟ้าแลบ Day 4 วาดด้วยโค้ด (`World/Rain.cs`). แถวด้านล่างเป็นสเปกเดิม
 
 | รหัส Asset | ชื่อไฟล์ | คำอธิบาย | ขนาด | Priority | สถานะ |
 | --- | --- | --- | --- | --- | --- |
@@ -161,7 +165,7 @@ project: BePal
 | รหัส Asset | ชื่อไฟล์ | คำอธิบาย | ขนาด | Scene | Priority | สถานะ |
 | --- | --- | --- | --- | --- | --- | --- |
 | **UI-01** | `ui/menu/logo_bepal.png` | โลโก้ชื่อเกม "BePal" | 640×220 | S1 | P0 | 🔲 Not Started |
-| **UI-02** | `ui/menu/btn_play.png`, `btn_option.png`, `btn_quit.png` | ปุ่ม Play / Option / Quit (ปกติ + hover) — Option ยังไม่ทำงานใน Prototype | 240×64 | S1 | P1 | 🔲 Not Started |
+| **UI-02** | `ui/menu/btn_play.png`, `btn_option.png`, `btn_quit.png` | ปุ่ม Play / Option / Quit (ปกติ + hover) — Option ทำงานแล้ว (volume เพลง/SFX) | 240×64 | S1 | P1 | 🔲 Not Started |
 | **UI-03** | `ui/keys/key_space.png`, `key_a.png`, `key_d.png`, `key_esc.png` | รูปปุ่มคีย์บอร์ด Space / A / D / ESC (หน้าเมนู + tutorial Day 1) | 64×64 (Space 160×64) | S1 | P1 | 🔲 Not Started |
 | **UI-04** | `ui/prompt/prompt_space.png` | ป้าย `[Space]` ลอยเหนือของที่อยู่ใกล้ผู้เล่น | 96×40 | S3 | P0 | 🔲 Not Started |
 | **UI-05** | `ui/dialogue/frame_textbox.png` | กรอบกล่องข้อความ (9-slice) โปร่งแสง ขอบไม้ | 1160×180 | S2, S15, S20 | P0 | 🔲 Not Started |
@@ -223,18 +227,18 @@ project: BePal
 
 ### 1.10 ไอเทม (Items — 48×48 px)
 
-Prototype มีร้านค้า 3 ชิ้น (ซื้อแล้วใช้ทันที ไม่มีกระเป๋า — 06 §3.4)
+Prototype มีร้านค้า **7 ชิ้น** (Crab Apple 25 · Caffeine Tonic 40 · Sea Tea 18 · Cloudy Glasses 30 · Ballet Shoes 50 · Torn Notebook 55 · Faded Ribbon 35) ซื้อแล้วเข้ากล่อง (Box) ในฐาน — 06 §3.4 · ตอนนี้การ์ดไอเทมวาดด้วยโค้ด (270×230) ยังไม่มีไอคอนจริง · Toy Knife ไม่มีในโค้ด
 
 | รหัส Asset | ชื่อไฟล์ | คำอธิบาย & การใช้งาน | ราคา | Priority | สถานะ |
 | --- | --- | --- | --- | --- | --- |
 | **ITM-01** | `ui/items/item_crab_apple.png` | **Crab Apple:** แอปเปิลทะเลสีแดงสด — สัตว์ 1 ตัว +18 HP, +20 Stomach | 25 | P1 | 🔲 Not Started |
 | **ITM-02** | `ui/items/item_caffeine_tonic.png` | **Caffeine Tonic:** ยาชูกำลังสีอำพัน — Energy +2 วันนี้ | 40 | P1 | 🔲 Not Started |
 | **ITM-03** | `ui/items/item_sea_tea.png` | **Sea Tea:** ชาน้ำทะเลสีฟ้าใส — Dodge zone +20% ใน Fight ครั้งถัดไป | 18 | P1 | 🔲 Not Started |
-| **ITM-04** | `ui/items/item_cloudy_glasses.png` | Cloudy Glasses — โล่ป้องกัน 2 ครั้ง | — | Later | 🔲 Not Started |
-| **ITM-05** | `ui/items/item_torn_notebook.png` | Torn Notebook — EXP Train +50% | — | Later | 🔲 Not Started |
-| **EQP-01** | `ui/items/eqp_ballet_shoes.png` | Ballet Shoes — Perfect Zone +15% | — | Later | 🔲 Not Started |
-| **EQP-02** | `ui/items/eqp_toy_knife.png` | Toy Knife — ATK สวนกลับ +35% | — | Later | 🔲 Not Started |
-| **EQP-03** | `ui/items/eqp_faded_ribbon.png` | Faded Ribbon — Clean Decay −30% | — | Later | 🔲 Not Started |
+| **ITM-04** | `ui/items/item_cloudy_glasses.png` | Cloudy Glasses — โล่ป้องกัน 2 ครั้ง (ในร้านแล้ว 30) | 30 | P1 | 🔲 Not Started |
+| **ITM-05** | `ui/items/item_torn_notebook.png` | Torn Notebook — Progress Train +50% วันนี้ (ในร้านแล้ว) | 55 | P1 | 🔲 Not Started |
+| **EQP-01** | `ui/items/eqp_ballet_shoes.png` | Ballet Shoes — Perfect Zone +15% (ในร้านแล้ว) | 50 | P1 | 🔲 Not Started |
+| **EQP-02** | `ui/items/eqp_toy_knife.png` | Toy Knife — ATK สวนกลับ +35% (ไม่มีในโค้ด) | — | Later | 🔲 Not Started |
+| **EQP-03** | `ui/items/eqp_faded_ribbon.png` | Faded Ribbon — Clean Decay −30% (ในร้านแล้ว) | 35 | P1 | 🔲 Not Started |
 | **ITM-06** | `ui/items/slot_frame.png` | กรอบช่องไอเทมในร้าน (+ ป้ายราคา) | 96×120 | P1 | 🔲 Not Started |
 
 ---
@@ -261,7 +265,7 @@ flowchart LR
     D --> E[Runtime<br>Content.Load&lt;T&gt;&#40;&#41;]
 ```
 
-- โฟลเดอร์ใน `Content/` ใช้ตามชื่อไฟล์ในตาราง (`player/`, `pet/`, `npc/`, `env/`, `bg/`, `ui/...`, `sfx/`, `music/`, `Fonts/`)
+- **As built:** โฟลเดอร์ใน `Content/` คือ `Sprites/` (แบน), `Sfx/`, `Music/`, `Fonts/` — ชื่อโฟลเดอร์ย่อยในตารางเป็นชื่อส่งมอบจาก Art ไม่ใช่โครงสร้างจริง; ชื่อไฟล์ที่โค้ดโหลด: `pet_<species>.png`, `enemy_*.png`, `npc_*.png`, `bg_parallax_*.png`, `fg_*.png`, `player.png`, `sfx_<area>_<action>.wav` (area: event/fight/qte/ui/world), `bgm_*.ogg`
 - ส่งไฟล์ตามชื่อในตารางเป๊ะๆ — โค้ดจะเปลี่ยนจาก placeholder เป็นภาพจริงได้ทีละชิ้นโดยไม่ต้องรอครบชุด
 - Sprite sheet แบบหลายเฟรม: เรียงแนวนอน ขนาดเฟรมเท่ากันทุกเฟรม แจ้งจำนวนเฟรมในชื่อไฟล์หรือแจ้งโชว์
 

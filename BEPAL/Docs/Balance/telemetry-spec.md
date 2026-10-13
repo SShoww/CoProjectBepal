@@ -1,5 +1,7 @@
 # Telemetry Spec (Q-20261009-run-telemetry)
 
+> **อ่าน §5 (As built) ก่อน** — §1–§3 เป็นสเปกตั้งต้น ชื่อไฟล์/field ที่ใช้จริงต่างออกไป: ไฟล์ `run_<yyyyMMdd_HHmmss>_<profile>[-<player>][-refuse]_<seed>[-N].jsonl` (ไม่มี `events.jsonl`/`runs.csv` จากเกม), เวลาใช้ field `t` (ไม่ใช่ `tSim`), counter ใน `run_summary` ชื่อ `coinIn_<reason>`/`coinOut_<reason>` (ไม่ใช่ `coin_daily`/`spent_*`), `seed` มีค่าเสมอ (fallback `Environment.TickCount`, ไม่ใช่ -1), มี event `bot_params`, และ telemetry ถูกปิดเมื่อใช้ `--shots` **หรือ `--scene`** (`telemetry.txt` ถูกเมินด้วย)
+
 ฟอร์แมต: JSONL (1 event/บรรทัด) flat fields เท่านั้น แปลงเป็น CSV ได้ตรง ๆ. ไฟล์: `telemetry/<runId>.events.jsonl` + `telemetry/runs.csv` (1 แถว/run).
 
 ## 1. ID scheme
