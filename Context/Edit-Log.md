@@ -3,6 +3,9 @@
 ล่าสุด 10 งาน งานละ 3 บรรทัด เขียนผ่าน `tools/context/log-edit.py` เท่านั้น — รายการเก่าอยู่ที่ [archive/edit-log/](archive/edit-log/)
 
 <!-- entries -->
+- **2026-10-13 20:08 · Q-20261013-validate-ps1** — validate.ps1: พารามิเตอร์ -Raw/-Csv/-Out, รู้จัก starter, ราคา Point ใหม่, I09 ไม่ห้ามร้านหลัง Sell, เพิ่ม I16 ไอเทม, วันที่ invariant
+  - Files: BEPAL/Docs/Balance/tools/validate.ps1, BEPAL/Docs/Balance/telemetry-spec.md, Context/Status.md
+  - Validation: batch 50 run -> 16/16 PASS; ทดสอบด้านลบจับ I01/I16; ยังไม่ได้ลองกับ data คนจริง
 - **2026-10-13 19:45 · Q-20261013-options-menu** — เมนู Options ปรับ volume เพลง/SFX (slider เมาส์/คีย์), เก็บใน %APPDATA%/BePal/settings.txt, เปิดจาก Main Menu และ Pause
   - Files: BEPAL/Bepal_Game/Bepal/Core/Settings.cs, Core/Ui.cs, Core/Audio.cs, Core/MusicPlayer.cs, Scenes/MenuScenes.cs, Scenes/BaseScene.cs, docs
   - Validation: build 0 warn; ทดสอบ input จริงผ่าน harness ชั่วคราว; autoplay ไม่แตะ settings; ยังไม่ได้ฟัง/เปิดจาก Pause ด้วยมือ
@@ -30,6 +33,3 @@
 - **2026-10-13 18:02 · Q-20261013-balance-migration** — ย้ายตัวเลข care QTE, ราคา/ผล shop, PlayerMaxExp และตัวคูณ upgrade เข้า Balance ค่าเดิมทุกตัว
   - Files: BEPAL/Bepal_Game/Bepal/Model/GameState.cs, BEPAL/Bepal_Game/Bepal/Scenes/CareScenes.cs, BEPAL/Bepal_Game/Bepal/Scenes/BaseMenus.cs, CLAUDE.md
   - Validation: build 0 warn; batch 50 run ก่อน/หลัง event stream เหมือนกัน; autoplay --refuse ผ่าน
-- **2026-10-12 20:02 · Q-20261012-human-telemetry** — วิเคราะห์ telemetry คนจริง 8 runs (Aggregate+validate, balance-report §7, ซ่อม Boom_121, แถว QTE not missed ใน players.md); jsonl ดิบ gitignore เพราะมีชื่อผู้เล่น ไม่ push
-  - Files: .gitignore, BEPAL/Docs/Balance/analysis/human, BEPAL/Docs/Balance/balance-report.md, BEPAL/Docs/Balance/tools/Aggregate/Program.cs
-  - Validation: validate 8/8 ผ่านหลังซ่อม; Aggregate build/รันผ่าน; ไม่ได้แก้โค้ดเกมใน branch นี้ จึงไม่ได้รัน build/autoplay ของเกม
