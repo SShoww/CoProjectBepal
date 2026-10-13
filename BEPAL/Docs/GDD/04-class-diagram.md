@@ -16,7 +16,7 @@ Project: `BEPAL/Bepal_Game/Bepal/` — MonoGame DesktopGL 3.8.4, .NET 8, 1280x72
 | `Model/` | `Pet`, `Enemy`, `GameState`, `Balance` (ตัวเลขทั้งหมดจาก [06-vertical-slice.md](06-vertical-slice.md)) |
 | `World/` | `Backdrop` (parallax สไปรต์ 5 ชั้น: sky/clouds/hills/mid/near จาก `Content/Sprites/bg_parallax_*.png`, สเกล 4x, โหลดผ่าน `Backdrop.Load` ใน `Gfx.Init`), `Art` (ตัวละคร placeholder; ตั้ง `Art.PlayerSprite` = รูปเดียวเพื่อแทนที่ตัว primitive), `SpriteMotion` (`SpriteMotion.cs`: pose หายใจ/เด้ง/เอียง/ยืดหด/พลิกหันจากความเร็ว สำหรับรูปเดียวไม่มี frame animation), `Rain` (VFX ฝน Day 4: static, tick จาก `SceneManager.Update`, วาดผ่านหน้าต่างใน `BaseScene`, `Rain.Flash()` จาก `DayEvents.Storm`) |
 | `Scenes/` | หน้าจอทั้งหมด (ด้านล่าง) |
-| `DevTools/` | `ShotRunner` (`--shots <dir>` เซฟภาพทุกหน้าจอ), `AutoPlay` (`--autoplay [--refuse] [--bot <profile>] [--seed n] [--telemetry <dir>]` บอทเล่น Day 1–5 เพื่อหา soft-lock และเก็บ telemetry; ดู `BEPAL/Docs/Balance/telemetry-spec.md`) |
+| `DevTools/` | `SceneCatalog` (รายชื่อ scene + ข้อมูลตัวอย่างทั้งหมด), `SceneJumpScene` (กด F2 ในเกมเพื่อกระโดดไป scene ใดก็ได้; `--scene <name>` เปิดตรง), `ShotRunner` (`--shots <dir>` เซฟภาพทุกหน้าจอ), `AutoPlay` (`--autoplay [--refuse] [--bot <profile>] [--seed n] [--telemetry <dir>]` บอทเล่น Day 1–5 เพื่อหา soft-lock และเก็บ telemetry; ดู `BEPAL/Docs/Balance/telemetry-spec.md`) |
 
 ## Scenes
 

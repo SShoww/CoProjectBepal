@@ -12,6 +12,7 @@ namespace Bepal
         private readonly SceneManager _scenes = new();
         private ShotRunner? _shots;
         private AutoPlay? _bot;
+        private bool _dev;   // F2 scene jumper: Debug builds, or --dev / --scene on a Release build
 
         public Game1()
         {
@@ -53,6 +54,19 @@ namespace Bepal
             if (int.TryParse(Arg("--seed"), out int seed)) RunSeed.Set(seed);
             _scenes.ResetNow(new MainMenuScene());
 
+            string? sceneArg = Arg("--scene");
+#if DEBUG
+            _dev = true;
+#endif
+            _dev |= Has("--dev") || sceneArg != null;
+            if (sceneArg != null)
+            {
+                var entry = SceneCatalog.Find(sceneArg);
+                if (entry != null) SceneCatalog.Apply(_scenes, entry);
+                else System.Console.WriteLine($"--scene '{sceneArg}': no unique match. Available:\n  "
+                    + string.Join("\n  ", System.Linq.Enumerable.Select(SceneCatalog.All, e => e.Name)));
+            }
+
             string? shotsDir = Arg("--shots");
             if (shotsDir != null) _shots = new ShotRunner(shotsDir);
             if (auto)
@@ -62,13 +76,13 @@ namespace Bepal
             // Tester build: a telemetry.txt next to the exe turns telemetry on for a plain double-click
             // (first line that is not blank or "#..." = player name; files go to <exe dir>/data).
             string telFile = System.IO.Path.Combine(System.AppContext.BaseDirectory, "telemetry.txt");
-            if (telDir == null && _shots == null && System.IO.File.Exists(telFile))
+            if (telDir == null && _shots == null && sceneArg == null && System.IO.File.Exists(telFile))
             {
                 telDir = System.IO.Path.Combine(System.AppContext.BaseDirectory, "data");
                 if (player == "")
                     player = System.Linq.Enumerable.FirstOrDefault(System.IO.File.ReadLines(telFile), l => l.Trim() != "" && !l.Trim().StartsWith('#'))?.Trim() ?? "";
             }
-            if (telDir != null && _shots == null)
+            if (telDir != null && _shots == null && sceneArg == null)
             {
                 Telemetry.Configure(telDir, _bot?.Profile ?? "human", auto ? "autoplay" : "play", Has("--refuse"), player);
                 Telemetry.SceneProbe = () => _scenes.Top?.GetType().Name ?? "";
@@ -112,6 +126,8 @@ namespace Bepal
             }
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
             Input.Update();
+            if (_dev && Input.Pressed(Microsoft.Xna.Framework.Input.Keys.F2) && _scenes.Top is not SceneJumpScene)
+                _scenes.Push(new SceneJumpScene());
             Gfx.UpdateShake(dt);
             Telemetry.Tick(dt);
             _scenes.Update(dt);
