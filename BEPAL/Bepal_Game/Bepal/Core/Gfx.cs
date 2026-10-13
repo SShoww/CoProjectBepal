@@ -33,6 +33,7 @@ public static class Gfx
         Small = content.Load<SpriteFont>("Fonts/Small");
         Backdrop.Load(content);
         Art.LoadPlayer(content);
+        Art.LoadOptional(content);
     }
 
     static Texture2D MakeCircle(GraphicsDevice gd, int size, bool soft)

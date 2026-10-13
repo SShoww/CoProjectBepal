@@ -61,6 +61,8 @@ project: BePal
 
 "น่ารักแต่แอบผิดปกติ (Uncanny)" — ดวงตาจ้องตามผู้เล่นตลอด (ถ้าวาดตาแยก layer ได้ โค้ดจะขยับตาให้)
 
+> **การใส่ภาพเข้าเกม (2026-10-13):** โค้ดรองรับภาพจริงแล้วสำหรับสัตว์/ศัตรู/พ่อค้า/หมอ (ภาพนิ่งเดียวต่อตัว หันขวา, ใช้เฉพาะท่า idle) — วางเป็น `Content/Sprites/pet_<species>.png`, `enemy_toothless.png`, `enemy_bigz.png`, `npc_merchant.png`, `npc_doctor.png` แล้วลงทะเบียนใน `Content.mgcb`; ถ้าไม่มีไฟล์จะวาด primitive เดิม ขั้นตอนเต็มใน [_candidates/README.md](../../Assets/_candidates/README.md) ท่า attack/hurt/happy ยังไม่ได้ต่อโค้ด
+
 | รหัส Asset | ชื่อไฟล์ | คำอธิบาย & รายละเอียดทางภาพ | ขนาด | Priority | สถานะ |
 | --- | --- | --- | --- | --- | --- |
 | **PET-01** | `pet/spr_mossling_idle.png` | **Mossling (ไอ่แดง) — Idle/Walk:** สิ่งมีชีวิตกึ่งพืช นุ่มฟูคล้ายตะไคร่น้ำ ตากลมโต มีดอกไม้ตูมบนหัว รักสงบ ตกใจง่าย | 280×360 | P0 | 🔲 Not Started |
