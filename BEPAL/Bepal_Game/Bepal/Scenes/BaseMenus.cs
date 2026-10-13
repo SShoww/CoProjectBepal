@@ -268,9 +268,9 @@ public class ShopScene : Scene
 
     static readonly Item[] Items =
     {
-        new("Crab Apple", 25, "One pet: +18 HP, +20 Stomach", new Color(220, 70, 60)),
-        new("Caffeine Tonic", 40, "+2 Energy today (up to max)", new Color(230, 160, 60)),
-        new("Sea Tea", 18, "Dodge zone +20% in your next fight", new Color(90, 190, 220)),
+        new("Crab Apple", Balance.CrabApplePrice, $"One pet: +{Balance.CrabAppleHp} HP, +{Balance.CrabAppleStomach} Stomach", new Color(220, 70, 60)),
+        new("Caffeine Tonic", Balance.TonicPrice, $"+{Balance.TonicEnergy} Energy today (up to max)", new Color(230, 160, 60)),
+        new("Sea Tea", Balance.SeaTeaPrice, "Dodge zone +20% in your next fight", new Color(90, 190, 220)),
     };
 
     public ShopScene(GameState gs)
@@ -296,8 +296,8 @@ public class ShopScene : Scene
                 _gs.SpendCoin(Items[0].Price, "shop_apple");
                 Telemetry.Emit("shop_buy", "item", "Crab Apple", "price", Items[0].Price, "target", p.Name);
                 Audio.Play(Sfx.UiCoin);
-                p.Hp += 18;
-                p.Stomach += 20;
+                p.Hp += Balance.CrabAppleHp;
+                p.Stomach += Balance.CrabAppleStomach;
                 p.ClampStats();
                 _popups.Add($"{p.Name} munches happily", Palette.Heal, new Vector2(Gfx.W / 2f, 150));
             }, onCancel: () => { }));
@@ -306,7 +306,7 @@ public class ShopScene : Scene
             _gs.SpendCoin(Items[1].Price, "shop_tonic");
             Telemetry.Emit("shop_buy", "item", "Caffeine Tonic", "price", Items[1].Price, "target", "");
             Audio.Play(Sfx.UiCoin);
-            int gained = _gs.AddEnergy(2, "tonic");
+            int gained = _gs.AddEnergy(Balance.TonicEnergy, "tonic");
             _popups.Add($"+{gained} Energy!", Palette.Heal, new Vector2(Gfx.W / 2f, 150));
         }
         if (_buy[2].Update())

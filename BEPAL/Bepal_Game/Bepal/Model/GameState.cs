@@ -128,6 +128,41 @@ public static class Balance
     /// <summary>Backdrop (night base seen through the door): world X and brightness.</summary>
     public const float FightBackdropX = 3000f, FightBackdropLight = 0.85f;
 
+    // ================= CARE (Scenes/CareScenes.cs) =================
+    // Wheel speeds are rad/s; zone sizes are half-widths in radians.
+    /// <summary>Care-select wheel: needle speed and the half-width of each of the 4 choices.</summary>
+    public const float CareSelectSpeed = 2.2f, CareSelectZone = 0.62f;
+    /// <summary>Care QTE needle speeds (Train is faster than the rest).</summary>
+    public const float QteBaseSpeed = 2.4f, QteTrainSpeed = 3.6f;
+    /// <summary>Feed: a Perfect speeds the needle up by this factor, capped at <see cref="FeedMaxSpeed"/>.</summary>
+    public const float FeedPerfectSpeedMul = 1.15f, FeedMaxSpeed = 6f;
+    /// <summary>Clean: the zone runs away at this fixed speed, always below the needle's base speed.</summary>
+    public const float CleanZoneSpeed = 4.8f;
+    /// <summary>Heal: needle fade cycle (lower = slower), its minimum alpha, and the zone shrink-rate multiplier (lower = dot lives longer).</summary>
+    public const float HealFadeRate = 2f, HealMinAlpha = 0f, HealShrink = 0.5f;
+    /// <summary>Heal: Perfect/Great half-widths lose this much per second (x HealShrink); the zone respawns once Perfect falls to the floor.</summary>
+    public const float HealPerfectShrinkRate = 0.035f, HealGreatShrinkRate = 0.07f, HealZoneMin = 0.02f;
+    /// <summary>Train zones (3 dots): Perfect/Great half-widths, min gap to the needle/other zones, and shrink per pet level (stops at LV 3).</summary>
+    public const float TrainPerfect = 0.07f, TrainGreat = 0.16f, TrainSpawnGap = 0.4f, TrainShrinkPerLevel = 0.15f;
+    public const int TrainShrinkMaxLevel = 3;
+    /// <summary>Feed/Clean/Heal zone: Perfect/Great half-widths and min spawn gap.</summary>
+    public const float CareZonePerfect = 0.12f, CareZoneGreat = 0.27f, CareSpawnGap = 0.9f;
+    /// <summary>Stomach burned when a QTE starts: Train, Clean/Heal.</summary>
+    public const int TrainStomachCost = 10, CleanHealStomachCost = 5;
+    /// <summary>Train Progress per hit before the Progress upgrade multiplier (Perfect, Great).</summary>
+    public const float TrainPerfectGain = 10, TrainGreatGain = 5;
+    /// <summary>Feed Stomach, Clean, Heal HP per hit (Perfect, Great).</summary>
+    public const int FeedPerfect = 6, FeedGreat = 3, CleanPerfect = 6, CleanGreat = 3, HealPerfect = 6, HealGreat = 3;
+    /// <summary>Per upgrade level: Progress gain +50% (Train), QTE zone size +20%.</summary>
+    public const float TrainGainPerUpgrade = 0.5f, QteZonePerUpgrade = 0.2f;
+    /// <summary>Player EXP to level up: first level, plus this much more each level.</summary>
+    public const int PlayerExpBase = 10, PlayerExpPerLevel = 10;
+
+    // ================= SHOP (Scenes/BaseMenus.cs, Day 3 merchant) =================
+    public const int CrabApplePrice = 25, CrabAppleHp = 18, CrabAppleStomach = 20;
+    public const int TonicPrice = 40, TonicEnergy = 2;
+    public const int SeaTeaPrice = 18;
+
     // Upgrade costs
     public const int QteCoin = 100, QtePoints = 1, QteMax = 3;
     public const int EnergyCoin = 150, EnergyPoints = 3;
@@ -153,9 +188,9 @@ public class GameState
     public bool SeaTea;
 
     public int MaxEnergy => Math.Min(Balance.BaseEnergy + EnergyUpgrade, Balance.MaxEnergyCap);
-    public int PlayerMaxExp => 10 + (PlayerLevel - 1) * 10;
-    public float TrainGainMultiplier => 1f + 0.5f * ProgressUpgrade;   // +10 -> +15
-    public float QteZoneMultiplier => 1f + 0.2f * QteUpgrade;
+    public int PlayerMaxExp => Balance.PlayerExpBase + (PlayerLevel - 1) * Balance.PlayerExpPerLevel;
+    public float TrainGainMultiplier => 1f + Balance.TrainGainPerUpgrade * ProgressUpgrade;   // +10 -> +15
+    public float QteZoneMultiplier => 1f + Balance.QteZonePerUpgrade * QteUpgrade;
 
     public IEnumerable<Pet> Alive => Pets.Where(p => !p.Dead);
 
