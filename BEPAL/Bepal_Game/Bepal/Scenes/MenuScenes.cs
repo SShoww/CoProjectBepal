@@ -12,6 +12,8 @@ public class MainMenuScene : Scene
     readonly Button _quit = new(new Rectangle(Gfx.W / 2 - 120, 450, 240, 56), "Quit");
     float _time;
 
+    public override string? Music => Bgm.Menu;
+
     public override void Update(float dt)
     {
         _time += dt;
@@ -41,6 +43,8 @@ public class ChooseStarterScene : Scene
 {
     float _time;
     bool _picked;
+
+    public override string? Music => Bgm.Menu;
 
     public override void Enter()
     {
@@ -102,6 +106,8 @@ public class ToBeContinuedScene : Scene
 {
     readonly int _days;
     float _time;
+
+    public override string? Music => Bgm.End;
 
     public ToBeContinuedScene(int days)
     {

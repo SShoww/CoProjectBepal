@@ -286,6 +286,7 @@ public class ShopScene : Scene
     float _time;
 
     public override bool Overlay => true;
+    public override string? Music => Bgm.Merchant;
 
     public ShopScene(GameState gs, Action? onClose = null)
     {

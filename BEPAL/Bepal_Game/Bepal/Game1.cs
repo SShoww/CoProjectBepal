@@ -47,6 +47,7 @@ namespace Bepal
             bool auto = Has("--autoplay") || botArg != null;
             Audio.Muted = auto || Has("--shots");
             Audio.Load(Content);
+            MusicPlayer.Load(Content);
             if (int.TryParse(Arg("--seed"), out int seed)) RunSeed.Set(seed);
             _scenes.ResetNow(new MainMenuScene());
 
@@ -113,6 +114,7 @@ namespace Bepal
             Telemetry.Tick(dt);
             _scenes.Update(dt);
             Audio.EndFrame(dt);
+            MusicPlayer.Update(dt, _scenes.WantedMusic);
             base.Update(gameTime);
         }
 

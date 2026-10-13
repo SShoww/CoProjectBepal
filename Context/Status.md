@@ -9,11 +9,11 @@
 - ใช้ Gitflow ([Gitflow.md](Gitflow.md)): `Develop` รวม PR ถึง #19 แล้ว; Sprint 2 (2026-10-05 → 2026-10-18); **final deadline 2026-11-04**
 - as-built:
   - Art: parallax 5 ชั้น + `fg_jungle` + `player.png`; สัตว์/ศัตรู/หมอ/พ่อค้ารองรับ sprite จริงแล้ว (ท่อพร้อม, `Art.LoadOptional`) แต่ยังไม่มีไฟล์ภาพ จึงวาด primitive (M16/M17 ค้างที่ตัวภาพ)
-  - Audio: SFX 17 ไฟล์เสร็จ; BGM 7 ไฟล์ (ogg) อยู่ใน `BEPAL/Assets/_candidates/music/` แต่**ยังไม่เข้า Content และยังไม่มีระบบเล่นเพลง**; ฟอนต์ยังเป็น `Segoe UI` (สิทธิ์แจกจ่ายไม่ชัด — S8)
+  - Audio: SFX 17 ไฟล์เสร็จ; BGM 7 ไฟล์เข้าเกมแล้ว (`Content/Music/`, `MusicPlayer`, เลือกเพลงตาม scene) แต่ยังไม่มีเมนู Option/volume; ฟอนต์ยังเป็น `Segoe UI` (สิทธิ์แจกจ่ายไม่ชัด — S8)
   - ทำแล้ว 2026-10-13: ตัวเลข care/shop/EXP ย้ายเข้า `Balance`; Energy 0 เปิด care ไม่ได้ + Heal จางเมื่อ HP เต็ม; หน้าจบบอกว่าเป็น demo; Point cost ต่อเลเวล (Energy 1/2/4, Progress 1/2/3 max 3) + UI อธิบาย Point; ร้านเปิดหลัง Sell/Refuse, ของเข้า Box (`InventoryScene`), ไอเทมใหม่ 4 ชิ้น (เพดาน 3 ชิ้นต่อชนิด `Balance.ShopMaxOwned` — ผู้ใช้ยังไม่ได้ confirm)
 
 ## ค้าง / รอบถัดไป
-- BGM + ระบบเล่นเพลง + Option/volume; ฟอนต์ OFL; release build (`dotnet publish -c Release -r win-x64 --self-contained`)
+- เมนู Option/volume ของ BGM; ฟอนต์ OFL; release build (`dotnet publish -c Release -r win-x64 --self-contained`)
 - `validate.ps1` ฝัง path (C10) และยังไม่รู้จัก event `item_use` / ตารางราคา Point ใหม่ที่เพิ่งแก้ (ยังไม่ได้ทดสอบ); ไม่มี CI; ShotRunner ไม่มี shot GameOver/Night/PetPick
 - เก็บ telemetry คนจริงเพิ่ม (ปัจจุบัน 8 runs ก่อนแก้ข้อ 3/5/6; เป้า 15–20) เพื่อดูว่าซื้อ Energy/ใช้ของมากขึ้นไหม; `sprint-plan-02.md` ยังไม่มี
 - ท่า attack/hurt/happy ของ sprite ยังไม่ต่อโค้ด; ยังไม่ได้ดู popup "No energy", dialogue Sell→ร้าน, hint Point แรก ด้วยตา

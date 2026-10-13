@@ -95,6 +95,9 @@ public class BaseScene : Scene
 
     public GameState State => _gs;
 
+    /// <summary>Cozy by default; the Day 4 storm theme once the red door has been opened.</summary>
+    public override string? Music => _gs.Day == 4 && _gs.DoorDone ? Bgm.Storm : Bgm.Base;
+
     PetActor Actor(Pet p)
     {
         if (!_actors.TryGetValue(p, out var a))

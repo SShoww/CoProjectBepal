@@ -13,6 +13,8 @@ namespace Bepal;
 /// </summary>
 public class FightScene : Scene
 {
+    public override string? Music => _enemy.IsBoss ? Bgm.Boss : Bgm.Fight;
+
     readonly GameState _gs;
     readonly Enemy _enemy;
     readonly Action<bool> _onEnd;
