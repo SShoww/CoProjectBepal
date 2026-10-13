@@ -34,7 +34,7 @@ There is no unit-test project. Verification = build, then `--autoplay` (look for
 
 Folders under `BEPAL/Bepal_Game/Bepal/` (namespace `Bepal` everywhere, no sub-namespaces):
 
-- `Core/` — `Gfx`, `Input`, `SceneManager` (+ abstract `Scene`), `Ui` (`Palette`, `Button`, `Ui` helpers), `Audio` (`Sfx` names, `Audio.Play/Loop/EndFrame/Muted`; 17 WAV in `Content/Sfx/` registered in `Content.mgcb`; `Typewriter` and `QtePerfect` are synthesized at runtime; `--autoplay`/`--shots` mute audio), `Ease` (`Ease`, `Smoothed`)
+- `Core/` — `Gfx`, `Input`, `SceneManager` (+ abstract `Scene`), `Ui` (`Palette`, `Button`, `Ui` helpers), `MusicPlayer` (+ `Bgm` names; BGM `Content/Music/*.ogg` as `Song`, loops with a fade; the scene stack picks the track via `Scene.Music` / `Scene.MusicOverride` — topmost non-null wins, null = keep the one below; see `SceneManager.WantedMusic`), `Audio` (`Sfx` names, `Audio.Play/Loop/EndFrame/Muted`; 17 WAV in `Content/Sfx/` registered in `Content.mgcb`; `Typewriter` and `QtePerfect` are synthesized at runtime; `--autoplay`/`--shots` mute audio), `Ease` (`Ease`, `Smoothed`)
 - `Model/` — `GameState` + `Balance`, `Pet` (+ `Species`, `Enemy`)
 - `Scenes/` — `MenuScenes` (MainMenu, ChooseStarter, GameOver, ToBeContinued, Night), `BaseScene`, `BaseMenus` (Upgrade, Doctor, Notebook, Shop), `CareScenes` (CareSelect, Qte), `FightScene`, `DialogScenes` (Dialogue, Choice, PetPick), `DayEvents`, `Wheel`
 - `World/` — `Art` (procedural characters/merchant/enemies + `Art.PlayerSprite`), `Backdrop` (5-layer sprite parallax + jungle foreground), `Rain` (Day 4 rain/lightning), `SpriteMotion` (procedural animation for the single player sprite)

@@ -70,12 +70,12 @@ public static class DayEvents
     {
         var target = gs.Pets.FirstOrDefault(p => p.Species == Species.Toothless && !p.Dead) ?? gs.Alive.FirstOrDefault() ?? gs.Pets[0];
         var portrait = Portrait((sb, t) => Art.Merchant(sb, new Vector2(Gfx.W / 2f, 490), t));
-        m.Push(new DialogueScene(new[]
+        m.Push(WithBgm(Bgm.Merchant, new DialogueScene(new[]
         {
             new Line("", "A tall figure in a wide hat waits outside, a cart of glass bottles and cages behind him."),
             new Line("Merchant", $"I'm quite interested in your {target.Name}... can you give it to me?"),
             new Line("Merchant", $"I'll pay {Balance.MerchantOffer:N0} coin. More than this little shelter earns in a lifetime."),
-        }, () => m.Push(new ChoiceScene($"Sell {target.Name} for {Balance.MerchantOffer:N0} coin?", new[]
+        }, () => m.Push(WithBgm(Bgm.Merchant, new ChoiceScene($"Sell {target.Name} for {Balance.MerchantOffer:N0} coin?", new[]
         {
             new Option("Sell", () =>
             {
@@ -84,17 +84,17 @@ public static class DayEvents
                 Telemetry.Emit("pet_removed", "pet", target.Name, "via", "merchant_sale");
                 gs.AddCoin(Balance.MerchantOffer, "merchant_sale");
                 Audio.Play(Sfx.UiCoin);
-                m.Push(DialogueScene.Say("Merchant", () => m.Push(new ShopScene(gs, onClose: () =>
+                m.Push(WithBgm(Bgm.Merchant, DialogueScene.Say("Merchant", () => m.Push(new ShopScene(gs, onClose: () =>
                         m.Push(DialogueScene.Say("", null, $"The cart rolls away. You can still hear {target.Name} crying long after it's gone.")))),
-                    "A pleasure doing business. It'll be... well looked after.", "Now, with all that coin... care to spend some of it? My cart is still open."));
+                    "A pleasure doing business. It'll be... well looked after.", "Now, with all that coin... care to spend some of it? My cart is still open.")));
             }, gs.Pets.Count > 1),
             new Option("Refuse", () =>
             {
                 Telemetry.DoorEvent("merchant", "refuse");
-                m.Push(DialogueScene.Say("Merchant", () => m.Push(new ShopScene(gs)),
-                    "Hmph. Sentimental. Suit yourself.", "Then perhaps you'd like to buy something instead?"));
+                m.Push(WithBgm(Bgm.Merchant, DialogueScene.Say("Merchant", () => m.Push(new ShopScene(gs)),
+                    "Hmph. Sentimental. Suit yourself.", "Then perhaps you'd like to buy something instead?")));
             }),
-        })), portrait));
+        }))), portrait)));
     }
 
     // ---------- Day 4 ----------
@@ -122,7 +122,7 @@ public static class DayEvents
     {
         var portrait = Portrait((sb, t) => Art.Enemy(sb, Enemy.BigZ(), new Vector2(Gfx.W / 2f, 520), t, Input.Mouse.ToVector2(), 0));
         void End() => m.Reset(new ToBeContinuedScene(gs.Day));
-        m.Push(new DialogueScene(new[]
+        m.Push(WithBgm(Bgm.Boss, new DialogueScene(new[]
         {
             new Line("", "KNOCK. KNOCK. The whole door bends inward."),
             new Line("Big Z", "So THIS is where the little strays hide."),
@@ -135,12 +135,19 @@ public static class DayEvents
                 m.Push(DialogueScene.Say("", End, "There is no one left to stand against Big Z."));
                 return;
             }
-            m.Push(new PetPickScene("Choose your pet", gs.Alive, pet =>
+            m.Push(WithBgm(Bgm.Boss, new PetPickScene("Choose your pet", gs.Alive, pet =>
             {
                 Telemetry.DoorEvent("bigz", "fight");
                 m.Push(new FightScene(gs, Enemy.BigZ(), pet, _ =>
-                    m.Push(DialogueScene.Say("Big Z", End, "Pathetic. Keep your shelter warm for me, keeper."))));
-            }));
-        }, portrait));
+                    m.Push(WithBgm(Bgm.Boss, DialogueScene.Say("Big Z", End, "Pathetic. Keep your shelter warm for me, keeper.")))));
+            })));
+        }, portrait)));
+    }
+
+    /// <summary>Gives <paramref name="s"/> its own background music for the length of the scene.</summary>
+    static T WithBgm<T>(string track, T s) where T : Scene
+    {
+        s.MusicOverride = track;
+        return s;
     }
 }

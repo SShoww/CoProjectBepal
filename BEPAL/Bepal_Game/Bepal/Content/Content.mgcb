@@ -220,3 +220,45 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Sprites/player.png
+
+#begin Music/bgm_menu.ogg
+/importer:OggImporter
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Music/bgm_menu.ogg
+
+#begin Music/bgm_base_cozy.ogg
+/importer:OggImporter
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Music/bgm_base_cozy.ogg
+
+#begin Music/bgm_fight.ogg
+/importer:OggImporter
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Music/bgm_fight.ogg
+
+#begin Music/bgm_boss_bigz.ogg
+/importer:OggImporter
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Music/bgm_boss_bigz.ogg
+
+#begin Music/bgm_merchant.ogg
+/importer:OggImporter
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Music/bgm_merchant.ogg
+
+#begin Music/bgm_thunderstorm.ogg
+/importer:OggImporter
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Music/bgm_thunderstorm.ogg
+
+#begin Music/bgm_to_be_continued.ogg
+/importer:OggImporter
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Music/bgm_to_be_continued.ogg

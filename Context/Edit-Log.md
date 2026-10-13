@@ -3,6 +3,9 @@
 ล่าสุด 10 งาน งานละ 3 บรรทัด เขียนผ่าน `tools/context/log-edit.py` เท่านั้น — รายการเก่าอยู่ที่ [archive/edit-log/](archive/edit-log/)
 
 <!-- entries -->
+- **2026-10-13 19:21 · Q-20261013-bgm** — เชื่อม BGM 7 ไฟล์ผ่าน MusicPlayer: เลือกเพลงตาม Scene.Music, loop + fade, เงียบใน autoplay/shots
+  - Files: BEPAL/Bepal_Game/Bepal/Core/MusicPlayer.cs, Core/SceneManager.cs, Game1.cs, Scenes/*, Content/Content.mgcb, Content/Music/, docs
+  - Validation: build 0 warn; รันจริงเห็น state=Playing; ลำดับเพลงจาก autoplay ถูกต้อง; ยังไม่ได้ฟังด้วยหู
 - **2026-10-13 19:07 · Q-20261013-context-housekeeping** — ผู้ใช้สั่งปิด Q-20261013 ทั้ง 7 ย้ายไป archive/quests และอัปเดต Status.md ให้ตรง Develop @ a05b7be
   - Files: Context/archive/quests/, Context/Status.md
   - Validation: ตรวจ path ต้นทาง/ปลายทาง (Context/quests -> Context/archive/quests) ไม่มีไฟล์ชน; แก้เอกสารล้วน ไม่ได้รัน build
@@ -30,6 +33,3 @@
 - **2026-10-12 19:54 · Q-20261012-telemetry-restart** — C9: Telemetry.RunStart รองรับเริ่มเกมใหม่ในเซสชันเดียว (ปิด run เก่าด้วย quit, reset state, ไฟล์ใหม่ต่อเกม) เพื่อแก้บั๊ก day/summary ผิดแบบ Boom_121
   - Files: BEPAL/Bepal_Game/Bepal/Core/Telemetry.cs, BEPAL/Docs/Balance/telemetry-spec.md, BEPAL/Docs/Balance/balance-report.md
   - Validation: build 0/0; --autoplay และ --refuse reached To be continued; harness ชั่วคราวผ่าน; ยังไม่ได้ทดสอบกด Main Menu ใน GUI จริง
-- **2026-10-10 00:23 · Q-20261009-run-telemetry** — Run telemetry: per-run JSONL + bot profiles + balance report (round 1); round 2: --player, Gregorian run ids, build hash baked into exe, telemetry.txt auto-enable for tester exe, Aggregate players.md, Energy clamped to MaxEnergy (Tonic disabled at full Energy)
-  - Files: BEPAL/Bepal_Game/Bepal/{Core/Telemetry.cs, Game1.cs, Bepal.csproj, Model/GameState.cs, Scenes/BaseMenus.cs, DevTools/AutoPlay.cs}, BEPAL/Docs/Balance/{telemetry-spec.md, tools/Aggregate/Program.cs}, BEPAL/Docs/GDD/{06-vertical-slice, 10-economy-items}.md, CLAUDE.md, Context/quests/Q-20261009-run-telemetry.md
-  - Validation: build slnx 0/0; --autoplay and --autoplay --refuse reach To be continued; --shots 23 PNG; 200-run batch + validate.ps1 0 fail (round 1); 20 human-bot runs 0 energy over max; published exe + telemetry.txt writes data/*.jsonl with build hash

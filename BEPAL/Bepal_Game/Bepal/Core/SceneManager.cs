@@ -12,6 +12,11 @@ public abstract class Scene
     /// <summary>Overlays are drawn on top of the scene below them (which keeps drawing but stops updating).</summary>
     public virtual bool Overlay => false;
 
+    /// <summary>Set to give this scene its own background music (a <see cref="Bgm"/> name).</summary>
+    public string? MusicOverride;
+    /// <summary>BGM wanted while this scene is on the stack: <see cref="Music"/> plays the topmost scene's non-null track; null = keep whatever is underneath.</summary>
+    public virtual string? Music => MusicOverride;
+
     /// <summary>Seconds since this scene was pushed (only counts while it is on top); drives the open animation.</summary>
     public float Age;
 
@@ -33,6 +38,17 @@ public class SceneManager
     int _fadeDir;         // 1 = fading out, -1 = fading in
 
     public Scene? Top => _stack.Count > 0 ? _stack[^1] : null;
+
+    /// <summary>Background music wanted right now: the first non-null <see cref="Scene.Music"/> from the top of the stack.</summary>
+    public string? WantedMusic
+    {
+        get
+        {
+            for (int i = _stack.Count - 1; i >= 0; i--)
+                if (_stack[i].Music is { } m) return m;
+            return null;
+        }
+    }
 
     public void Push(Scene s)
     {

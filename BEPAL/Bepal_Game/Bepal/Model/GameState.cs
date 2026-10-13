@@ -18,6 +18,9 @@ public static class Balance
     /// <summary>Volume of the QTE Perfect chime, 0..1.</summary>
     public const float PerfectVolume = 0.8f;
 
+    /// <summary>Background music: master level 0..1 and the fade out/in time (s) when the track changes.</summary>
+    public const float MusicVolume = 0.5f, MusicFadeTime = 0.8f;
+
     // ---- Movement feel (presentation only; no gameplay impact) ----
     public const float PlayerMaxSpeed = 330, PlayerAccel = 2200, PlayerDecel = 2800, PlayerTurnAccel = 4500;
     /// <summary>Below this speed (px/s) the footstep loop stays silent.</summary>
