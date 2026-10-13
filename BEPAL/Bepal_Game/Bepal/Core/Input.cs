@@ -37,6 +37,8 @@ public static class Input
     public static bool Down(Keys key) => _k.IsKeyDown(key);
     public static bool Pressed(Keys key) => _k.IsKeyDown(key) && !_pk.IsKeyDown(key);
     public static Point Mouse => _m.Position;
+    /// <summary>Left button is down (for dragging sliders); <see cref="Click"/> is the press edge.</summary>
+    public static bool MouseHeld => _m.LeftButton == ButtonState.Pressed;
     public static bool Click => _m.LeftButton == ButtonState.Pressed && _pm.LeftButton == ButtonState.Released;
 
     public static bool Confirm => Pressed(Keys.Space) || Pressed(Keys.Enter);

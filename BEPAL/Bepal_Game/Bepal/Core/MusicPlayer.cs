@@ -60,7 +60,7 @@ public static class MusicPlayer
                     else MediaPlayer.Stop();
                 }
             }
-            MediaPlayer.Volume = _level * Balance.MusicVolume;
+            MediaPlayer.Volume = _level * Balance.MusicVolume * Settings.Music;
         }
         catch (Exception e)
         {

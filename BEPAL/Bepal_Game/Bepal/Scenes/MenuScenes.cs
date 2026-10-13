@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 namespace Bepal;
 
@@ -9,7 +10,8 @@ namespace Bepal;
 public class MainMenuScene : Scene
 {
     readonly Button _play = new(new Rectangle(Gfx.W / 2 - 120, 380, 240, 56), "Play");
-    readonly Button _quit = new(new Rectangle(Gfx.W / 2 - 120, 450, 240, 56), "Quit");
+    readonly Button _options = new(new Rectangle(Gfx.W / 2 - 120, 450, 240, 56), "Options");
+    readonly Button _quit = new(new Rectangle(Gfx.W / 2 - 120, 520, 240, 56), "Quit");
     float _time;
 
     public override string? Music => Bgm.Menu;
@@ -18,6 +20,7 @@ public class MainMenuScene : Scene
     {
         _time += dt;
         if (_play.Update() || Input.Confirm) M.Reset(new ChooseStarterScene());
+        else if (_options.Update()) M.Push(new OptionsScene());
         else if (_quit.Update()) Game1.Instance.Exit();
     }
 
@@ -31,6 +34,7 @@ public class MainMenuScene : Scene
         Art.Pet(sb, Species.Blinkbun, Pet.Create(Species.Blinkbun).Color, new Vector2(200, 640), 1f, _time, new Vector2(640, 300));
         Art.Pet(sb, Species.Mossling, Pet.Create(Species.Mossling).Color, new Vector2(1080, 640), 1f, _time + 1, new Vector2(640, 300));
         _play.Draw(sb);
+        _options.Draw(sb);
         _quit.Draw(sb);
         if (MathF.Sin(_time * 4) > -0.3f)
             Gfx.Text(sb, Gfx.Font, "[ Space ] to Enter", new Vector2(Gfx.W / 2f, 612), Palette.Text, 0.5f);
@@ -180,5 +184,72 @@ public class NightScene : Scene
         if (_t > 0.8f && _t < 3.6f)
             Gfx.Text(sb, Gfx.Big, _advanced ? $"Day {_base.State.Day}" : $"Day {_base.State.Day} is over...",
                 new Vector2(Gfx.W / 2f, 280), Palette.Text * MathHelper.Clamp(a * 1.5f, 0, 1), 0.5f);
+    }
+}
+
+/// <summary>Options (from the main menu and the pause menu): music and sound-effect volume, saved when closed.</summary>
+public class OptionsScene : Scene
+{
+    readonly Slider[] _sliders;
+    readonly Button _back = new(new Rectangle(Gfx.W / 2 - 100, 470, 200, 50), "Back");
+    readonly Action? _onClose;
+    int _sel;
+
+    public override bool Overlay => true;
+
+    public OptionsScene(Action? onClose = null)
+    {
+        _onClose = onClose;
+        _sliders = new[]
+        {
+            new Slider(new Rectangle(560, 270, 360, 12), Settings.Music),
+            new Slider(new Rectangle(560, 350, 360, 12), Settings.Sfx),
+        };
+    }
+
+    void Close()
+    {
+        Settings.Music = _sliders[0].Value;
+        Settings.Sfx = _sliders[1].Value;
+        Settings.Save();
+        M.Remove(this);
+        _onClose?.Invoke();
+    }
+
+    public override void Update(float dt)
+    {
+        if (Input.Pressed(Keys.Up) || Input.Pressed(Keys.W)) _sel = 0;
+        if (Input.Pressed(Keys.Down) || Input.Pressed(Keys.S)) _sel = 1;
+        float nudge = (Input.Pressed(Keys.Right) || Input.Pressed(Keys.D) ? 1 : 0) - (Input.Pressed(Keys.Left) || Input.Pressed(Keys.A) ? 1 : 0);
+        if (nudge != 0) _sliders[_sel].Nudge(nudge * Balance.OptionsStep);
+
+        for (int i = 0; i < _sliders.Length; i++)
+        {
+            _sliders[i].Update();
+            if (_sliders[i].Changed || _sliders[i].Released) _sel = i;
+        }
+        // Apply live so the music reacts while dragging; the SFX slider plays a click on release so you can hear the level
+        Settings.Music = _sliders[0].Value;
+        Settings.Sfx = _sliders[1].Value;
+        if (_sliders[1].Released) Audio.Play(Sfx.UiCoin);
+        if (_back.Update() || Input.Back || Input.Confirm) Close();
+    }
+
+    public override void Draw(SpriteBatch sb)
+    {
+        Ui.Dim(sb, 0.7f);
+        var panel = new Rectangle(Gfx.W / 2 - 360, 150, 720, 400);
+        Ui.Panel(sb, panel);
+        Gfx.Text(sb, Gfx.Big, "Options", new Vector2(Gfx.W / 2f, panel.Y + 10), Palette.Warm, 0.5f);
+        string[] names = { "Music", "Sound effects" };
+        for (int i = 0; i < _sliders.Length; i++)
+        {
+            var s = _sliders[i];
+            Gfx.Text(sb, Gfx.Font, names[i], new Vector2(panel.X + 50, s.Rect.Center.Y - 14), i == _sel ? Palette.Text : Palette.Dim);
+            s.Draw(sb, i == _sel);
+            Gfx.Text(sb, Gfx.Font, $"{(int)MathF.Round(s.Value * 100)}%", new Vector2(panel.Right - 50, s.Rect.Center.Y - 14), Palette.Coin, 1f);
+        }
+        _back.Draw(sb);
+        Ui.Hint(sb, "Drag or click a slider   |   W/S  Select   A/D  Adjust   |   ESC  Back");
     }
 }

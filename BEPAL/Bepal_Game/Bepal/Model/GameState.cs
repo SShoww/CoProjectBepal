@@ -20,6 +20,8 @@ public static class Balance
 
     /// <summary>Background music: master level 0..1 and the fade out/in time (s) when the track changes.</summary>
     public const float MusicVolume = 0.5f, MusicFadeTime = 0.8f;
+    /// <summary>Options menu: volume change per Left/Right key press.</summary>
+    public const float OptionsStep = 0.05f;
 
     // ---- Movement feel (presentation only; no gameplay impact) ----
     public const float PlayerMaxSpeed = 330, PlayerAccel = 2200, PlayerDecel = 2800, PlayerTurnAccel = 4500;
