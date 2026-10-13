@@ -63,6 +63,13 @@ public static class Balance
 
     public const int HpPerLevel = 10;
     public const int AtkPerLevel = 5;
+    /// <summary>Clean at or below this lowers Max HP (x CleanLowHpMul) / ATK (x CleanLowAtkMul) — GDD 06 §3.5.</summary>
+    public const int CleanLowHpThreshold = 25, CleanLowAtkThreshold = 50;
+    public const float CleanLowHpMul = 0.8f, CleanLowAtkMul = 0.75f;
+    /// <summary>Train progress needed per level: MaxProgress = ProgressBase + (Level - 1) * ProgressPerLevel.</summary>
+    public const int ProgressBase = 100, ProgressPerLevel = 50;
+    /// <summary>Toothless joins the team at this Hp (below its Max Hp).</summary>
+    public const int ToothlessStartHp = 60;
 
     public const int Attempts = 10;
 

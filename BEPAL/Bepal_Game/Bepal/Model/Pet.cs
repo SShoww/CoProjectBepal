@@ -27,9 +27,9 @@ public class Pet
     public bool Has(Species s) => Species == s && PassiveUnlocked;
 
     // GDD 06 §3.5: Clean <= 25 lowers Max HP, Clean <= 50 lowers ATK.
-    public int MaxHp => (int)((BaseMaxHp + (Level - 1) * Balance.HpPerLevel) * (Clean <= 25 ? 0.8f : 1f));
-    public int Atk => (int)MathF.Round((BaseAtk + (Level - 1) * Balance.AtkPerLevel) * (Clean <= 50 ? 0.75f : 1f));
-    public int MaxProgress => 100 + (Level - 1) * 50;
+    public int MaxHp => (int)((BaseMaxHp + (Level - 1) * Balance.HpPerLevel) * (Clean <= Balance.CleanLowHpThreshold ? Balance.CleanLowHpMul : 1f));
+    public int Atk => (int)MathF.Round((BaseAtk + (Level - 1) * Balance.AtkPerLevel) * (Clean <= Balance.CleanLowAtkThreshold ? Balance.CleanLowAtkMul : 1f));
+    public int MaxProgress => Balance.ProgressBase + (Level - 1) * Balance.ProgressPerLevel;
     public bool Dead => Hp <= 0;
     public int HpShown => (int)MathF.Ceiling(Math.Max(0, Hp));
 
@@ -82,7 +82,7 @@ public class Pet
         _ => new Pet
         {
             Species = s, Name = "Toothless", Element = "Acid", Color = new Color(52, 46, 64),
-            BaseMaxHp = 120, BaseAtk = 15, Hp = 60, Stomach = 60, Clean = 60,
+            BaseMaxHp = 120, BaseAtk = 15, Hp = Balance.ToothlessStartHp, Stomach = 60, Clean = 60,
             Description = "A slick black reptile with no teeth and a throat sac full of purple acid. Tamed... mostly.",
             Passive = "Every attack poisons the enemy: it takes more damage and hits weaker. Does not stack.",
         },
