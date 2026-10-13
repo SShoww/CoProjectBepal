@@ -84,8 +84,9 @@ public static class DayEvents
                 Telemetry.Emit("pet_removed", "pet", target.Name, "via", "merchant_sale");
                 gs.AddCoin(Balance.MerchantOffer, "merchant_sale");
                 Audio.Play(Sfx.UiCoin);
-                m.Push(DialogueScene.Say("Merchant", null, "A pleasure doing business. It'll be... well looked after.",
-                    $"The cart rolls away. You can still hear {target.Name} crying long after it's gone."));
+                m.Push(DialogueScene.Say("Merchant", () => m.Push(new ShopScene(gs, onClose: () =>
+                        m.Push(DialogueScene.Say("", null, $"The cart rolls away. You can still hear {target.Name} crying long after it's gone.")))),
+                    "A pleasure doing business. It'll be... well looked after.", "Now, with all that coin... care to spend some of it? My cart is still open."));
             }, gs.Pets.Count > 1),
             new Option("Refuse", () =>
             {

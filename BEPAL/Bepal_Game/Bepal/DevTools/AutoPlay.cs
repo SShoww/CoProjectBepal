@@ -195,6 +195,14 @@ public class AutoPlay
                     _cooldown = 3;
                 }
                 break;
+            case InventoryScene inv:
+                {
+                    int use = Array.FindIndex(Items.All, it => WantItem(inv.State, it.Item));
+                    if (use >= 0) _click = InventoryScene.UseRect(use).Center;
+                    else keys.Add(Keys.Escape);
+                    _cooldown = 4;
+                    break;
+                }
             case DoctorScene d:
                 if ((Profile == "upgrade-first" || Human) && d.State.Coin >= Balance.ReviveCost && d.State.Pets.Any(p => p.Dead))
                     _click = DoctorScene.Card(0, d.State.Pets.Count(p => p.Dead)).Center;
@@ -271,23 +279,32 @@ public class AutoPlay
         return -1;
     }
 
-    /// <summary>Buy each shop item once per visit if affordable (Sea Tea, Tonic, Apple). Returns true if it clicked.</summary>
+    /// <summary>Buy each shop item once per visit if affordable (Sea Tea, Tonic, Apple first, then the rest). Returns true if it clicked.</summary>
     bool ShopBrain(GameState gs)
     {
-        int[] price = { 25, 40, 18 };   // Crab Apple, Caffeine Tonic, Sea Tea (ShopScene.Items)
-        foreach (int i in new[] { 2, 1, 0 })
+        foreach (int i in new[] { 2, 1, 0, 3, 4, 5, 6 })
         {
-            if ((_shopMask & (1 << i)) != 0 || gs.Coin < price[i]) continue;
+            var it = Items.All[i];
+            if ((_shopMask & (1 << i)) != 0 || gs.Coin < it.Price || gs.Owned(it.Item) >= Balance.ShopMaxOwned) continue;
             if (i == 0 && !gs.Alive.Any()) continue;
-            if (i == 2 && gs.SeaTea) continue;
-            if (i == 1 && gs.Energy >= gs.MaxEnergy) continue;   // Tonic is disabled at full Energy
             _shopMask |= 1 << i;
-            if (Human && _prm.NextDouble() >= _shopP[i]) continue;
+            if (Human && i < _shopP.Length && _prm.NextDouble() >= _shopP[i]) continue;
             _click = ShopScene.BuyRect(i).Center;
             return true;
         }
         return false;
     }
+
+    /// <summary>Would the bot use this item right now? Shared by the base brain (walk to the box) and the inventory screen.</summary>
+    static bool WantItem(GameState gs, Item item) =>
+        gs.Owned(item) > 0 && Items.UseBlock(gs, item) == null && item switch
+        {
+            Item.CaffeineTonic => gs.Energy == 0,
+            Item.CrabApple => gs.Alive.Any(p => p.Stomach < 50 || p.Hp < p.MaxHp * 0.6f),
+            _ => true,
+        };
+
+    static bool BoxWanted(GameState gs) => Enum.GetValues<Item>().Any(i => WantItem(gs, i));
 
     void BaseBrain(BaseScene b, List<Keys> keys)
     {
@@ -314,6 +331,7 @@ public class AutoPlay
             if (b.Near?.Kind == want) _doctorVisited.Add(gs.Day);
         }
         else if (upg && UpgradePick(gs) >= 0) (target, want) = (BaseScene.UpgradeX, BaseScene.Kind.Upgrade);
+        else if ((upg || Profile == "upgrade-first") && BoxWanted(gs)) (target, want) = (BaseScene.BoxX, BaseScene.Kind.Box);
         else if (gs.Energy > 0 && pet != null) (target, want) = (b.PetX(pet), BaseScene.Kind.Pet);
         else if (gs.Pets.Any(p => p.Dead) && !_doctorVisited.Contains(gs.Day))
         {

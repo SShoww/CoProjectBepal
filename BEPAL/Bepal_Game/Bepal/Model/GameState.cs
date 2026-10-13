@@ -164,6 +164,15 @@ public static class Balance
     public const int CrabApplePrice = 25, CrabAppleHp = 18, CrabAppleStomach = 20;
     public const int TonicPrice = 40, TonicEnergy = 2;
     public const int SeaTeaPrice = 18;
+    public const int GlassesPrice = 30, GlassesShield = 2;
+    public const int BalletPrice = 50, BalletStomachExtra = 5;
+    public const float BalletPerfectBonus = 0.15f;
+    public const int NotebookPrice = 55;
+    public const float NotebookTrainBonus = 0.5f;
+    public const int RibbonPrice = 35;
+    public const float RibbonCleanDecayCut = 0.3f;
+    /// <summary>Most of one item you can hold in the box (stops hoarding Tonics with the 5000 coin).</summary>
+    public const int ShopMaxOwned = 3;
 
     // Upgrade costs
     /// <summary>Coin per level and max level of each upgrade. Point cost depends on the level being bought (see <see cref="PointCost"/>).</summary>
@@ -198,12 +207,21 @@ public class GameState
     public bool DoorDone;
     public bool DisasterSeen;
     public bool SeaTea;
+    /// <summary>Cloudy Glasses: hits the next fight will block.</summary>
+    public int GlassesShield;
+    /// <summary>Day buffs from items; they run out when the day is processed (<see cref="AdvanceDay"/>).</summary>
+    public bool BalletActive, NotebookActive, RibbonActive;
+    public readonly Dictionary<Item, int> Inventory = new();
+
+    public int Owned(Item i) => Inventory.TryGetValue(i, out var n) ? n : 0;
+    public void AddItem(Item i) => Inventory[i] = Owned(i) + 1;
+    public void TakeItem(Item i) => Inventory[i] = Math.Max(0, Owned(i) - 1);
     /// <summary>The "spend your point at the Upgrade station" hint was already shown.</summary>
     public bool PointHintShown;
 
     public int MaxEnergy => Math.Min(Balance.BaseEnergy + EnergyUpgrade, Balance.MaxEnergyCap);
     public int PlayerMaxExp => Balance.PlayerExpBase + (PlayerLevel - 1) * Balance.PlayerExpPerLevel;
-    public float TrainGainMultiplier => 1f + Balance.TrainGainPerUpgrade * ProgressUpgrade;   // +10 -> +15
+    public float TrainGainMultiplier => 1f + Balance.TrainGainPerUpgrade * ProgressUpgrade + (NotebookActive ? Balance.NotebookTrainBonus : 0f);   // +10 -> +15
     public float QteZoneMultiplier => 1f + Balance.QteZonePerUpgrade * QteUpgrade;
 
     public IEnumerable<Pet> Alive => Pets.Where(p => !p.Dead);
@@ -275,15 +293,18 @@ public class GameState
         AddEnergy(MaxEnergy - Energy, "daily_restore");
         DoorDone = false;
 
+        int stomachDecay = Balance.DailyStomachDecay + (BalletActive ? Balance.BalletStomachExtra : 0);
+        float cleanDecay = Balance.DailyCleanDecay * (RibbonActive ? 1f - Balance.RibbonCleanDecayCut : 1f);
         foreach (var p in Pets.Where(p => !p.Dead))
         {
-            p.Stomach -= Balance.DailyStomachDecay;
-            p.Clean -= Balance.DailyCleanDecay;
+            p.Stomach -= stomachDecay;
+            p.Clean -= cleanDecay;
             p.ClampStats();
         }
+        BalletActive = NotebookActive = RibbonActive = false;
 
         report.Insert(0, $"Day {Day}. +{Balance.DailyCoin} coin, energy restored.");
-        report.Add($"Every pet got hungrier (Stomach -{Balance.DailyStomachDecay}) and dirtier (Clean -{Balance.DailyCleanDecay}).");
+        report.Add($"Every pet got hungrier (Stomach -{stomachDecay}) and dirtier (Clean -{cleanDecay:0.#}).");
         if (DoorEventPending) report.Add("...something is knocking at the red door.");
         return report;
     }

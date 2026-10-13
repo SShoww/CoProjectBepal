@@ -31,7 +31,7 @@ public class BaseScene : Scene
             if (x + 8 > WindowX(i) - WindowW / 2 && x < WindowX(i) + WindowW / 2) return true;
         return false;
     }
-    public const float BedX = 300, UpgradeX = 900, HearthX = 1900, DoctorX = 2650, BookX = 3100, DoorX = 3640;
+    public const float BedX = 300, BoxX = 600, UpgradeX = 900, HearthX = 1900, DoctorX = 2650, BookX = 3100, DoorX = 3640;
 
     readonly GameState _gs;
     float _playerX = HearthX - 150;
@@ -67,7 +67,7 @@ public class BaseScene : Scene
     readonly Dictionary<Pet, PetActor> _actors = new();
     readonly Random _rng = RunSeed.Make(2);
 
-    public enum Kind { Bed, Upgrade, Doctor, Book, Door, Pet }
+    public enum Kind { Bed, Box, Upgrade, Doctor, Book, Door, Pet }
 
     public record Spot(Kind Kind, float X, string Label, Pet? Pet = null);
 
@@ -110,6 +110,7 @@ public class BaseScene : Scene
     IEnumerable<Spot> Spots()
     {
         yield return new Spot(Kind.Bed, BedX, "Sleep (End day)");
+        yield return new Spot(Kind.Box, BoxX, "Box (items)");
         yield return new Spot(Kind.Upgrade, UpgradeX, "Upgrade");
         yield return new Spot(Kind.Doctor, DoctorX, "Doctor");
         yield return new Spot(Kind.Book, BookX, "Notebook");
@@ -279,6 +280,9 @@ public class BaseScene : Scene
                         new Option("Sleep", () => M.Push(new NightScene(this))),
                         new Option("Not yet", () => { }),
                     }, cancellable: true));
+                break;
+            case Kind.Box:
+                M.Push(new InventoryScene(_gs));
                 break;
             case Kind.Upgrade:
                 M.Push(new UpgradeScene(_gs));
@@ -480,6 +484,12 @@ public class BaseScene : Scene
         Gfx.Rect(sb, bx - 90, g - 50, 180, 50, new Color(120, 80, 60));
         Gfx.Rect(sb, bx - 90, g - 70, 180, 26, new Color(200, 170, 150));
         Gfx.Rect(sb, bx - 90, g - 90, 50, 40, new Color(236, 220, 200));
+        // Box (items from the merchant); the dot shows there is something inside
+        float kx = Sx(BoxX);
+        Gfx.Rect(sb, kx - 45, g - 60, 90, 60, new Color(130, 92, 60));
+        Gfx.Rect(sb, kx - 45, g - 60, 90, 12, new Color(160, 118, 80));
+        Gfx.Rect(sb, kx - 8, g - 48, 16, 10, new Color(220, 190, 110));
+        if (_gs.Inventory.Values.Any(n => n > 0)) Gfx.Circle(sb, new Vector2(kx + 45, g - 62), 8, Palette.Coin);
         // Upgrade console
         float ux = Sx(UpgradeX);
         Gfx.Rect(sb, ux - 50, g - 150, 100, 150, new Color(60, 70, 84));

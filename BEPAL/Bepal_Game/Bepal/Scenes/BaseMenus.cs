@@ -260,92 +260,149 @@ public class NotebookScene : Scene
     }
 }
 
-/// <summary>Day 3 merchant shop (only after refusing to sell). Items take effect on purchase.</summary>
+/// <summary>Item card shared by the shop and the inventory.</summary>
+static class ItemCards
+{
+    public static void Draw(SpriteBatch sb, ItemInfo it, Rectangle card, int owned)
+    {
+        Ui.Panel(sb, card);
+        Gfx.Circle(sb, new Vector2(card.Center.X, card.Y + 42), 26, it.Color);
+        Gfx.Circle(sb, new Vector2(card.Center.X - 8, card.Y + 33), 7, Color.White * 0.4f);
+        Gfx.Text(sb, Gfx.Font, it.Name, new Vector2(card.Center.X, card.Y + 78), Palette.Text, 0.5f);
+        Gfx.Text(sb, Gfx.Small, Gfx.Wrap(Gfx.Small, it.Desc, card.Width - 40), new Vector2(card.Center.X, card.Y + 108), Palette.Dim, 0.5f);
+        if (owned > 0) Gfx.Text(sb, Gfx.Small, $"x{owned}", new Vector2(card.Right - 14, card.Y + 10), Palette.Coin, 1f);
+    }
+}
+
+/// <summary>Day 3 merchant shop (after Sell or Refuse). Items go into the box in the base; use them later from there.</summary>
 public class ShopScene : Scene
 {
     readonly GameState _gs;
-    readonly Button[] _buy = new Button[3];
-    readonly Button _leave = new(new Rectangle(Gfx.W / 2 - 100, 600, 200, 50), "Leave");
+    readonly Button[] _buy = new Button[Items.Count];
+    readonly Button _leave = new(new Rectangle(Gfx.W / 2 - 100, 650, 200, 46), "Leave");
+    readonly Action? _onClose;
     public GameState State => _gs;
     readonly Popups _popups = new();
     float _time;
 
     public override bool Overlay => true;
 
-    record Item(string Name, int Price, string Desc, Color Color);
-
-    static readonly Item[] Items =
-    {
-        new("Crab Apple", Balance.CrabApplePrice, $"One pet: +{Balance.CrabAppleHp} HP, +{Balance.CrabAppleStomach} Stomach", new Color(220, 70, 60)),
-        new("Caffeine Tonic", Balance.TonicPrice, $"+{Balance.TonicEnergy} Energy today (up to max)", new Color(230, 160, 60)),
-        new("Sea Tea", Balance.SeaTeaPrice, "Dodge zone +20% in your next fight", new Color(90, 190, 220)),
-    };
-
-    public ShopScene(GameState gs)
+    public ShopScene(GameState gs, Action? onClose = null)
     {
         _gs = gs;
-        for (int i = 0; i < 3; i++) _buy[i] = new Button(BuyRect(i), $"Buy  {Items[i].Price}");
+        _onClose = onClose;
+        for (int i = 0; i < Items.Count; i++) _buy[i] = new Button(BuyRect(i), $"Buy  {Items.All[i].Price}");
     }
 
     /// <summary>Hit box of the Buy button of item <paramref name="i"/> (also used by the autoplay bot).</summary>
-    public static Rectangle BuyRect(int i) => new(250 + i * 280, 470, 220, 50);
+    public static Rectangle BuyRect(int i) => Items.ButtonRect(i);
+
+    void Close()
+    {
+        M.Remove(this);
+        _onClose?.Invoke();
+    }
 
     public override void Update(float dt)
     {
         _time += dt;
         _popups.Update(dt);
-        _buy[0].Enabled = _gs.Coin >= Items[0].Price && _gs.Alive.Any();
-        _buy[1].Enabled = _gs.Coin >= Items[1].Price && _gs.Energy < _gs.MaxEnergy;
-        _buy[2].Enabled = _gs.Coin >= Items[2].Price && !_gs.SeaTea;
-
-        if (_buy[0].Update())
-            M.Push(new PetPickScene("Who gets the Crab Apple?", _gs.Pets, p =>
-            {
-                _gs.SpendCoin(Items[0].Price, "shop_apple");
-                Telemetry.Emit("shop_buy", "item", "Crab Apple", "price", Items[0].Price, "target", p.Name);
-                Audio.Play(Sfx.UiCoin);
-                p.Hp += Balance.CrabAppleHp;
-                p.Stomach += Balance.CrabAppleStomach;
-                p.ClampStats();
-                _popups.Add($"{p.Name} munches happily", Palette.Heal, new Vector2(Gfx.W / 2f, 150));
-            }, onCancel: () => { }));
-        if (_buy[1].Update())
+        for (int i = 0; i < Items.Count; i++)
         {
-            _gs.SpendCoin(Items[1].Price, "shop_tonic");
-            Telemetry.Emit("shop_buy", "item", "Caffeine Tonic", "price", Items[1].Price, "target", "");
+            var it = Items.All[i];
+            _buy[i].Enabled = _gs.Coin >= it.Price && _gs.Owned(it.Item) < Balance.ShopMaxOwned;
+            if (!_buy[i].Update()) continue;
+            _gs.SpendCoin(it.Price, ShopSink(it.Item));
+            _gs.AddItem(it.Item);
+            Telemetry.Emit("shop_buy", "item", it.Name, "price", it.Price, "target", "");
             Audio.Play(Sfx.UiCoin);
-            int gained = _gs.AddEnergy(Balance.TonicEnergy, "tonic");
-            _popups.Add($"+{gained} Energy!", Palette.Heal, new Vector2(Gfx.W / 2f, 150));
+            _popups.Add($"{it.Name} added to your box", Palette.Heal, new Vector2(Gfx.W / 2f, 140));
         }
-        if (_buy[2].Update())
-        {
-            _gs.SpendCoin(Items[2].Price, "shop_tea");
-            Telemetry.Emit("shop_buy", "item", "Sea Tea", "price", Items[2].Price, "target", "");
-            Audio.Play(Sfx.UiCoin);
-            _gs.SeaTea = true;
-            _popups.Add("Sea Tea ready for the next fight", Palette.Clean, new Vector2(Gfx.W / 2f, 150));
-        }
-        if (_leave.Update() || Input.Back) M.Remove(this);
+        if (_leave.Update() || Input.Back) Close();
     }
+
+    static string ShopSink(Item i) => i switch
+    {
+        Item.CrabApple => "shop_apple",
+        Item.CaffeineTonic => "shop_tonic",
+        Item.SeaTea => "shop_tea",
+        Item.CloudyGlasses => "shop_glasses",
+        Item.BalletShoes => "shop_ballet",
+        Item.TornNotebook => "shop_notebook",
+        _ => "shop_ribbon",
+    };
 
     public override void Draw(SpriteBatch sb)
     {
         Ui.Dim(sb, 0.75f);
         Art.Merchant(sb, new Vector2(1150, 700), _time);
-        Gfx.Text(sb, Gfx.Big, "Merchant", new Vector2(Gfx.W / 2f, 60), Palette.Warm, 0.5f);
-        Gfx.Text(sb, Gfx.Font, $"Coin : {_gs.Coin}", new Vector2(Gfx.W / 2f, 130), Palette.Coin, 0.5f);
-        for (int i = 0; i < 3; i++)
+        Gfx.Text(sb, Gfx.Big, "Merchant", new Vector2(Gfx.W / 2f, 24), Palette.Warm, 0.5f);
+        Gfx.Text(sb, Gfx.Font, $"Coin : {_gs.Coin}", new Vector2(Gfx.W / 2f, 96), Palette.Coin, 0.5f);
+        Gfx.Text(sb, Gfx.Small, $"Bought items go to the box in your base (max {Balance.ShopMaxOwned} of each).", new Vector2(Gfx.W / 2f, 124), Palette.Dim, 0.5f);
+        for (int i = 0; i < Items.Count; i++)
         {
-            var it = Items[i];
-            var card = new Rectangle(240 + i * 280, 200, 240, 330);
-            Ui.Panel(sb, card);
-            Gfx.Circle(sb, new Vector2(card.Center.X, card.Y + 90), 44, it.Color);
-            Gfx.Circle(sb, new Vector2(card.Center.X - 14, card.Y + 74), 12, Color.White * 0.4f);
-            Gfx.Text(sb, Gfx.Font, it.Name, new Vector2(card.Center.X, card.Y + 150), Palette.Text, 0.5f);
-            Gfx.Text(sb, Gfx.Small, Gfx.Wrap(Gfx.Small, it.Desc, 200), new Vector2(card.Center.X, card.Y + 190), Palette.Dim, 0.5f);
+            ItemCards.Draw(sb, Items.All[i], Items.CardRect(i), _gs.Owned(Items.All[i].Item));
             _buy[i].Draw(sb);
         }
         _leave.Draw(sb);
         _popups.Draw(sb);
+    }
+}
+
+/// <summary>The box in the base: use the items bought from the merchant.</summary>
+public class InventoryScene : Scene
+{
+    readonly GameState _gs;
+    readonly Button[] _use = new Button[Items.Count];
+    readonly Popups _popups = new();
+    public GameState State => _gs;
+
+    public override bool Overlay => true;
+
+    public InventoryScene(GameState gs)
+    {
+        _gs = gs;
+        for (int i = 0; i < Items.Count; i++) _use[i] = new Button(UseRect(i), "Use");
+    }
+
+    /// <summary>Hit box of the Use button of item <paramref name="i"/> (also used by the autoplay bot).</summary>
+    public static Rectangle UseRect(int i) => Items.ButtonRect(i);
+
+    public override void Update(float dt)
+    {
+        _popups.Update(dt);
+        for (int i = 0; i < Items.Count; i++)
+        {
+            var it = Items.All[i];
+            string? block = Items.UseBlock(_gs, it.Item);
+            _use[i].Enabled = _gs.Owned(it.Item) > 0 && block == null;
+            _use[i].Label = _gs.Owned(it.Item) == 0 ? "None" : block ?? "Use";
+            if (!_use[i].Update()) continue;
+            if (it.Item == Item.CrabApple)
+                M.Push(new PetPickScene("Who gets the Crab Apple?", _gs.Pets, p => Use(it.Item, p), onCancel: () => { }));
+            else Use(it.Item, null);
+        }
+        if (Input.Back) M.Remove(this);
+    }
+
+    void Use(Item item, Pet? target)
+    {
+        string msg = Items.Apply(_gs, item, target);
+        Audio.Play(Sfx.UiClick);
+        _popups.Add(msg, Palette.Heal, new Vector2(Gfx.W / 2f, 120));
+    }
+
+    public override void Draw(SpriteBatch sb)
+    {
+        Ui.Dim(sb, 0.75f);
+        Gfx.Text(sb, Gfx.Big, "Box", new Vector2(Gfx.W / 2f, 24), Palette.Warm, 0.5f);
+        Gfx.Text(sb, Gfx.Font, $"Energy {_gs.Energy}/{_gs.MaxEnergy}", new Vector2(Gfx.W / 2f, 96), Palette.Warm, 0.5f);
+        for (int i = 0; i < Items.Count; i++)
+        {
+            ItemCards.Draw(sb, Items.All[i], Items.CardRect(i), _gs.Owned(Items.All[i].Item));
+            _use[i].Draw(sb);
+        }
+        _popups.Draw(sb);
+        Ui.Hint(sb, "Click Use   |   ESC  Back");
     }
 }

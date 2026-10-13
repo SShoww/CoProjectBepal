@@ -164,6 +164,7 @@ public class QteScene : Scene
         var z = _care == Care.Train
             ? new Zone { Perfect = Balance.TrainPerfect * TrainScale, Great = Balance.TrainGreat * TrainScale }
             : new Zone { Perfect = Balance.CareZonePerfect, Great = Balance.CareZoneGreat };
+        if (_gs.BalletActive) z.Perfect *= 1f + Balance.BalletPerfectBonus;   // Ballet Shoes: bigger Perfect zone today
         z.Color = Col;
         z.Center = _wheel.FreeAngle(_care == Care.Train ? Balance.TrainSpawnGap : Balance.CareSpawnGap);
         _wheel.Zones.Add(z);

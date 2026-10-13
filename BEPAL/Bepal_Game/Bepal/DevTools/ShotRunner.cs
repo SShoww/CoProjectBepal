@@ -56,6 +56,14 @@ public class ShotRunner
         _shots.Add(("12b_notebook_pet_lv1", () => { var g = Gs(); return With(new BaseScene(g), new NotebookScene(g, 0)); }, 0.2f));
         _shots.Add(("12c_notebook_pet_lv2", () => { var g = Gs(); g.Pets[0].Level = Balance.PassiveLevel; return With(new BaseScene(g), new NotebookScene(g, 0)); }, 0.2f));
         _shots.Add(("13_shop", () => { var g = Gs(3); return With(new BaseScene(g), new ShopScene(g)); }, 0.2f));
+        _shots.Add(("13b_inventory", () =>
+        {
+            var g = Gs(3);
+            g.AddItem(Item.CrabApple); g.AddItem(Item.CrabApple); g.AddItem(Item.CaffeineTonic); g.AddItem(Item.CloudyGlasses); g.AddItem(Item.FadedRibbon);
+            g.Energy = 1;
+            return With(new BaseScene(g), new InventoryScene(g));
+        }, 0.2f));
+        _shots.Add(("13c_base_box", () => { var g = Gs(3); g.AddItem(Item.SeaTea); return With(new BaseScene(g) { StartX = BaseScene.BoxX }); }, 0.3f));
         _shots.Add(("14_dialogue", () => { var g = Gs(); return With(new BaseScene(g), DialogueScene.Say("Toothless", null, "Arrrrrrhrhrhrhhrrhrhrha")); }, 2f));
         _shots.Add(("15_choice", () => { var g = Gs(); return With(new BaseScene(g), new ChoiceScene("Toothless is at the door. What will you do?",
             new[] { new Option("Chase", () => { }), new Option("Tame", () => { }) })); }, 0.2f));
