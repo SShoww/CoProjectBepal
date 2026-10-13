@@ -238,7 +238,7 @@ public class FightScene : Scene
         var petFeet = new Vector2(Balance.FightPetX + _lunge * Balance.FightPetLunge, Balance.FightFloorY);
         var enemyFeet = new Vector2(Balance.FightEnemyX - _lunge * Balance.FightEnemyLunge, Balance.FightFloorY);
         Art.Pet(sb, _pet.Species, Color.Lerp(_pet.Color, Color.Red, _petFlash), petFeet, Balance.FightPetScale, _time, enemyFeet - new Vector2(0, 80),
-            1f, _pet.Dead);
+            1f, _pet.Dead, flash: _petFlash);
         Art.Enemy(sb, _enemy, enemyFeet, _time, petFeet, MathF.Max(_enemyFlash, _poisoned ? Balance.FightPoisonTint : 0));
 
         // Pet HP (small bar over its head) and enemy HP (top right), per Figma

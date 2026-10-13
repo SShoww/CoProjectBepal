@@ -14,9 +14,60 @@ public static class Art
         Gfx.Circle(sb, c + look * r * 0.45f, r * 0.55f, new Color(14, 10, 16) * alpha);
     }
 
+    // ---- Optional real sprites: Content/Sprites/<name>.png registered in Content.mgcb; a missing file means "draw the primitive" ----
+    // Names: pet_<species lowercase>, enemy_toothless, enemy_bigz, npc_merchant, npc_doctor. See BEPAL/Assets/_candidates/README.md.
+    record Sprite(Texture2D Tex, Rectangle Src);
+    static readonly System.Collections.Generic.Dictionary<string, Sprite> Sprites = new();
+
+    /// <summary>Drawn height (px) of each sprite at scale 1 (match the primitive it replaces); feet = bottom edge of the opaque pixels.</summary>
+    const float PetSpriteHeight = 90, DoctorSpriteHeight = 125, MerchantSpriteHeight = 220, ToothlessEnemyHeight = 150, BigZSpriteHeight = 230;
+
+    public static void LoadOptional(ContentManager content)
+    {
+        var names = new System.Collections.Generic.List<string> { "enemy_toothless", "enemy_bigz", "npc_merchant", "npc_doctor" };
+        foreach (Species s in Enum.GetValues<Species>()) names.Add("pet_" + s.ToString().ToLowerInvariant());
+        foreach (var n in names)
+        {
+            try
+            {
+                var tex = content.Load<Texture2D>("Sprites/" + n);
+                Sprites[n] = new Sprite(tex, OpaqueBounds(tex));
+            }
+            catch (ContentLoadException) { }   // no art yet: keep the primitive
+        }
+    }
+
+    /// <summary>Tight box around the non-transparent pixels, so any padding in the PNG doesn't move the feet.</summary>
+    static Rectangle OpaqueBounds(Texture2D tex)
+    {
+        var px = new Color[tex.Width * tex.Height];
+        tex.GetData(px);
+        int x0 = tex.Width, y0 = tex.Height, x1 = -1, y1 = -1;
+        for (int y = 0; y < tex.Height; y++)
+        for (int x = 0; x < tex.Width; x++)
+            if (px[y * tex.Width + x].A > 8)
+            {
+                x0 = Math.Min(x0, x); x1 = Math.Max(x1, x);
+                y0 = Math.Min(y0, y); y1 = Math.Max(y1, y);
+            }
+        return x1 < 0 ? new Rectangle(0, 0, tex.Width, tex.Height) : new Rectangle(x0, y0, x1 - x0 + 1, y1 - y0 + 1);
+    }
+
+    /// <summary>Draws the named sprite standing on <paramref name="feet"/> (idle breathing + bob via <see cref="SpriteMotion"/>'s <see cref="Pose"/>). Returns false if there is no such sprite.
+    /// Sprites face right; <paramref name="lookAt"/> mirrors them toward it.</summary>
+    static bool TryDrawSprite(SpriteBatch sb, string name, Vector2 feet, float height, float time, Vector2 lookAt, Color tint, float bobPx)
+    {
+        if (!Sprites.TryGetValue(name, out var spr)) return false;
+        float dx = lookAt.X - feet.X;
+        float breath = MathF.Sin(time * 2f) * Balance.BreathScale;
+        var pose = new Pose { Offset = new Vector2(0, -MathF.Abs(MathF.Sin(time * 3f)) * bobPx), Scale = new Vector2(1 - breath * 0.6f, 1 + breath) };
+        SpriteMotion.Draw(sb, spr.Tex, spr.Src, feet, height, pose, dx < -8 ? -1 : 1, tint);
+        return true;
+    }
+
     /// <summary>Draws a pet standing on <paramref name="feet"/>. <paramref name="lookAt"/> is a world/screen point the eyes follow.</summary>
     public static void Pet(SpriteBatch sb, Species s, Color col, Vector2 feet, float scale, float time, Vector2 lookAt,
-        float alpha = 1f, bool dead = false, bool highlight = false)
+        float alpha = 1f, bool dead = false, bool highlight = false, float flash = 0f)
     {
         float bob = dead ? 0 : MathF.Sin(time * 3f) * 3f * scale;
         var body = feet + new Vector2(0, -40 * scale + bob);
@@ -27,6 +78,9 @@ public static class Art
 
         Gfx.Ellipse(sb, feet + new Vector2(0, -2), 40 * scale, 8 * scale, Color.Black * 0.3f * alpha);
         if (highlight) Gfx.Glow(sb, body, 90 * scale, 90 * scale, Palette.Warm * 0.55f);
+
+        var spriteTint = Color.Lerp(dead ? Color.Gray : Color.White, new Color(255, 110, 110), flash) * alpha;
+        if (TryDrawSprite(sb, "pet_" + s.ToString().ToLowerInvariant(), feet, PetSpriteHeight * scale, time, lookAt, spriteTint, dead ? 0 : 3 * scale)) return;
 
         switch (s)
         {
@@ -79,6 +133,7 @@ public static class Art
     {
         if (e.Name == "Toothless")
         {
+            if (TryDrawSprite(sb, "enemy_toothless", feet, ToothlessEnemyHeight, time, lookAt, Color.Lerp(Color.White, new Color(255, 110, 110), flash), 4)) return;
             Pet(sb, Species.Toothless, Color.Lerp(e.Color, Color.White, flash), feet, 1.6f, time, lookAt);
             return;
         }
@@ -88,6 +143,7 @@ public static class Art
         var body = feet + new Vector2(0, -90 * s + MathF.Sin(time * 1.3f) * 4);
         Gfx.Ellipse(sb, feet, 110 * s, 16 * s, Color.Black * 0.4f);
         Gfx.Glow(sb, body, 200 * s, 200 * s, new Color(255, 40, 60) * 0.25f);
+        if (TryDrawSprite(sb, "enemy_bigz", feet, BigZSpriteHeight * s, time, lookAt, Color.Lerp(Color.White, new Color(255, 110, 110), flash), 4)) return;
         Gfx.Ellipse(sb, body, 90 * s, 96 * s, c);
         for (int i = 0; i < 5; i++)
         {
@@ -142,6 +198,7 @@ public static class Art
     public static void Doctor(SpriteBatch sb, Vector2 feet, float time)
     {
         Gfx.Ellipse(sb, feet + new Vector2(0, -2), 26, 6, Color.Black * 0.35f);
+        if (TryDrawSprite(sb, "npc_doctor", feet, DoctorSpriteHeight, time, feet + new Vector2(1, 0), Color.White, 0)) return;
         Gfx.Ellipse(sb, feet + new Vector2(0, -50), 24, 50, new Color(230, 230, 236));
         Gfx.Circle(sb, feet + new Vector2(0, -108), 18, new Color(196, 170, 150));
         Gfx.Rect(sb, feet.X - 14, feet.Y - 116, 28, 6, new Color(230, 230, 236));
@@ -154,6 +211,7 @@ public static class Art
     public static void Merchant(SpriteBatch sb, Vector2 feet, float time)
     {
         Gfx.Ellipse(sb, feet + new Vector2(0, -2), 40, 8, Color.Black * 0.35f);
+        if (TryDrawSprite(sb, "npc_merchant", feet, MerchantSpriteHeight, time, feet + new Vector2(1, 0), Color.White, 0)) return;
         Gfx.Ellipse(sb, feet + new Vector2(0, -80), 40, 80, new Color(34, 28, 40));
         Gfx.Circle(sb, feet + new Vector2(0, -160), 30, new Color(20, 16, 24));                    // shadowed face
         Gfx.Ellipse(sb, feet + new Vector2(0, -170), 64, 10, new Color(24, 20, 28));             // wide hat brim
