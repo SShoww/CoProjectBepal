@@ -3,6 +3,9 @@
 ล่าสุด 10 งาน งานละ 3 บรรทัด เขียนผ่าน `tools/context/log-edit.py` เท่านั้น — รายการเก่าอยู่ที่ [archive/edit-log/](archive/edit-log/)
 
 <!-- entries -->
+- **2026-10-13 18:10 · Q-20261013-energy-ux** — Energy 0 ไม่เปิด care (แจ้งให้ไปนอน); Heal จางและเป็น gap เมื่อ HP เต็ม; bot ไม่เลือก Heal ตอน HP เต็ม
+  - Files: BEPAL/Bepal_Game/Bepal/Scenes/BaseScene.cs, BEPAL/Bepal_Game/Bepal/Scenes/CareScenes.cs, BEPAL/Bepal_Game/Bepal/Scenes/Wheel.cs, BEPAL/Bepal_Game/Bepal/DevTools/AutoPlay.cs
+  - Validation: build 0 warn; autoplay+refuse ผ่าน; batch 50 run ผลเท่า baseline; shots ตรวจแล้ว
 - **2026-10-13 18:02 · Q-20261013-balance-migration** — ย้ายตัวเลข care QTE, ราคา/ผล shop, PlayerMaxExp และตัวคูณ upgrade เข้า Balance ค่าเดิมทุกตัว
   - Files: BEPAL/Bepal_Game/Bepal/Model/GameState.cs, BEPAL/Bepal_Game/Bepal/Scenes/CareScenes.cs, BEPAL/Bepal_Game/Bepal/Scenes/BaseMenus.cs, CLAUDE.md
   - Validation: build 0 warn; batch 50 run ก่อน/หลัง event stream เหมือนกัน; autoplay --refuse ผ่าน
@@ -30,6 +33,3 @@
 - **2026-10-07 10:47 · Q-20261007-fight-dodge-after-hit** — Fight wheel สลับเฟส Attack -> Dodge หลัง Attack โดน; Attack กว้างเท่า Dodge และหดได้; ย้ายตัวเลข Fight ทั้งหมด (zone/damage/enemy/visual) เข้า Balance แบ่งหมวด
   - Files: BEPAL/Bepal_Game/Bepal/Scenes/FightScene.cs, BEPAL/Bepal_Game/Bepal/Model/GameState.cs, BEPAL/Bepal_Game/Bepal/Model/Pet.cs, Context/quests/Q-20261007-fight-dodge-after-hit.md
   - Validation: build ผ่าน; --autoplay ได้ reached To be continued; --shots 08/09 ปกติ; ผู้ใช้เล่นมือแล้วผ่าน; ไม่ได้รัน --autoplay --refuse รอบสุดท้าย
-- **2026-10-07 03:48 · Q-20261007-pet-passive** — เพิ่ม passive Lv2: Mossling heal 1%, Toothless พิษ, Blinkbun วาร์ปเข็ม + แสดงในสมุด
-  - Files: BEPAL/Bepal_Game/Bepal/Model/Pet.cs, Model/GameState.cs, Scenes/FightScene.cs, Scenes/BaseMenus.cs, DevTools/ShotRunner.cs, BEPAL/Docs/GDD/04-class-diagram.md
-  - Validation: build ผ่าน, autoplay ปกติ/refuse ผ่าน, shots 12b/12c ตรวจแล้ว; ยังไม่ได้เล่น fight Lv2 จริง

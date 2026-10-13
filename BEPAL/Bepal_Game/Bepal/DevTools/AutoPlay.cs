@@ -214,6 +214,7 @@ public class AutoPlay
                     {
                         _careScene = cs;
                         _careTarget = DrawCare();
+                        if (_careTarget == nameof(Care.Heal) && cs.Pet.Hp >= cs.Pet.MaxHp) _careTarget = nameof(Care.Train);   // Heal is disabled at full HP
                     }
                     string? only = Profile switch
                     {

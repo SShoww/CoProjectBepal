@@ -299,6 +299,11 @@ public class BaseScene : Scene
             case Kind.Pet:
                 if (s.Pet!.Dead)
                     M.Push(DialogueScene.Say("", null, $"{s.Pet.Name} isn't moving. The Doctor might be able to help."));
+                else if (_gs.Energy <= 0)
+                {
+                    Telemetry.Emit("care_select", "pet", s.Pet.Name, "result", "noenergy", "care", "", "hit", "Miss", "energyAfter", _gs.Energy);
+                    M.Push(DialogueScene.Say("", null, "No energy left. Sleep at the bed to rest."));
+                }
                 else M.Push(new CareSelectScene(_gs, s.Pet));
                 break;
         }
