@@ -48,7 +48,7 @@ project: BePal
 
 ### 2.2 Background Music (BGM — OGG Looping)
 
-> **As built (2026-10-13):** BGM-01..07 อยู่ใน `Content/Music/` (`OggImporter` + `SongProcessor`) และเล่นแล้วผ่าน `Core/MusicPlayer.cs` — loop, fade 0.8 s เมื่อเปลี่ยนเพลง, ระดับเสียง `Balance.MusicVolume` (0.5); scene ระบุเพลงด้วย `Scene.Music` / `MusicOverride` (ฐาน = cozy, Day 4 หลังเปิดประตู = thunderstorm, Fight = fight/boss (เพลง Boss ครอบคลุม dialogue + เลือกสัตว์ Day 5 ด้วย), พ่อค้า+ร้าน = merchant, Menu/เลือกสัตว์ = menu, จบ = to_be_continued, GameOver = เงียบ) BGM-08 ยังไม่ทำ; ปรับ volume เพลง/SFX ได้ในเมนู Options (Main Menu และ Pause) ค่าเก็บใน `%APPDATA%/BePal/settings.txt` (`Core/Settings.cs`)
+> **As built (2026-10-13):** BGM-01..07 อยู่ใน `Content/Music/` (`OggImporter` + `SongProcessor`) และเล่นแล้วผ่าน `Core/MusicPlayer.cs` — loop, fade 0.8 s เมื่อเปลี่ยนเพลง, ระดับเสียง `Balance.MusicVolume` (0.5); scene ระบุเพลงด้วย `Scene.Music` / `MusicOverride` (ฐาน = cozy, Day 4 ทั้งวัน = thunderstorm (ไฟล์ `.wav` ใช้ `WavImporter`), Fight = fight/boss (เพลง Boss ครอบคลุม dialogue + เลือกสัตว์ Day 5 ด้วย), พ่อค้า+ร้าน = merchant, Menu/เลือกสัตว์ = menu, จบ = to_be_continued, GameOver = เงียบ) BGM-08 ยังไม่ทำ; ปรับ volume เพลง/SFX ได้ในเมนู Options (Main Menu และ Pause) ค่าเก็บใน `%APPDATA%/BePal/settings.txt` (`Core/Settings.cs`)
 
 | รหัส Audio | ชื่อไฟล์ | บริบทของฉาก | สไตล์และอารมณ์ดนตรี | Priority |
 | --- | --- | --- | --- | --- |
@@ -56,7 +56,7 @@ project: BePal
 | **BGM-02** | `music/bgm_base_cozy.ogg` | ฐาน (Day 1–5) + Care/QTE | อะคูสติกกีตาร์ + เปียโนไฟฟ้า Lo-Fi สบายๆ แต่มีโน้ตแปลกแทรก | P0 |
 | **BGM-03** | `music/bgm_fight.ogg` | Fight กับ Toothless (Day 2) | ตึงเครียด จังหวะเร็ว | P0 |
 | **BGM-04** | `music/bgm_merchant.ogg` | พ่อค้า + ร้านค้า (Day 3) | แจ๊ซหม่นๆ เจ้าเล่ห์ | P1 |
-| **BGM-05** | `music/bgm_thunderstorm.ogg` | หน้าพายุ (Day 4) | ambient ฝนตก ฟ้าร้อง | P1 |
+| **BGM-05** | `music/bgm_thunderstorm.wav` | หน้าพายุ (Day 4) | ambient ฝนตก ฟ้าร้อง | P1 |
 | **BGM-06** | `music/bgm_boss_bigz.ogg` | Fight กับ Big Z (Day 5) | หนักหน่วง สิ้นหวัง | P1 |
 | **BGM-07** | `music/bgm_to_be_continued.ogg` | หน้า "To be continued..." | เปียโนเดี่ยว ค้างคา | P1 |
 | **BGM-08** | `music/bgm_ending_bittersweet.ogg`, `bgm_ending_heroic.ogg` | ฉากจบ A/B ของ Merchant arc (เกมเต็ม) | — | Later |
