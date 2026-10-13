@@ -251,11 +251,11 @@
 /processorParam:Quality=Best
 /build:Music/bgm_merchant.ogg
 
-#begin Music/bgm_thunderstorm.ogg
-/importer:OggImporter
+#begin Music/bgm_thunderstorm.wav
+/importer:WavImporter
 /processor:SongProcessor
 /processorParam:Quality=Best
-/build:Music/bgm_thunderstorm.ogg
+/build:Music/bgm_thunderstorm.wav
 
 #begin Music/bgm_to_be_continued.ogg
 /importer:OggImporter
