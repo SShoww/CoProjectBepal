@@ -13,7 +13,7 @@ public class CareSelectScene : Scene
     readonly Pet _pet;
     public Pet Pet => _pet;
     public Wheel Wheel => _wheel;
-    readonly Wheel _wheel = new(new Vector2(Gfx.W / 2f, 330), 170) { Speed = 2.2f };
+    readonly Wheel _wheel = new(new Vector2(Gfx.W / 2f, 330), 170) { Speed = Balance.CareSelectSpeed };
     readonly Popups _popups = new();
     float _time;
     float _openDelay = -1;
@@ -32,7 +32,7 @@ public class CareSelectScene : Scene
         for (int i = 0; i < 4; i++)
             _wheel.Zones.Add(new Zone
             {
-                Center = i * MathHelper.PiOver2, Perfect = 0.62f, Great = 0, Color = choices[i].col, Label = choices[i].care.ToString(),
+                Center = i * MathHelper.PiOver2, Perfect = Balance.CareSelectZone, Great = 0, Color = choices[i].col, Label = choices[i].care.ToString(),
             });
     }
 
@@ -123,12 +123,6 @@ public class QteScene : Scene
     float _finish = -1;
     int _perfects, _greats, _levelUps;
     bool _playerLevelUp;
-    const float BaseSpeed = 2.4f;
-    const float TrainSpeed = 3.6f;
-    const float CleanZoneSpeed = 4.8f;   // Clean: fixed run-away speed, always below the needle's BaseSpeed
-    const float HealFadeRate = 2f;     // Heal: needle fade cycle (lower = slower, easier to read)
-    const float HealMinAlpha = 0f;     // Heal: needle never fades below this
-    const float HealShrink = 0.5f;       // Heal: zone shrink rate multiplier (lower = dot lives longer)
 
     public override bool Overlay => true;
 
@@ -150,11 +144,11 @@ public class QteScene : Scene
         _pet = pet;
         _care = care;
         (_t0Stomach, _t0Clean, _t0Hp) = (pet.Stomach, pet.Clean, pet.Hp);
-        _wheel.Speed = care == Care.Train ? TrainSpeed : BaseSpeed;
+        _wheel.Speed = care == Care.Train ? Balance.QteTrainSpeed : Balance.QteBaseSpeed;
 
         // Metabolic burn (GDD 03 §2.2): Train -10 Stomach, Clean/Heal -5.
-        if (care == Care.Train) _pet.Stomach -= 10;
-        if (care is Care.Clean or Care.Heal) _pet.Stomach -= 5;
+        if (care == Care.Train) _pet.Stomach -= Balance.TrainStomachCost;
+        if (care is Care.Clean or Care.Heal) _pet.Stomach -= Balance.CleanHealStomachCost;
         _pet.ClampStats();
 
         if (care == Care.Train)
@@ -163,16 +157,16 @@ public class QteScene : Scene
     }
 
     /// <summary>Train dots shrink as the pet levels (stops at LV 3); the QTE upgrade widens them.</summary>
-    float TrainScale => _gs.QteZoneMultiplier / (1f + 0.15f * (Math.Min(_pet.Level, 3) - 1));
+    float TrainScale => _gs.QteZoneMultiplier / (1f + Balance.TrainShrinkPerLevel * (Math.Min(_pet.Level, Balance.TrainShrinkMaxLevel) - 1));
 
     void SpawnZone(Zone? replace = null)
     {
         if (replace != null) _wheel.Zones.Remove(replace);
         var z = _care == Care.Train
-            ? new Zone { Perfect = 0.07f * TrainScale, Great = 0.16f * TrainScale }
-            : new Zone { Perfect = 0.12f, Great = 0.27f };
+            ? new Zone { Perfect = Balance.TrainPerfect * TrainScale, Great = Balance.TrainGreat * TrainScale }
+            : new Zone { Perfect = Balance.CareZonePerfect, Great = Balance.CareZoneGreat };
         z.Color = Col;
-        z.Center = _wheel.FreeAngle(_care == Care.Train ? 0.4f : 0.9f);
+        z.Center = _wheel.FreeAngle(_care == Care.Train ? Balance.TrainSpawnGap : Balance.CareSpawnGap);
         _wheel.Zones.Add(z);
     }
 
@@ -185,16 +179,16 @@ public class QteScene : Scene
         switch (_care)
         {
             case Care.Clean:   // zone runs away in the needle's direction, slower than the needle
-                foreach (var z in _wheel.Zones) z.Center += _wheel.Dir * CleanZoneSpeed * dt;
+                foreach (var z in _wheel.Zones) z.Center += _wheel.Dir * Balance.CleanZoneSpeed * dt;
                 break;
             case Care.Heal:    // needle fades in and out (never fully gone); zone slowly shrinks, respawns when gone
-                float f = MathF.Cos(_time * HealFadeRate);
-                _wheel.NeedleAlpha = MathHelper.Clamp(0.6f + f * 0.7f, HealMinAlpha, 1);
+                float f = MathF.Cos(_time * Balance.HealFadeRate);
+                _wheel.NeedleAlpha = MathHelper.Clamp(0.6f + f * 0.7f, Balance.HealMinAlpha, 1);
                 foreach (var z in _wheel.Zones.ToArray())
                 {
-                    z.Perfect -= 0.035f * HealShrink * dt;
-                    z.Great -= 0.07f * HealShrink * dt;
-                    if (z.Perfect <= 0.02f) SpawnZone(z);
+                    z.Perfect -= Balance.HealPerfectShrinkRate * Balance.HealShrink * dt;
+                    z.Great -= Balance.HealGreatShrinkRate * Balance.HealShrink * dt;
+                    if (z.Perfect <= Balance.HealZoneMin) SpawnZone(z);
                 }
                 break;
         }
@@ -221,7 +215,7 @@ public class QteScene : Scene
         if (hit == Hit.Miss)
         {
             Audio.Play(Sfx.QteMiss);
-            if (_care == Care.Feed) _wheel.Speed = BaseSpeed;
+            if (_care == Care.Feed) _wheel.Speed = Balance.QteBaseSpeed;
             return;
         }
 
@@ -234,20 +228,20 @@ public class QteScene : Scene
         switch (_care)
         {
             case Care.Train:
-                float gain = (perfect ? 10 : 5) * _gs.TrainGainMultiplier;
+                float gain = (perfect ? Balance.TrainPerfectGain : Balance.TrainGreatGain) * _gs.TrainGainMultiplier;
                 _progressGain += gain;
                 _levelUps += _pet.AddProgress(gain);
                 break;
             case Care.Feed:
-                _pet.Stomach += perfect ? 6 : 3;
+                _pet.Stomach += perfect ? Balance.FeedPerfect : Balance.FeedGreat;
                 _wheel.Dir = -_wheel.Dir;                                   // hit flips the spin
-                if (perfect) _wheel.Speed = MathF.Min(_wheel.Speed * 1.15f, 6f);
+                if (perfect) _wheel.Speed = MathF.Min(_wheel.Speed * Balance.FeedPerfectSpeedMul, Balance.FeedMaxSpeed);
                 break;
             case Care.Clean:
-                _pet.Clean += perfect ? 6 : 3;
+                _pet.Clean += perfect ? Balance.CleanPerfect : Balance.CleanGreat;
                 break;
             case Care.Heal:
-                _pet.Hp += perfect ? 6 : 3;
+                _pet.Hp += perfect ? Balance.HealPerfect : Balance.HealGreat;
                 break;
         }
         _pet.ClampStats();
