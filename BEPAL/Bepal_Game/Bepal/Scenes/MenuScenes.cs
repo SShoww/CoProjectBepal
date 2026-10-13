@@ -97,7 +97,7 @@ public class GameOverScene : Scene
     }
 }
 
-/// <summary>End of the vertical slice (Day 5, after Big Z).</summary>
+/// <summary>End of the demo (Day 5, after Big Z): the boss cannot be beaten yet, the story continues in the full game.</summary>
 public class ToBeContinuedScene : Scene
 {
     readonly int _days;
@@ -119,10 +119,12 @@ public class ToBeContinuedScene : Scene
     {
         Gfx.Rect(sb, 0, 0, Gfx.W, Gfx.H, Color.Black);
         float a = MathHelper.Clamp(_time / 1.5f, 0, 1);
-        Gfx.Text(sb, Gfx.Font, "The sanctuary fell silent.", new Vector2(Gfx.W / 2f, 230), Palette.Text * a, 0.5f);
-        Gfx.Text(sb, Gfx.Big, "To be continued...", new Vector2(Gfx.W / 2f, 290), Palette.Warm * a, 0.5f);
-        Gfx.Text(sb, Gfx.Small, $"You kept the sanctuary alive for {_days} days.", new Vector2(Gfx.W / 2f, 380), Palette.Dim * a, 0.5f);
-        if (_time > 2f) Gfx.Text(sb, Gfx.Small, "Space  Main Menu", new Vector2(Gfx.W / 2f, 470), Palette.Dim, 0.5f);
+        Gfx.Text(sb, Gfx.Font, "The sanctuary fell silent.", new Vector2(Gfx.W / 2f, 190), Palette.Text * a, 0.5f);
+        Gfx.Text(sb, Gfx.Big, "End of the BePal demo", new Vector2(Gfx.W / 2f, 250), Palette.Warm * a, 0.5f);
+        Gfx.Text(sb, Gfx.Font, "Big Z can't be beaten yet - the story continues in the full game.", new Vector2(Gfx.W / 2f, 330), Palette.Text * a, 0.5f);
+        Gfx.Text(sb, Gfx.Small, $"You kept the sanctuary alive for {_days} days.", new Vector2(Gfx.W / 2f, 395), Palette.Dim * a, 0.5f);
+        Gfx.Text(sb, Gfx.Font, "Thanks for playing!", new Vector2(Gfx.W / 2f, 450), Palette.Warm * a, 0.5f);
+        if (_time > 2f) Gfx.Text(sb, Gfx.Small, "Space  Main Menu", new Vector2(Gfx.W / 2f, 520), Palette.Dim, 0.5f);
     }
 }
 
