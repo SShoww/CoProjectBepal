@@ -1,11 +1,19 @@
 # Telemetry validator (Q-20261009-run-telemetry). PowerShell 7.
-# Usage: pwsh BEPAL/Docs/Balance/tools/validate.ps1
-# Reads data/raw/*.jsonl + data/runs.csv, writes data/validation.md
+# Usage: pwsh BEPAL/Docs/Balance/tools/validate.ps1 [-Raw <dir of *.jsonl>] [-Csv <runs.csv>] [-Out <validation.md>]
+#   Defaults: data/raw/*.jsonl + data/runs.csv -> data/validation.md (next to this tools/ folder).
+#   Other data sets, e.g. a run-batch.ps1 -OutDir <dir> batch (Aggregate writes runs.csv one level up from <dir>):
+#     pwsh validate.ps1 -Raw $env:TEMP/tel -Csv $env:TEMP/runs.csv -Out $env:TEMP/validation.md
+param(
+  # Aliases keep the short -Raw/-Csv/-Out; the real names differ because $csv/$out are reused as script variables below (PowerShell is case-insensitive)
+  [Alias('Raw')][string]$RawArg = '',
+  [Alias('Csv')][string]$CsvArg = '',
+  [Alias('Out')][string]$OutArg = ''
+)
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
-$rawDir = Join-Path $root 'data/raw'
-$csvPath = Join-Path $root 'data/runs.csv'
-$outPath = Join-Path $root 'data/validation.md'
+$rawDir = if ($RawArg) { (Resolve-Path $RawArg).Path } else { Join-Path $root 'data/raw' }
+$csvPath = if ($CsvArg) { $CsvArg } else { Join-Path $root 'data/runs.csv' }
+$outPath = if ($OutArg) { $OutArg } else { Join-Path $root 'data/validation.md' }
 $inv = [ordered]@{}
 $invTitle = [ordered]@{
   I01 = 'Coin: start+sum(delta)==final; earned-spent==final-start; coinAfter chain; coin>=0; sinks==upgrade/shop events'
@@ -16,13 +24,14 @@ $invTitle = [ordered]@{
   I06 = 'Upgrades: max levels; maxEnergy==min(3+upgEnergy,6); cost per purchase == Balance'
   I07 = 'Fight: fight_end counters/dmg == recomputed from fight_press/hurt; won->enemyHp==0; Toothless dmg>=120; petsLost<=pets'
   I08 = 'Pet: 0<=stomach,clean<=100; 0<=hp<=maxHp; progress<maxProgress; level non-decreasing; revives*250==spent; deaths>=revives'
-  I09 = 'Coin sources: daily==100*(dayReached-1); toothless in {0,200}; merchant in {0,5000}; sell->pet removed & no shop_buy'
+  I09 = 'Coin sources: daily==100*(dayReached-1); toothless in {0,200}; merchant in {0,5000}; sell->pet removed (shop opens after Sell and Refuse)'
   I10 = 'Run structure: 1 run_start/1 run_end/1 run_summary(last); seq contiguous; day & t monotonic; tReal>0; outcome valid; TBC->day5'
   I11 = 'day_end exactly once for each day 1..(dayReached-1)'
   I12 = 'run_summary counters == recomputed from events'
   I13 = 'No negative stats (hp, stomach, clean, coin, energy, exp, points, counters)'
   I14 = 'Deaths consistent: pet_death count==summary; deathDay==first death; starve died->pet_death; petsAliveFinal==non-dead snapshots'
   I15 = 'runs.csv matches jsonl (row set, shared columns vs run_summary)'
+  I16 = 'Items: shop_buy known item at catalog price on day 3, <=3 held; item_use only with stock, `left` matches; Crab Apple has a target; tonic uses == energy(tonic); shielded hits dmg 0 and <=2 per Cloudy Glasses used'
 }
 foreach ($k in $invTitle.Keys) { $inv[$k] = [ordered]@{} }
 function Fail($i, $run, $msg) {
@@ -240,10 +249,39 @@ foreach ($rid in $runs.Keys) {
   $rem = @((Of 'pet_removed') | Where-Object { $_['via'] -eq 'merchant_sale' })
   if ((N $cin['merchant_sale']) -eq 5000) {
     if ($rem.Count -ne 1) { Fail 'I09' $rid "merchant sold but pet_removed=$($rem.Count)" }
-    if ($shop.Count -gt 0) { Fail 'I09' $rid 'merchant sold but shop_buy present' }
   } elseif ($rem.Count -ne 0) { Fail 'I09' $rid 'pet_removed(merchant) without sale coin' }
   $mc = @((Of 'door_event') | Where-Object { $_['event'] -eq 'merchant' })
   if ($mc.Count -eq 1) { $want = $mc[0]['choice']; $got = $S['merchantChoice']; if ($want -ne $got) { Fail 'I09' $rid "merchantChoice $got != door_event $want" } }
+
+  # ---- I16 items (shop -> box -> use)
+  $catalog = @{ 'Crab Apple' = 25; 'Caffeine Tonic' = 40; 'Sea Tea' = 18; 'Cloudy Glasses' = 30; 'Ballet Shoes' = 50; 'Torn Notebook' = 55; 'Faded Ribbon' = 35 }
+  $owned = @{}
+  foreach ($e in $ev) {
+    if ($e['type'] -eq 'shop_buy') {
+      $n = "$($e['item'])"
+      if (-not $catalog.ContainsKey($n)) { Fail 'I16' $rid "unknown shop item '$n' seq $($e['seq'])"; continue }
+      if ((N $e['price']) -ne $catalog[$n]) { Fail 'I16' $rid "$n price $($e['price']) != $($catalog[$n])" }
+      if ([int](N $e['day']) -ne 3) { Fail 'I16' $rid "shop_buy on day $($e['day'])" }
+      $owned[$n] = (N $owned[$n]) + 1
+      if ($owned[$n] -gt 3) { Fail 'I16' $rid "$n held $($owned[$n]) > 3" }
+    }
+    elseif ($e['type'] -eq 'item_use') {
+      $n = "$($e['item'])"
+      if (-not $catalog.ContainsKey($n)) { Fail 'I16' $rid "unknown used item '$n' seq $($e['seq'])"; continue }
+      if ((N $owned[$n]) -lt 1) { Fail 'I16' $rid "item_use $n with no stock seq $($e['seq'])" } else { $owned[$n] = $owned[$n] - 1 }
+      if (-not (Eq $e['left'] $owned[$n])) { Fail 'I16' $rid "item_use $n left=$($e['left']) expected $(N $owned[$n])" }
+      $hasTarget = "$($e['target'])" -ne ''
+      if (($n -eq 'Crab Apple') -ne $hasTarget) { Fail 'I16' $rid "item_use $n target='$($e['target'])'" }
+    }
+  }
+  $uses = Of 'item_use'
+  $tonicUses = @($uses | Where-Object { $_['item'] -eq 'Caffeine Tonic' }).Count
+  $tonicEn = @($en | Where-Object { $_['reason'] -eq 'tonic' }).Count
+  if ($tonicUses -ne $tonicEn) { Fail 'I16' $rid "tonic item_use $tonicUses != energy(tonic) $tonicEn" }
+  $shielded = @((Of 'fight_hurt') | Where-Object { $_['shielded'] -eq $true })
+  foreach ($h in $shielded) { if ((N $h['dmgTaken']) -ne 0 -or (N $h['hpLost']) -ne 0) { Fail 'I16' $rid "shielded hit took damage seq $($h['seq'])" } }
+  $glasses = @($uses | Where-Object { $_['item'] -eq 'Cloudy Glasses' }).Count
+  if ($shielded.Count -gt 2 * $glasses) { Fail 'I16' $rid "shielded hits $($shielded.Count) > 2 x Cloudy Glasses used ($glasses)" }
 
   # ---- I11
   $deDays = @($dayEnds | ForEach-Object { [int]$_['day'] })
@@ -316,9 +354,11 @@ $cmpCols = 0
 foreach ($r in $csv) {
   if (-not $sumRows.ContainsKey($r.runId)) { continue }
   $S = $sumRows[$r.runId]
+  $first = $runs[$r.runId][0]
+  if ($first.ContainsKey('starter') -and "$($first['starter'])" -ne "$($r.starter)") { Fail 'I15' $r.runId "csv starter '$($r.starter)' != run_start '$($first['starter'])'" }
   foreach ($p in $r.PSObject.Properties) {
     $k = $p.Name; if ($k -in 'runId', 'profileKey', 'file', 'refuse', 't', 'pressesTotal') { continue }
-    if ($k -in 'qtePresses', 'qtePerfectRate', 'qteGreatRate', 'qteMissRate', 'fightPresses', 'fightHitRate', 'energyLeftTotal', 'upgradesTotal', 'day') { continue }  # derived by Aggregate
+    if ($k -in 'qtePresses', 'qtePerfectRate', 'qteGreatRate', 'qteMissRate', 'fightPresses', 'fightHitRate', 'energyLeftTotal', 'upgradesTotal', 'day', 'starter') { continue }  # derived by Aggregate (starter: checked below against run_start)
     if (-not $S.ContainsKey($k)) { if ("$($p.Value)" -ne '' -and (N $p.Value) -ne 0) { Fail 'I15' $r.runId "csv $k='$($p.Value)' but absent from summary" }; continue }
     $a = "$($S[$k])"; $b = "$($p.Value)"
     $ok2 = if ($a -eq $b) { $true } elseif ($S[$k] -is [ValueType] -and $b -ne '') { Eq $S[$k] $b } elseif ($S[$k] -is [bool]) { "$a".ToLower() -eq $b.ToLower() } else { $false }
@@ -376,7 +416,7 @@ foreach ($m in $mcs) { $bot.Add("- Low variance: $m") }
 # ================= write report =================
 $sb = [System.Text.StringBuilder]::new()
 [void]$sb.AppendLine('# Telemetry validation'); [void]$sb.AppendLine('')
-[void]$sb.AppendLine("Generated by ``tools/validate.ps1`` on $(Get-Date -Format 'yyyy-MM-dd HH:mm'). Runs: $($runs.Count) jsonl, $($csv.Count) runs.csv rows."); [void]$sb.AppendLine('')
+[void]$sb.AppendLine("Generated by ``tools/validate.ps1`` on $((Get-Date).ToString('yyyy-MM-dd HH:mm', [cultureinfo]::InvariantCulture)). Runs: $($runs.Count) jsonl, $($csv.Count) runs.csv rows."); [void]$sb.AppendLine('')
 [void]$sb.AppendLine('## Invariants'); [void]$sb.AppendLine(''); [void]$sb.AppendLine('| id | result | failing runs | description |'); [void]$sb.AppendLine('|---|---|---:|---|')
 foreach ($k in $invTitle.Keys) { $n = $inv[$k].Count; [void]$sb.AppendLine("| $k | $(if ($n -eq 0) { 'PASS' } else { 'FAIL' }) | $n/$($runs.Count) | $($invTitle[$k]) |") }
 [void]$sb.AppendLine('')

@@ -50,6 +50,7 @@ runId,profile,seed,build,mode,outcome,dayReached,deathDay,deathScene,tRealSec,tS
 7. fight: attackHits+attackMiss+dodgeOk+tooSlow(non-press)... presses = attackP+attackG+dodgeOk+missPress; dmgDealt == Σ fight_press.dmgDealt; won=true -> enemyHp==0; Toothless dmgDealt ≥ 120; petsLost ≤ #pets; dmgTaken == Σ hurt (ก่อน clamp Hp≥0 อาจน้อยกว่า, ใช้ min).
 8. pet: 0≤stomach,clean≤100; hp≤maxHp; progress<maxProgress; level ไม่ลดลง; death -> revive ก่อนจะ care ได้; reviveCount*250 == spent_revive; petDeaths ≥ revives.
 9. coin sources: daily == 100×(dayReached−1) (ถ้าไม่ตายก่อน); toothless ∈{0,200}; merchant ∈{0,5000}; merchant sell -> petsFinal ลด 1 และ shop_* == 0 ในวันนั้น.
+9b. items (I16): `shop_buy` ต้องเป็นไอเทมในแคตตาล็อกที่ราคาตรง (25/40/18/30/50/55/35) ในวัน 3 ถือไม่เกิน 3 ชิ้นต่อชนิด; `item_use` ต้องมีของในกล่อง, `left` = จำนวนที่เหลือ, Crab Apple มี target ชนิดอื่นไม่มี; จำนวน item_use Caffeine Tonic == energy(reason=tonic); `fight_hurt.shielded` ต้อง dmgTaken=0 และไม่เกิน 2 × จำนวน Cloudy Glasses ที่ใช้; ขายพ่อค้าแล้วมี shop_buy ได้ (ร้านเปิดหลัง Sell/Refuse)
 10. เวลา: tRealSec>0; `seq` ต่อเนื่อง; day ไม่ลดลง; events เรียงตาม tSim; outcome เป็นค่าใดค่าหนึ่ง และมี `run_end` เพียง 1 ต่อ run; to_be_continued -> dayReached==5.
 11. day_end: day_end ครบ 1..(dayReached−1) (+วัน 5 ไม่มี day_end เพราะจบที่ BigZ).
 
