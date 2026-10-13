@@ -3,6 +3,9 @@
 ล่าสุด 10 งาน งานละ 3 บรรทัด เขียนผ่าน `tools/context/log-edit.py` เท่านั้น — รายการเก่าอยู่ที่ [archive/edit-log/](archive/edit-log/)
 
 <!-- entries -->
+- **2026-10-14 00:11 · Q-20261014-drawio-sync** — แก้ 6 diagram .drawio + PNG ให้ตรงโค้ด (ไม่มีปุ่ม E, Refuse = ร้านค้า, Day 4-5 Storm/Big Z, Options/Box/Shop); WinLose_CoreFlow ตรงอยู่แล้ว
+  - Files: BEPAL/Docs/GDD/diagrams/**
+  - Validation: render PNG ดูทุกไฟล์, XML parse ผ่าน, แก้เฉพาะเอกสาร ไม่รัน build/autoplay, ยังไม่เปิดใน VS Code จริง
 - **2026-10-13 22:46 · Q-20261013-gdd-sync** — ปรับ GDD 01-14, README, telemetry-spec, CLAUDE.md ให้ตรงโค้ด (Day1-5 ตายตัว, ร้าน 7 ไอเทม+Box, Options/BGM, dev tools)
   - Files: BEPAL/Docs/GDD/*.md, BEPAL/Docs/Balance/telemetry-spec.md, CLAUDE.md
   - Validation: dotnet build ผ่าน, แก้เฉพาะเอกสาร, ไม่รัน autoplay, ไม่ได้ตรวจ drawio/00-concept
@@ -30,6 +33,3 @@
 - **2026-10-13 18:29 · Q-20261013-upgrade-points** — ราคา Point ต่อเลเวล (Energy 1/2/4, Progress 1/2/3 max 3, QTE 1/1/1) พร้อมข้อความ Upgrade/HUD/hint แรกให้ชัดว่าต้องใช้และได้ Point จากไหน
   - Files: BEPAL/Bepal_Game/Bepal/Model/GameState.cs, BEPAL/Bepal_Game/Bepal/Scenes/BaseMenus.cs, BEPAL/Bepal_Game/Bepal/Scenes/BaseScene.cs, BEPAL/Bepal_Game/Bepal/Scenes/CareScenes.cs, BEPAL/Bepal_Game/Bepal/DevTools/AutoPlay.cs, BEPAL/Docs/Balance/tools/validate.ps1, BEPAL/Docs/GDD/06-vertical-slice.md
   - Validation: build 0 warn; autoplay+refuse ผ่าน; batch 50 run ไม่ soft-lock, upgrade_buy cost ตรงตาราง; validate.ps1 ยังไม่ได้รัน
-- **2026-10-13 18:11 · Q-20261013-demo-ending** — ToBeContinuedScene เปลี่ยนข้อความเป็นจุดจบ demo (End of the BePal demo / Big Z can't be beaten yet / Thanks for playing)
-  - Files: BEPAL/Bepal_Game/Bepal/Scenes/MenuScenes.cs
-  - Validation: build 0 warn; autoplay+refuse ผ่าน; shot 16_tbc ตรวจแล้ว
