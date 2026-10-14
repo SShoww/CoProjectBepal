@@ -87,12 +87,14 @@ public class CareSelectScene : Scene
         Art.Pet(sb, _pet.Species, _pet.Color, new Vector2(_wheel.Center.X, _wheel.Center.Y + 115), 0.8f, _time,
             Gfx.OnWheel(_wheel.Center, 200, _wheel.Needle));
         _wheel.Draw(sb);
-        PetStats(sb, _pet, new Rectangle(40, 200, 250, 210));
-        Gfx.Text(sb, Gfx.Font, $"Energy {_gs.Energy}/{_gs.MaxEnergy}", new Vector2(Gfx.W - 60, 210), Palette.Warm, 1f);
-        Gfx.Text(sb, Gfx.Small, "Each care costs 1 Energy", new Vector2(Gfx.W - 60, 244), Palette.Dim, 1f);
+        PetStats(sb, _pet, new Rectangle(Ui.Margin, 200, StatsW, StatsH));
+        Gfx.Text(sb, Gfx.Font, $"Energy {_gs.Energy}/{_gs.MaxEnergy}", new Vector2(Gfx.W - Ui.Margin - 8, 210), Palette.Warm, 1f);
+        Gfx.Text(sb, Gfx.Small, "Each care costs 1 Energy", new Vector2(Gfx.W - Ui.Margin - 8, 238), Palette.Dim, 1f);
         _popups.Draw(sb);
         Ui.Hint(sb, "SPACE  Pick when the needle is on a choice   |   ESC  Back");
     }
+
+    public const int StatsW = 250, StatsH = 190;
 
     public static void PetStats(SpriteBatch sb, Pet p, Rectangle r)
     {
@@ -280,7 +282,7 @@ public class QteScene : Scene
         Art.Pet(sb, _pet.Species, _pet.Color, new Vector2(_wheel.Center.X, _wheel.Center.Y + 115), 0.8f, _time,
             Gfx.OnWheel(_wheel.Center, 200, _wheel.Needle));
         _wheel.Draw(sb);
-        CareSelectScene.PetStats(sb, _pet, new Rectangle(40, 200, 250, 210));
+        CareSelectScene.PetStats(sb, _pet, new Rectangle(Ui.Margin, 200, CareSelectScene.StatsW, CareSelectScene.StatsH));
 
         var ar = new Rectangle(Gfx.W - 290, 200, 250, 120);
         Ui.Panel(sb, ar, 0.9f);

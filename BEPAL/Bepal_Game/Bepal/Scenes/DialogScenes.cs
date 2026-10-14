@@ -31,7 +31,7 @@ public class DialogueScene : Scene
     public static DialogueScene Say(string speaker, Action? onDone, params string[] texts) =>
         new(texts.Select(t => new Line(speaker, t)), onDone);
 
-    string Current => Gfx.Wrap(Gfx.Font, _lines[_index].Text, 1060);
+    string Current => Gfx.Wrap(Gfx.Font, _lines[_index].Text, 940);
 
     public override void Update(float dt)
     {
@@ -77,7 +77,7 @@ public class DialogueScene : Scene
         var text = Current;
         Gfx.Text(sb, Gfx.Font, text[..Math.Min(text.Length, (int)_chars)], new Vector2(110, 530), Palette.Text);
         if (_chars >= text.Length && MathF.Sin(_time * 6) > 0)
-            Gfx.Text(sb, Gfx.Small, "Space >", new Vector2(1180, 650), Palette.Warm, 1f);
+            Gfx.Text(sb, Gfx.Small, "Space >", new Vector2(box.Right - Ui.Pad, box.Bottom - Ui.Pad - 14), Palette.Warm, 1f);
     }
 }
 

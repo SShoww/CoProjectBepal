@@ -1,6 +1,7 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Extended.Graphics;
 
 namespace Bepal;
 
@@ -56,10 +57,11 @@ public class Button
         var r = Rect;
         r.Y -= (int)MathF.Round(Balance.ButtonLiftPx * _hover);
         var bg = !Enabled ? new Color(40, 36, 40) : Color.Lerp(Palette.Panel, Accent, 0.35f * _hover);
-        Gfx.Rect(sb, r, bg * 0.95f);
-        Gfx.Outline(sb, r, Enabled ? Color.Lerp(Accent, Palette.Warm, 0.4f * _hover) : new Color(80, 70, 70), 2 + (int)MathF.Round(_hover));
-        var size = Gfx.Font.MeasureString(Label);
-        Gfx.Text(sb, Gfx.Font, Label, new Vector2(r.Center.X, r.Center.Y - size.Y / 2), Enabled ? Palette.Text : Palette.Dim, 0.5f);
+        Ui.Frame(sb, r, bg * 0.95f, Enabled ? Color.Lerp(Accent, Palette.Warm, 0.4f * _hover) : new Color(80, 70, 70));
+        float room = r.Width - Ui.Pad;
+        var font = Gfx.Font.MeasureString(Label).X > room ? Gfx.Small : Gfx.Font;   // long label: drop to the small size first
+        var label = Gfx.Fit(font, Label, room);
+        Gfx.Text(sb, font, label, new Vector2(r.Center.X, r.Center.Y - font.LineSpacing / 2f), Enabled ? Palette.Text : Palette.Dim, 0.5f);
     }
 }
 
@@ -120,10 +122,19 @@ public static class Ui
     /// <summary>0..1 fade-in of the overlay currently being drawn (1 = fully open); scales <see cref="Dim"/>.</summary>
     public static float OpenAlpha = 1f;
 
+    /// <summary>Layout rhythm shared by the screens: safe margin from the screen edge, inner padding of a panel, gap under a title.</summary>
+    public const int Margin = 32, Pad = 24, TitleGap = 16;
+
     public static void Panel(SpriteBatch sb, Rectangle r, float alpha = 0.95f)
     {
-        Gfx.Rect(sb, r, Palette.Panel * alpha);
-        Gfx.Outline(sb, r, Palette.PanelEdge, 2);
+        Frame(sb, r, Palette.Panel * alpha, Palette.PanelEdge);
+    }
+
+    /// <summary>Rounded box: <paramref name="fill"/> under a 2px <paramref name="edge"/> border (MonoGame.Extended nine-patch).</summary>
+    public static void Frame(SpriteBatch sb, Rectangle r, Color fill, Color edge)
+    {
+        sb.Draw(Gfx.PanelFill, r, fill);
+        sb.Draw(Gfx.PanelRing, r, edge);
     }
 
     public static void Bar(SpriteBatch sb, Rectangle r, float value, float max, Color fill, string? label = null)
@@ -132,7 +143,7 @@ public static class Ui
         float t = max <= 0 ? 0 : MathHelper.Clamp(value / max, 0, 1);
         Gfx.Rect(sb, r.X + 2, r.Y + 2, (r.Width - 4) * t, r.Height - 4, fill);
         if (label != null)
-            Gfx.Text(sb, Gfx.Small, label, new Vector2(r.X + 6, r.Y + (r.Height - Gfx.Small.LineSpacing) / 2f), Palette.Text);
+            Gfx.Text(sb, Gfx.Small, Gfx.Fit(Gfx.Small, label, r.Width - 12), new Vector2(r.X + 6, r.Y + (r.Height - Gfx.Small.LineSpacing) / 2f), Palette.Text);
     }
 
     // Oversized so it still covers the screen while an overlay is scaled down during its open animation
