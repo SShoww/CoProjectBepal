@@ -94,13 +94,15 @@ public static class Balance
     /// <summary>Dodge counts as "Too slow" (enemy hits) once it shrinks to this half-width.</summary>
     public const float DodgeVanish = 0.012f;
     /// <summary>Attack shrinks at this fraction of the enemy's DodgeShrink.</summary>
-    public const float AttackShrinkMul = 0.5f;
+    public const float AttackShrinkMul = 0.3f;
     /// <summary>Attack Perfect never shrinks below this half-width.</summary>
-    public const float AttackMinPerfect = 0.06f;
-    /// <summary>Attack Great half-width = Perfect + this.</summary>
+    public const float AttackMinPerfect = 0.03f;
+    /// <summary>Attack Great half-width at the start = Perfect + this; as Perfect shrinks, Great shrinks with the same ratio (start Great / start Perfect).</summary>
     public const float AttackGreatBand = 0.16f;
     /// <summary>Min distance (rad) from the needle / other zones when a new zone is placed.</summary>
     public const float DodgeSpawnGap = 1.2f, AttackSpawnGap = 0.8f;
+    /// <summary>Blinkbun passive: after an Attack the needle warps so it reaches the Dodge centre this many seconds later (time, not angle: needle speed differs per enemy).</summary>
+    public const float BlinkbunLeadTime = 0.65f;
 
     // --- Fight: damage ---
     /// <summary>Share of ATK dealt by a Great hit (Perfect = 100%).</summary>
@@ -110,7 +112,7 @@ public static class Balance
     public const int ToothlessHp = 120, ToothlessAtk = 15;
     public const float ToothlessDodgeShrink = 0.1f, ToothlessNeedleSpeed = 2.4f;
     public const int BigZHp = 9999, BigZAtk = 20;
-    public const float BigZDodgeShrink = 0.26f, BigZNeedleSpeed = 3.4f;
+    public const float BigZDodgeShrink = 0.2f, BigZNeedleSpeed = 3.4f;
 
     // --- Fight visual: layout (pixels, 1280x720) ---
     public const float FightWheelY = 440f, FightWheelRadius = 150f, FightWheelThickness = 26f;

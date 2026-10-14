@@ -77,7 +77,7 @@ public class Pet
             Species = s, Name = "Blinkbun", Element = "Shadow", Color = new Color(92, 176, 112),
             BaseMaxHp = 110, BaseAtk = 15, Hp = 110, Stomach = 60, Clean = 60,
             Description = "A long-eared rabbit with a third eye on its forehead. Patient and tough. The third eye watches you sleep.",
-            Passive = "Every attack warps the needle to 12 o'clock.",
+            Passive = "After every attack the needle warps to just ahead of the Dodge zone, giving you time to aim.",
         },
         _ => new Pet
         {

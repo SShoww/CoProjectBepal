@@ -154,7 +154,7 @@ public class FightScene : Scene
         if (_dodge == null)
         {
             _attack.Perfect = MathF.Max(Balance.AttackMinPerfect, _attack.Perfect - _enemy.DodgeShrink * Balance.AttackShrinkMul * dt);
-            _attack.Great = _attack.Perfect + Balance.AttackGreatBand;
+            _attack.Great = _attack.Perfect * _dodgeStart / (_dodgeStart - Balance.AttackGreatBand);   // Great keeps its starting ratio to Perfect (2x) while shrinking
         }
         else
         {
@@ -197,7 +197,6 @@ public class FightScene : Scene
             Gfx.Shake(Balance.FightHitShake, Balance.FightHitShakeTime);
             _popups.Add(hit, CenterPopup);
             _popups.Add($"-{(int)dmg}", Palette.Text, Balance.FightPopupEnemyDmg);
-            if (_pet.Has(Species.Blinkbun)) _wheel.Needle = 0;
             if (_pet.Has(Species.Mossling))
             {
                 int heal = Math.Max(1, (int)MathF.Round(_pet.MaxHp * Balance.MosslingHealPct));
@@ -215,7 +214,12 @@ public class FightScene : Scene
                 _won = true;
                 _end = Balance.FightEndDelay;
             }
-            else StartDodge();
+            else
+            {
+                StartDodge();
+                if (_pet.Has(Species.Blinkbun))   // needle warps to arrive at the Dodge centre in BlinkbunLeadTime seconds
+                    _wheel.Needle = ((_dodge!.Center - _wheel.Dir * _wheel.Speed * Balance.BlinkbunLeadTime) % MathHelper.TwoPi + MathHelper.TwoPi) % MathHelper.TwoPi;
+            }
         }
         else
         {
