@@ -159,9 +159,10 @@ foreach ($rid in $runs.Keys) {
   # ---- I05 exp / points
   $exps = Of 'exp'
   $qexp = Sum @($exps | Where-Object { $_['reason'] -eq 'qte' }) 'delta'
-  $nonMiss = @($qp | Where-Object { $_['hit'] -ne 'Miss' }).Count
-  if (-not (Eq $qexp $nonMiss)) { Fail 'I05' $rid "sum exp(qte)=$qexp != non-miss presses $nonMiss" }
-  if (-not (Eq (Sum $qp 'expGain') $nonMiss)) { Fail 'I05' $rid 'sum expGain != non-miss presses' }
+  # Player EXP per press: Great 1, Perfect 2 (Balance.PlayerExpGreat / PlayerExpPerfect)
+  $expWant = @($qp | Where-Object { $_['hit'] -eq 'Great' }).Count + 2 * @($qp | Where-Object { $_['hit'] -eq 'Perfect' }).Count
+  if (-not (Eq $qexp $expWant)) { Fail 'I05' $rid "sum exp(qte)=$qexp != Great + 2 x Perfect = $expWant" }
+  if (-not (Eq (Sum $qp 'expGain') $expWant)) { Fail 'I05' $rid 'sum expGain != Great + 2 x Perfect' }
   foreach ($x in $exps) {
     $maxX = 10 + ((N $x['level']) - 1) * 10
     if ((N $x['exp']) -ge $maxX) { Fail 'I05' $rid "exp $($x['exp']) >= PlayerMaxExp $maxX (lvl $($x['level'])) seq $($x['seq'])" }

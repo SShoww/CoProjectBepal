@@ -73,7 +73,7 @@ deadline: 2026-09-30
 | Coin เริ่มต้น | 150 |
 | รายได้ | +100 ทุกเช้า · ชนะ Toothless +200 · ขายสัตว์ให้พ่อค้า +5,000 |
 | หมอชุบชีวิต | **250 coin** → HP = 1 |
-| Player EXP | ได้ **+1 ทุกครั้งที่กด QTE โดน** (Perfect หรือ Great) — EXP เต็ม = +1 Point (สูตร Max EXP ตาม [08-care-qte](08-care-qte.md) §3.3) |
+| Player EXP | ได้ **Great +1 / Perfect +2 ทุกครั้งที่กด QTE โดน** — EXP เต็ม = +1 Point (สูตร Max EXP ตาม [08-care-qte](08-care-qte.md) §3.3) |
 
 ### 3.3 Upgrade (ตาม Figma)
 
@@ -112,7 +112,7 @@ deadline: 2026-09-30
 
 ### 3.6 Care / QTE และสูตรเลเวล (As built)
 
-- QTE ทุกแบบ `Attempts` = 10 ครั้ง · ทุกครั้งที่กดโดน (Perfect/Great) Player EXP +1
+- QTE ทุกแบบ `Attempts` = 10 ครั้ง · ทุกครั้งที่กดโดน Player EXP Great +1 / Perfect +2
 - ต่อครั้ง Perfect / Great: Train Progress +10 / +5 (× `TrainGainMultiplier`) · Feed Stomach +6 / +3 · Clean +6 / +3 · Heal HP +6 / +3
 - Stomach ที่เผาผลาญตอนเริ่ม QTE: Train −10 · Clean/Heal −5 · Feed 0
 - Max HP = (BaseMaxHp + (Lv−1)×10) × (Clean ≤ 25 ? 0.8 : 1) · ATK = round((BaseAtk + (Lv−1)×5) × (Clean ≤ 50 ? 0.75 : 1))

@@ -79,7 +79,7 @@ $$\text{MaxProgress}_{L} = 100 + (L - 1) \times 50$$
 - แต่ยิ่ง level สูง **choice zone ของ QTE Train จะเล็กลง** และ max progress bar เพิ่มขึ้น (เช่น 100 → 150 ตรงกับสมการด้านบน) — ใช้ Upgrade สาย QTE ช่วยถ่วงสมดุล
 - เมื่อถึงเลเวลหนึ่ง (ประมาณ **Lv. 3**) choice จะไม่หดเล็กลงอีก (implemented) และจะ **ปลดล็อกท่าโจมตีใหม่** (⏳ ยังไม่มี mechanic — มีแค่ข้อความ "learned a new move! (coming soon)") · Passive ของสายพันธุ์ปลดล็อกที่ Pet Lv 2 (`Balance.PassiveLevel`)
 
-**3. สมการอัปเลเวลผู้เล่นและ Skill Points (Player Level Curve)** แต้ม EXP ของผู้เล่นได้ +1 ทุกครั้งที่กด QTE โดน (Perfect หรือ Great) เราสามารถใช้สมการที่ต้องการแต้มเพิ่มขึ้นทีละ 10 เพื่อให้ความท้าทายสูงขึ้นเรื่อยๆ
+**3. สมการอัปเลเวลผู้เล่นและ Skill Points (Player Level Curve)** แต้ม EXP ของผู้เล่นได้ Great +1 / Perfect +2 ทุกครั้งที่กด QTE โดน เราสามารถใช้สมการที่ต้องการแต้มเพิ่มขึ้นทีละ 10 เพื่อให้ความท้าทายสูงขึ้นเรื่อยๆ
 
 $$\text{PlayerMaxEXP}_{L} = 10 + (L - 1) \times 10$$
 

@@ -17,7 +17,7 @@ Ordering fields ทุก event: `seq` (int, เรียงใน run), `tReal`
 ## 2. Events (ชื่อ -> fields -> จุดที่ emit)
 - `run_start`: starter(Species), startCoin, startEnergy -> `ChooseStarter` สร้าง `new GameState` (MenuScenes.cs) 
 - `care_select`: pet, result(`ok|gap|noenergy`), care(Train/Feed/Clean/Heal|""), hit(Perfect/Great/Miss) , energyAfter -> CareScenes.cs CareSelectScene.Update (~L61-70) ทุกครั้งที่กด Confirm
-- `qte_press`: pet, care, idx(1..10), hit, expGain(0/1), levelUps, ... -> QteScene.Update (~L100 หลัง Evaluate) / Apply
+- `qte_press`: pet, care, idx(1..10), hit, expGain(0/1/2 = Miss/Great/Perfect), levelUps, ... -> QteScene.Update (~L100 หลัง Evaluate) / Apply
 - `qte_end`: pet, care, perfect, great, miss, attempts, progressDelta, stomachDelta, cleanDelta, hpDelta, petLevelUps, playerLevelUp(bool) -> QteScene.Close()
 - `fight_start`: enemy, pet, petHp, petMaxHp, petAtk, seaTea(bool), dodgeStart -> FightScene ctor
 - `fight_press`: kind(`attack|dodge|miss`), hit, dmgDealt, combo, petHp, enemyHp, poisoned -> FightScene.Update (ที่ branch `zone==_dodge` / `zone==_attack` / else)

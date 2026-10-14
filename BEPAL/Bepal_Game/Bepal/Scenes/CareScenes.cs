@@ -206,7 +206,7 @@ public class QteScene : Scene
         _popups.Add(hit, new Vector2(Gfx.W / 2f, 150));
         Apply(hit, zone);
         Telemetry.Emit("qte_press", "pet", _pet.Name, "care", _care.ToString(), "idx", Balance.Attempts - _attempts, "hit", hit.ToString(),
-            "expGain", hit == Hit.Miss ? 0 : 1);
+            "expGain", hit == Hit.Miss ? 0 : hit == Hit.Perfect ? Balance.PlayerExpPerfect : Balance.PlayerExpGreat);
         if (_attempts == 0) _finish = 0.9f;
     }
 
@@ -223,7 +223,7 @@ public class QteScene : Scene
         if (perfect) Audio.Play(Sfx.QtePerfect, Balance.PerfectVolume, Balance.PerfectPitch);
         else Audio.Play(Sfx.QteGreat);
         if (perfect) _perfects++; else _greats++;
-        if (_gs.AddExp(1)) _playerLevelUp = true;   // player EXP: every successful press
+        if (_gs.AddExp(perfect ? Balance.PlayerExpPerfect : Balance.PlayerExpGreat)) _playerLevelUp = true;   // player EXP: every successful press
 
         switch (_care)
         {

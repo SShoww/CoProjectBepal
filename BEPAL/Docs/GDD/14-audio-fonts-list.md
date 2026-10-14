@@ -69,7 +69,7 @@ project: BePal
 
 ข้อความในเกมเป็นภาษาอังกฤษทั้งหมด — ไม่ต้องใช้ฟอนต์ไทย · ต้องเป็นฟอนต์ที่ **อนุญาตให้ใช้ในเกมได้** (เช่น Google Fonts / OFL)
 
-| รหัส Font | ไฟล์ | บริบทการใช้งาน | สไตล์ฟอนต์ | ปัจจุบันในโค้ด | Priority |
-| --- | --- | --- | --- | --- | --- |
-| **FNT-01** | `Fonts/fnt_title_display.ttf` → `Big.spritefont` (44 pt) | โลโก้, หัวข้อหน้าจอ, "Knock Knock !!", "To be continued...", Perfect/Great/Miss | ตัวหนา กึ่งลึกลับ มีเอกลักษณ์ | `Segoe UI` 44 Bold | P1 |
-| **FNT-02** | `Fonts/fnt_ui_cozy.ttf` → `Main.spritefont` (18 pt) + `Small.spritefont` (14 pt) | Dialogue, ปุ่ม, HUD, คำอธิบายไอเทม | Sans-serif มน อบอุ่น อ่านง่าย | `Segoe UI` 18 Bold (Main) / 14 Regular (Small) | P1 |
+| รหัส Font  | ไฟล์                                                                             | บริบทการใช้งาน                                                                  | สไตล์ฟอนต์                    | ปัจจุบันในโค้ด                                 | Priority |
+| ---------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ----------------------------- | ---------------------------------------------- | -------- |
+| **FNT-01** | `Fonts/fnt_title_display.ttf` → `Big.spritefont` (44 pt)                         | โลโก้, หัวข้อหน้าจอ, "Knock Knock !!", "To be continued...", Perfect/Great/Miss | ตัวหนา กึ่งลึกลับ มีเอกลักษณ์ | `Segoe UI` 44 Bold                             | P1       |
+| **FNT-02** | `Fonts/fnt_ui_cozy.ttf` → `Main.spritefont` (18 pt) + `Small.spritefont` (14 pt) | Dialogue, ปุ่ม, HUD, คำอธิบายไอเทม                                              | Sans-serif มน อบอุ่น อ่านง่าย | `Segoe UI` 18 Bold (Main) / 14 Regular (Small) | P1       |

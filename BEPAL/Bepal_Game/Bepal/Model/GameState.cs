@@ -171,6 +171,8 @@ public static class Balance
     public const float TrainGainPerUpgrade = 0.5f, QteZonePerUpgrade = 0.2f;
     /// <summary>Player EXP to level up: first level, plus this much more each level.</summary>
     public const int PlayerExpBase = 10, PlayerExpPerLevel = 10;
+    /// <summary>Player EXP per successful QTE press (Great, Perfect).</summary>
+    public const int PlayerExpGreat = 1, PlayerExpPerfect = 2;
 
     // ================= SHOP (Scenes/BaseMenus.cs, Day 3 merchant) =================
     public const int CrabApplePrice = 25, CrabAppleHp = 18, CrabAppleStomach = 20;
