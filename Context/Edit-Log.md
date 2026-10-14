@@ -3,15 +3,15 @@
 ล่าสุด 10 งาน งานละ 3 บรรทัด เขียนผ่าน `tools/context/log-edit.py` เท่านั้น — รายการเก่าอยู่ที่ [archive/edit-log/](archive/edit-log/)
 
 <!-- entries -->
-- **2026-10-14 13:51 · Q-20261014-ui-font-patrick-hand** — แทนฟอนต์ UI (Butter Squishy ไม่มี license) ด้วย Patrick Hand SC (OFL, ดาวน์โหลดจาก google/fonts) ขนาด Main 18 / Small 15
-  - Files: Content/Fonts/*, CLAUDE.md, 14-audio-fonts-list.md, Status.md
-  - Validation: build 0 warning; autoplay + --refuse reached To be continued; shots ตรวจ 6 ภาพ; ยังไม่ได้เล่นจริง
-- **2026-10-14 13:24 · Q-20261014-custom-fonts** — ใช้ฟอนต์ Animal (title) + Butter Squishy (UI) จาก _candidates แทน Tahoma; เปลี่ยนป้าย [Space] เป็น (Space) เพราะฟอนต์ไม่มี [ ]
-  - Files: Content/Fonts/*, Core/Ui.cs, Scenes/{BaseScene, MenuScenes}.cs, CLAUDE.md, 14-audio-fonts-list.md, Status.md
-  - Validation: build 0 warning; autoplay + --refuse reached To be continued; shots ตรวจ 6 ภาพ; ยังไม่ได้เล่นจริง; license Butter Squishy ไม่มีบันทึก
-- **2026-10-14 12:36 · Q-20261014-ui-polish-extended** — ลดขนาดฟอนต์ (Tahoma, เพิ่ม Title) จัด layout UI แก้เส้นขีดวงล้อ QTE (Gfx.Arc เป็น mesh ไม่ซ้อน) และใช้ MonoGame.Extended NinePatch ทำกรอบมน
-  - Files: BEPAL/Bepal_Game/Bepal/Core/{Gfx, Ui}.cs, Scenes/*, Content/Fonts/*, Bepal.csproj, CLAUDE.md, 14-audio-fonts-list.md, Status.md
-  - Validation: build 0 warning; autoplay + --refuse reached To be continued; shots ตรวจด้วยตา; ยังไม่ได้เล่นจริง
+- **2026-10-14 13:54 · Q-20261014-ui-font-patrick-hand** — ปิด quest ui-font-patrick-hand (ย้ายไป archive ตามคำสั่งผู้ใช้)
+  - Files: Context/quests, Context/archive/quests
+  - Validation: merge แล้ว PR #32; ยังไม่ได้เล่นจริง
+- **2026-10-14 13:54 · Q-20261014-custom-fonts** — ปิด quest custom-fonts (ย้ายไป archive ตามคำสั่งผู้ใช้)
+  - Files: Context/quests, Context/archive/quests
+  - Validation: merge แล้ว PR #31; ยังไม่ได้เล่นจริง
+- **2026-10-14 13:54 · Q-20261014-ui-polish-extended** — ปิด quest ui-polish-extended (ย้ายไป archive ตามคำสั่งผู้ใช้)
+  - Files: Context/quests, Context/archive/quests
+  - Validation: merge แล้ว PR #30; ยังไม่ได้เล่นจริง
 - **2026-10-14 00:36 · Q-20261013-bgm** — Day 4 เล่น bgm_thunderstorm ทั้งวัน (เดิมเฉพาะหลังเปิดประตู)
   - Files: BEPAL/Bepal_Game/Bepal/Scenes/BaseScene.cs, BEPAL/Docs/GDD/14-audio-fonts-list.md
   - Validation: build 0 warning/0 error; --autoplay -> RESULT: reached To be continued; ยังไม่ได้ฟังด้วยหู
