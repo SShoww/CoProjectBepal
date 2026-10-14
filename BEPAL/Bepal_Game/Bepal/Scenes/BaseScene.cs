@@ -533,14 +533,14 @@ public class BaseScene : Scene
 
     void DrawHud(SpriteBatch sb)
     {
-        var r = new Rectangle(16, 14, 488, 64);
+        var r = new Rectangle(16, 14, 488, 74);
         Ui.Panel(sb, r, 0.85f);
         Gfx.Text(sb, Gfx.Font, $"Day {_gs.Day}", new Vector2(r.X + 16, r.Y + 8), Palette.Warm);
-        Gfx.Circle(sb, new Vector2(r.X + 100, r.Y + 22), 9, Palette.Coin);
+        Gfx.Circle(sb, new Vector2(r.X + 100, r.Y + 26), 7, Palette.Coin);
         Gfx.Text(sb, Gfx.Font, $"{_gs.Coin}", new Vector2(r.X + 116, r.Y + 8), Palette.Coin);
-        Gfx.Text(sb, Gfx.Small, "Energy", new Vector2(r.X + 16, r.Y + 38), Palette.Dim);
+        Gfx.Text(sb, Gfx.Small, "Energy", new Vector2(r.X + 22, r.Y + 41), Palette.Dim);
         for (int i = 0; i < _gs.MaxEnergy; i++)
-            Gfx.Rect(sb, r.X + 88 + i * 20, r.Y + 41, 14, 14, i < _gs.Energy ? new Color(120, 240, 140) : new Color(50, 60, 50));
+            Gfx.Rect(sb, r.X + 88 + i * 20, r.Y + 46, 14, 14, i < _gs.Energy ? new Color(120, 240, 140) : new Color(50, 60, 50));
         Gfx.Text(sb, Gfx.Font, $"Player LV. {_gs.PlayerLevel}", new Vector2(r.X + 228, r.Y + 8), Palette.Text);
         Ui.Bar(sb, new Rectangle(r.X + 228, r.Y + 40, 150, 14), _expShown.Value, _gs.PlayerMaxExp, Palette.Progress);
         Gfx.Text(sb, Gfx.Font, $"Points {_gs.Points}", new Vector2(r.X + 392, r.Y + 24), _gs.Points > 0 ? Palette.Coin : Palette.Dim);
