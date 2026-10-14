@@ -9,7 +9,7 @@
 - ใช้ Gitflow ([Gitflow.md](Gitflow.md)): `Develop` รวม PR ถึง #19 แล้ว; Sprint 2 (2026-10-05 → 2026-10-18); **final deadline 2026-11-04**
 - as-built:
   - Art: parallax 5 ชั้น + `fg_jungle` + `player.png`; สัตว์/ศัตรู/หมอ/พ่อค้ารองรับ sprite จริงแล้ว (ท่อพร้อม, `Art.LoadOptional`) แต่ยังไม่มีไฟล์ภาพ จึงวาด primitive (M16/M17 ค้างที่ตัวภาพ)
-  - Audio: SFX 17 ไฟล์เสร็จ; BGM 7 ไฟล์เข้าเกมแล้ว (`Content/Music/`, `MusicPlayer`, เลือกเพลงตาม scene) และมีเมนู Options ปรับ volume เพลง/SFX (Main Menu + Pause); ฟอนต์เป็น `Tahoma` (ฟอนต์ระบบ Windows, สิทธิ์แจกจ่ายยังไม่ชัด — S8; เปลี่ยนจาก Segoe UI เพราะตัวอักษรเอียงทั้งเกม)
+  - Audio: SFX 17 ไฟล์เสร็จ; BGM 7 ไฟล์เข้าเกมแล้ว (`Content/Music/`, `MusicPlayer`, เลือกเพลงตาม scene) และมีเมนู Options ปรับ volume เพลง/SFX (Main Menu + Pause); ฟอนต์เป็น Animal (title) + Butter Squishy (UI) (.otf; Animal = Personal Use Only, Butter Squishy ยังไม่มีบันทึก license — ใช้ได้เฉพาะงานรายวิชา ต้องตรวจ/เปลี่ยนเป็น OFL ก่อนเผยแพร่ — S8)
   - ทำแล้ว 2026-10-13: ตัวเลข care/shop/EXP ย้ายเข้า `Balance`; Energy 0 เปิด care ไม่ได้ + Heal จางเมื่อ HP เต็ม; หน้าจบบอกว่าเป็น demo; Point cost ต่อเลเวล (Energy 1/2/4, Progress 1/2/3 max 3) + UI อธิบาย Point; ร้านเปิดหลัง Sell/Refuse, ของเข้า Box (`InventoryScene`), ไอเทมใหม่ 4 ชิ้น (เพดาน 3 ชิ้นต่อชนิด `Balance.ShopMaxOwned` — ผู้ใช้ยังไม่ได้ confirm)
 
 ## ค้าง / รอบถัดไป

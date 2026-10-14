@@ -59,7 +59,8 @@ public class Button
         var bg = !Enabled ? new Color(40, 36, 40) : Color.Lerp(Palette.Panel, Accent, 0.35f * _hover);
         Ui.Frame(sb, r, bg * 0.95f, Enabled ? Color.Lerp(Accent, Palette.Warm, 0.4f * _hover) : new Color(80, 70, 70));
         float room = r.Width - Ui.Pad;
-        var font = Gfx.Font.MeasureString(Label).X > room ? Gfx.Small : Gfx.Font;   // long label: drop to the small size first
+        var font = Label.Length == 1 ? Gfx.Big                                   // glyph buttons ("+") need the big size to read
+            : Gfx.Font.MeasureString(Label).X > room ? Gfx.Small : Gfx.Font;   // long label: drop to the small size first
         var label = Gfx.Fit(font, Label, room);
         Gfx.Text(sb, font, label, new Vector2(r.Center.X, r.Center.Y - font.LineSpacing / 2f), Enabled ? Palette.Text : Palette.Dim, 0.5f);
     }

@@ -382,7 +382,7 @@ public class BaseScene : Scene
         {
             float fade = Ease.OutCubic(_promptT / Balance.PromptFadeTime);
             var pos = new Vector2(Sx(_near.X), GroundY - (_near.Kind == Kind.Pet ? 150 : 200) + MathF.Sin(_time * 3.2f) * 4);
-            string text = $"[Space] {_near.Label}";
+            string text = $"(Space) {_near.Label}";
             var size = Gfx.Small.MeasureString(text);
             Gfx.Rect(sb, pos.X - size.X / 2 - 10, pos.Y - 4, size.X + 20, size.Y + 8, Color.Black * (0.6f * fade));
             Gfx.Text(sb, Gfx.Small, text, new Vector2(pos.X, pos.Y), Palette.Warm * fade, 0.5f);
