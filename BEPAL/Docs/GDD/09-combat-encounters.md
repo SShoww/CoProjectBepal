@@ -32,10 +32,10 @@ date: 2026-10-13
 | **Choose pet to fight** | คลิ๊กเลือกสัตว์ของเรา (hover ขึ้นกรอบรอบตัว) |
 | **HUD** | หลอด HP ของศัตรู + หลอด HP เล็กบนหัวสัตว์ของเรา · ชื่อท่าศัตรูโผล่เฉพาะใน popup ตอนโดน ("{Attack}! -{dmg}") ไม่มี HUD ถาวร |
 | **Dodge choice** | มีแค่ zone **Perfect** (เริ่ม half-width 0.32, Sea Tea 0.38) ที่ **ค่อยๆ หดสั้นลง** จน "vanish" ที่ 0.012 ("Too slow") — ถ้ากดไม่ทันหรือไม่โดน สัตว์เราถูกโจมตี |
-| **Attack choice** | zone **Perfect = 100%** ของ ATK / **Great = 75%** ของ ATK (เช่น ATK 100 → 100 / 75) · Great band 0.16, Perfect ต่ำสุด 0.06, หดครึ่งเดียวของ Dodge |
+| **Attack choice** | zone **Perfect = 100%** ของ ATK / **Great = 75%** ของ ATK (เช่น ATK 100 → 100 / 75) · ตอนเริ่ม Great = Perfect + 0.16 (Perfect 0.16 / Great 0.32 = 2 เท่า) · Perfect ต่ำสุด 0.06 · ระหว่างหด Great หดตาม Perfect ในอัตราส่วนเดิม (ต่ำสุด Great ≈ 0.12) · หดครึ่งเดียวของ Dodge |
 | **ลำดับ (As built)** | วงล้อเดียวสลับเฟส: เริ่มที่ **Attack (เขียว)** → ตีโดนแต่ไม่ตาย = **Dodge (เหลือง)** → หลบสำเร็จ = กลับ Attack · กดพลาดทั้งสองเฟส (หรือ Attack พลาด) = สัตว์ถูกตี |
 | **สูตรดาเมจ** | สัตว์ = ATK × (Perfect 1.0 / Great 0.75) × (ศัตรูโดนพิษ ? 1.25 : 1) · ศัตรู = ATK × (สัตว์เราโดนพิษ ? 0.75 : 1) · Cloudy Glasses กัน hit ("Blocked! (n left)") |
-| **Passive ใน Fight** | Nibbleclaw "Combo xN" (+50%/combo) · Blinkbun เข็มวาร์ปไป 12 นาฬิกา · Mossling ฟื้น 1% Max HP (≥1) · Toothless "Poisoned!" (เริ่มที่ Pet Lv 2) |
+| **Passive ใน Fight** | Nibbleclaw "Combo xN" (+50%/combo) · Blinkbun เข็มวาร์ปให้ไปถึงกลาง Dodge ในอีก 0.75 วิ · Mossling ฟื้น 1% Max HP (≥1) · Toothless "Poisoned!" (เริ่มที่ Pet Lv 2) |
 | **ชนะ** | ศัตรู HP = 0 → "You got new pet !!!" รับสัตว์ตัวใหม่ (Toothless เริ่ม HP 60) + **+200 coin** |
 | **สัตว์เราตาย** | "{pet} has fallen! Send another pet" → เลือกตัวอื่นมาสู้ต่อ — **HP ศัตรูคงเดิม** (combo Nibbleclaw รีเซ็ต) จนกว่าศัตรูจะ HP = 0 |
 | **แพ้** | สัตว์ตายหมด → **Game Over** → เริ่มเลือกสัตว์ใหม่ที่ Scene 2 |

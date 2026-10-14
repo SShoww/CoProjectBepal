@@ -62,7 +62,7 @@ deadline: 2026-09-30
 | **Toothless** (ศัตรู → สัตว์เลี้ยง) | — | ศัตรู (Fight Day 2) HP 120 / ATK 15 (`Balance.ToothlessHp`) · สัตว์เลี้ยงหลัง Tame: Max HP ฐาน 120 แต่เริ่มที่ **HP 60** / ATK 15 | 60 / 60 (หลัง Tame) |
 | **Big Z** (บอส) | — | 9999 | 20 | — |
 
-> **Passive ของสัตว์ — implemented (first pass, ยังต้อง balance):** ปลดล็อกที่ Pet Level ≥ `Balance.PassiveLevel` (= 2) · Mossling: ฟื้น 1% Max HP ต่อการ Attack · Nibbleclaw: combo Attack โดนติดกัน ดาเมจ ×(1 + combo × 0.5) รีเซ็ตเมื่อพลาด · Blinkbun: เข็มวาร์ปไป 12 นาฬิกาหลัง Attack · Toothless: พิษ — ศัตรูรับดาเมจ ×1.25 / ตี ×0.75 (ไม่ stack)
+> **Passive ของสัตว์ — implemented (first pass, ยังต้อง balance):** ปลดล็อกที่ Pet Level ≥ `Balance.PassiveLevel` (= 2) · Mossling: ฟื้น 1% Max HP ต่อการ Attack · Nibbleclaw: combo Attack โดนติดกัน ดาเมจ ×(1 + combo × 0.5) รีเซ็ตเมื่อพลาด · Blinkbun: หลัง Attack เข็มวาร์ปให้ไปถึงกลาง Dodge ในอีก 0.75 วิ (`Balance.BlinkbunLeadTime`) · Toothless: พิษ — ศัตรูรับดาเมจ ×1.25 / ตี ×0.75 (ไม่ stack)
 > ท่าโจมตีใหม่เมื่อ Pet Lv 3 ("learned a new move! (coming soon)") **ยังไม่มี mechanic** — pending
 
 ### 3.2 ทรัพยากร
