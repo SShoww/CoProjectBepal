@@ -76,7 +76,7 @@ public class CareSelectScene : Scene
         Telemetry.Emit("care_select", "pet", _pet.Name, "result", "ok", "care", zone.Label, "hit", hit.ToString(), "energyAfter", _gs.Energy);
         Audio.Play(Sfx.QteSelect);
         Gfx.Shake(10, 0.3f);
-        _popups.Add(zone.Label!, zone.Color, new Vector2(Gfx.W / 2f, 120));
+        _popups.Add(zone.Label!, zone.Color, new Vector2(Gfx.W / 2f, 250));
         _openDelay = 0.4f;
     }
 
@@ -205,7 +205,7 @@ public class QteScene : Scene
 
         _attempts--;
         var (hit, zone) = _wheel.Evaluate();
-        _popups.Add(hit, new Vector2(Gfx.W / 2f, 150));
+        _popups.Add(hit, new Vector2(Gfx.W / 2f, 250));
         Apply(hit, zone);
         Telemetry.Emit("qte_press", "pet", _pet.Name, "care", _care.ToString(), "idx", Balance.Attempts - _attempts, "hit", hit.ToString(),
             "expGain", hit == Hit.Miss ? 0 : hit == Hit.Perfect ? Balance.PlayerExpPerfect : Balance.PlayerExpGreat);
