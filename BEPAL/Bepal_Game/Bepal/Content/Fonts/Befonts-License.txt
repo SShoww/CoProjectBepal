@@ -2,4 +2,4 @@ License: Personal Use Only
 Link: https://befonts.com/baby-animal-handwritten-font.html
 Link: https://befonts.com/animal-simple-handmade-font.html
 
-NOTE: fnt_ui_cozy.otf is now "Butter Squishy" by Khurasan (replaced 2026-10-14). Its license is not recorded here - check before any release.
+NOTE: this file covers Animal (fnt_title_display.otf) only. The UI font fnt_ui_cozy.ttf is Patrick Hand SC under the SIL OFL 1.1 - see PatrickHandSC-OFL.txt.

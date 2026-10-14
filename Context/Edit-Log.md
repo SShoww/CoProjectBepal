@@ -3,6 +3,9 @@
 ล่าสุด 10 งาน งานละ 3 บรรทัด เขียนผ่าน `tools/context/log-edit.py` เท่านั้น — รายการเก่าอยู่ที่ [archive/edit-log/](archive/edit-log/)
 
 <!-- entries -->
+- **2026-10-14 13:51 · Q-20261014-ui-font-patrick-hand** — แทนฟอนต์ UI (Butter Squishy ไม่มี license) ด้วย Patrick Hand SC (OFL, ดาวน์โหลดจาก google/fonts) ขนาด Main 18 / Small 15
+  - Files: Content/Fonts/*, CLAUDE.md, 14-audio-fonts-list.md, Status.md
+  - Validation: build 0 warning; autoplay + --refuse reached To be continued; shots ตรวจ 6 ภาพ; ยังไม่ได้เล่นจริง
 - **2026-10-14 13:24 · Q-20261014-custom-fonts** — ใช้ฟอนต์ Animal (title) + Butter Squishy (UI) จาก _candidates แทน Tahoma; เปลี่ยนป้าย [Space] เป็น (Space) เพราะฟอนต์ไม่มี [ ]
   - Files: Content/Fonts/*, Core/Ui.cs, Scenes/{BaseScene, MenuScenes}.cs, CLAUDE.md, 14-audio-fonts-list.md, Status.md
   - Validation: build 0 warning; autoplay + --refuse reached To be continued; shots ตรวจ 6 ภาพ; ยังไม่ได้เล่นจริง; license Butter Squishy ไม่มีบันทึก
@@ -30,6 +33,3 @@
 - **2026-10-13 19:07 · Q-20261013-context-housekeeping** — ผู้ใช้สั่งปิด Q-20261013 ทั้ง 7 ย้ายไป archive/quests และอัปเดต Status.md ให้ตรง Develop @ a05b7be
   - Files: Context/archive/quests/, Context/Status.md
   - Validation: ตรวจ path ต้นทาง/ปลายทาง (Context/quests -> Context/archive/quests) ไม่มีไฟล์ชน; แก้เอกสารล้วน ไม่ได้รัน build
-- **2026-10-13 19:06 · Q-20261013-art-pipeline** — Art.Pet/Enemy/Merchant/Doctor ใช้ texture optional ต่อ asset (null = primitive เดิม) วาดผ่าน SpriteMotion; เขียนขั้นตอนใส่ภาพใน README/asset-list
-  - Files: BEPAL/Bepal_Game/Bepal/World/Art.cs, Core/Gfx.cs, Scenes/FightScene.cs, BEPAL/Assets/_candidates/README.md, BEPAL/Docs/GDD/05-asset-list.md
-  - Validation: build 0 warn; ไม่มีไฟล์ -> shots+autoplay ผ่าน; ทดสอบด้วย PNG ชั่วคราวที่ไม่ commit
