@@ -49,7 +49,9 @@ public static class DayEvents
                 {
                     if (!won)
                     {
-                        m.Reset(new GameOverScene("All your pets have fallen to Toothless."));
+                        m.Push(DialogueScene.Say("", null,
+                            "All your pets have fallen to Toothless. It slinks back into the dark.",
+                            "Carry them home and ask the Doctor to revive them."));
                         return;
                     }
                     var t = Pet.Create(Species.Toothless);

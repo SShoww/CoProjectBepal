@@ -3,6 +3,9 @@
 ล่าสุด 10 งาน งานละ 3 บรรทัด เขียนผ่าน `tools/context/log-edit.py` เท่านั้น — รายการเก่าอยู่ที่ [archive/edit-log/](archive/edit-log/)
 
 <!-- entries -->
+- **2026-10-14 15:09 · Q-20261014-toothless-defeat** — แพ้ Toothless (สัตว์ตายหมด) -> dialogue แล้วกลับฐานไปชุบกับหมอ แทน GameOverScene
+  - Files: BEPAL/Bepal_Game/Bepal/Scenes/DayEvents.cs, Context/quests/Q-20261014-toothless-defeat.md
+  - Validation: build 0 warn/0 err; autoplay + --refuse reached To be continued; ยังไม่ได้ทดสอบเส้นทางแพ้จริง
 - **2026-10-14 13:54 · Q-20261014-ui-font-patrick-hand** — ปิด quest ui-font-patrick-hand (ย้ายไป archive ตามคำสั่งผู้ใช้)
   - Files: Context/quests, Context/archive/quests
   - Validation: merge แล้ว PR #32; ยังไม่ได้เล่นจริง
@@ -30,6 +33,3 @@
 - **2026-10-13 19:45 · Q-20261013-options-menu** — เมนู Options ปรับ volume เพลง/SFX (slider เมาส์/คีย์), เก็บใน %APPDATA%/BePal/settings.txt, เปิดจาก Main Menu และ Pause
   - Files: BEPAL/Bepal_Game/Bepal/Core/Settings.cs, Core/Ui.cs, Core/Audio.cs, Core/MusicPlayer.cs, Scenes/MenuScenes.cs, Scenes/BaseScene.cs, docs
   - Validation: build 0 warn; ทดสอบ input จริงผ่าน harness ชั่วคราว; autoplay ไม่แตะ settings; ยังไม่ได้ฟัง/เปิดจาก Pause ด้วยมือ
-- **2026-10-13 19:07 · Q-20261013-context-housekeeping** — ผู้ใช้สั่งปิด Q-20261013 ทั้ง 7 ย้ายไป archive/quests และอัปเดต Status.md ให้ตรง Develop @ a05b7be
-  - Files: Context/archive/quests/, Context/Status.md
-  - Validation: ตรวจ path ต้นทาง/ปลายทาง (Context/quests -> Context/archive/quests) ไม่มีไฟล์ชน; แก้เอกสารล้วน ไม่ได้รัน build
