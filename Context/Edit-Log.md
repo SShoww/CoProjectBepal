@@ -3,6 +3,9 @@
 ล่าสุด 10 งาน งานละ 3 บรรทัด เขียนผ่าน `tools/context/log-edit.py` เท่านั้น — รายการเก่าอยู่ที่ [archive/edit-log/](archive/edit-log/)
 
 <!-- entries -->
+- **2026-10-14 12:36 · Q-20261014-ui-polish-extended** — ลดขนาดฟอนต์ (Tahoma, เพิ่ม Title) จัด layout UI แก้เส้นขีดวงล้อ QTE (Gfx.Arc เป็น mesh ไม่ซ้อน) และใช้ MonoGame.Extended NinePatch ทำกรอบมน
+  - Files: BEPAL/Bepal_Game/Bepal/Core/{Gfx, Ui}.cs, Scenes/*, Content/Fonts/*, Bepal.csproj, CLAUDE.md, 14-audio-fonts-list.md, Status.md
+  - Validation: build 0 warning; autoplay + --refuse reached To be continued; shots ตรวจด้วยตา; ยังไม่ได้เล่นจริง
 - **2026-10-14 00:36 · Q-20261013-bgm** — Day 4 เล่น bgm_thunderstorm ทั้งวัน (เดิมเฉพาะหลังเปิดประตู)
   - Files: BEPAL/Bepal_Game/Bepal/Scenes/BaseScene.cs, BEPAL/Docs/GDD/14-audio-fonts-list.md
   - Validation: build 0 warning/0 error; --autoplay -> RESULT: reached To be continued; ยังไม่ได้ฟังด้วยหู
@@ -30,6 +33,3 @@
 - **2026-10-13 18:48 · Q-20261013-inventory-items** — ร้านเปิดหลัง Sell/Refuse, ของเข้า Box ใช้ผ่าน InventoryScene, เพิ่ม Cloudy Glasses/Ballet Shoes/Torn Notebook/Faded Ribbon, bot ซื้อ/ใช้ไอเทม
   - Files: BEPAL/Bepal_Game/Bepal/Model/Items.cs, Model/GameState.cs, Scenes/BaseMenus.cs, Scenes/BaseScene.cs, Scenes/FightScene.cs, Scenes/DayEvents.cs, DevTools/AutoPlay.cs, GDD docs, CLAUDE.md
   - Validation: build 0 warn; autoplay+refuse ผ่าน; batch 50 run ไม่ timeout item_use ครบ 7 ชนิด; validate.ps1 ไม่ได้รัน
-- **2026-10-13 18:29 · Q-20261013-upgrade-points** — ราคา Point ต่อเลเวล (Energy 1/2/4, Progress 1/2/3 max 3, QTE 1/1/1) พร้อมข้อความ Upgrade/HUD/hint แรกให้ชัดว่าต้องใช้และได้ Point จากไหน
-  - Files: BEPAL/Bepal_Game/Bepal/Model/GameState.cs, BEPAL/Bepal_Game/Bepal/Scenes/BaseMenus.cs, BEPAL/Bepal_Game/Bepal/Scenes/BaseScene.cs, BEPAL/Bepal_Game/Bepal/Scenes/CareScenes.cs, BEPAL/Bepal_Game/Bepal/DevTools/AutoPlay.cs, BEPAL/Docs/Balance/tools/validate.ps1, BEPAL/Docs/GDD/06-vertical-slice.md
-  - Validation: build 0 warn; autoplay+refuse ผ่าน; batch 50 run ไม่ soft-lock, upgrade_buy cost ตรงตาราง; validate.ps1 ยังไม่ได้รัน
