@@ -48,6 +48,8 @@ public static class Balance
     public const float FadeSpeed = 2.5f;
     public const float OverlayOpenTime = 0.18f, OverlayOpenScale = 0.94f;
     public const float ButtonHoverK = 18, ButtonLiftPx = 2;
+    // Shop / inventory carousel: Staging (hero 0.9 -> 1.0, the rest dimmed to 0.4) + Horizontal Scrub (drag maps 1:1 onto the track)
+    public const float StageHeroScale = 0.9f, StageDimAlpha = 0.4f, TrackSnapK = 14, TrackStride = 290, TrackDragSlop = 6;
     public const int StartCoin = 150;
     public const int DailyCoin = 100;
     public const int ToothlessReward = 200;
