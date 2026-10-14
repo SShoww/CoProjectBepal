@@ -420,3 +420,6 @@ Context/.edit-log.lock
 BEPAL/Docs/Balance/data/raw/
 BEPAL/Docs/Balance/data-human/
 BEPAL/Docs/Balance/data-human-raw/
+
+# Claude Code personal overrides
+.claude/settings.local.json
