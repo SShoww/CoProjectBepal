@@ -37,7 +37,7 @@ public class MainMenuScene : Scene
         _options.Draw(sb);
         _quit.Draw(sb);
         if (MathF.Sin(_time * 4) > -0.3f)
-            Gfx.Text(sb, Gfx.Font, "[ Space ] to Enter", new Vector2(Gfx.W / 2f, 612), Palette.Text, 0.5f);
+            Gfx.Text(sb, Gfx.Font, "Press Space to Enter", new Vector2(Gfx.W / 2f, 612), Palette.Text, 0.5f);
         Gfx.Text(sb, Gfx.Small, "A / D  Walk      SPACE  Interact / QTE      Mouse  UI", new Vector2(Gfx.W / 2f, 670), Palette.Dim, 0.5f);
     }
 }
@@ -202,8 +202,8 @@ public class OptionsScene : Scene
         _onClose = onClose;
         _sliders = new[]
         {
-            new Slider(new Rectangle(560, 270, 360, 12), Settings.Music),
-            new Slider(new Rectangle(560, 350, 360, 12), Settings.Sfx),
+            new Slider(new Rectangle(520, 270, 360, 12), Settings.Music),
+            new Slider(new Rectangle(520, 350, 360, 12), Settings.Sfx),
         };
     }
 

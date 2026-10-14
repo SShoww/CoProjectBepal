@@ -69,7 +69,9 @@ project: BePal
 
 ข้อความในเกมเป็นภาษาอังกฤษทั้งหมด — ไม่ต้องใช้ฟอนต์ไทย · ต้องเป็นฟอนต์ที่ **อนุญาตให้ใช้ในเกมได้** (เช่น Google Fonts / OFL)
 
+> **ฟอนต์ที่ใช้อยู่ (2026-10-14):** Animal (title, befonts.com — license **Personal Use Only**, `Content/Fonts/Befonts-License.txt`) และ Butter Squishy (UI, Khurasan — **license ยังไม่มีบันทึก ต้องตรวจ**) ผู้ใช้ยืนยันว่าโปรเจกต์นี้เป็นงานรายวิชาที่ส่งอาจารย์ ไม่ใช้เชิงพาณิชย์ (ยืนยันแล้วสำหรับ Animal); **ต้องเปลี่ยนเป็น OFL/ตรวจ license ก่อนเผยแพร่/ขายต่อ** · Animal มีเฉพาะตัวพิมพ์ใหญ่ (โลโก้ขึ้น "BEPAL") · Butter Squishy ไม่มีอักขระ `[ ] ^ { } ~` (ตัวที่ขาดจะขึ้น `?`) จึงเปลี่ยนป้าย `[Space]` เป็น `(Space)` — ห้ามใช้อักขระเหล่านี้ในข้อความเกม
+
 | รหัส Font  | ไฟล์                                                                             | บริบทการใช้งาน                                                                  | สไตล์ฟอนต์                    | ปัจจุบันในโค้ด                                 | Priority |
 | ---------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ----------------------------- | ---------------------------------------------- | -------- |
-| **FNT-01** | `Fonts/fnt_title_display.ttf` → `Big.spritefont` (44 pt)                         | โลโก้, หัวข้อหน้าจอ, "Knock Knock !!", "To be continued...", Perfect/Great/Miss | ตัวหนา กึ่งลึกลับ มีเอกลักษณ์ | `Tahoma` 30 Bold (+ `Title.spritefont` 60 โลโก้)  | P1       |
-| **FNT-02** | `Fonts/fnt_ui_cozy.ttf` → `Main.spritefont` (18 pt) + `Small.spritefont` (14 pt) | Dialogue, ปุ่ม, HUD, คำอธิบายไอเทม                                              | Sans-serif มน อบอุ่น อ่านง่าย | `Tahoma` 15 Bold (Main) / 13 Regular (Small)   | P1       |
+| **FNT-01** | `Fonts/fnt_title_display.ttf` → `Big.spritefont` (44 pt)                         | โลโก้, หัวข้อหน้าจอ, "Knock Knock !!", "To be continued...", Perfect/Great/Miss | ตัวหนา กึ่งลึกลับ มีเอกลักษณ์ | `fnt_title_display.otf` 34 (+ `Title.spritefont` 68 โลโก้) ✅ | P1       |
+| **FNT-02** | `Fonts/fnt_ui_cozy.ttf` → `Main.spritefont` (18 pt) + `Small.spritefont` (14 pt) | Dialogue, ปุ่ม, HUD, คำอธิบายไอเทม                                              | Sans-serif มน อบอุ่น อ่านง่าย | `fnt_ui_cozy.otf` 17 (Main) / 14 (Small) ✅       | P1       |
