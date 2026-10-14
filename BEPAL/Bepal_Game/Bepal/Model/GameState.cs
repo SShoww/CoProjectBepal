@@ -116,10 +116,10 @@ public static class Balance
     public const float FightPetX = 250f, FightEnemyX = 1010f, FightPetScale = 1.4f;
     public const int FightPetBarW = 140, FightPetBarH = 16, FightPetBarY = 380, FightPetLabelY = 354;
     public const int FightEnemyBarW = 400, FightEnemyBarH = 24, FightEnemyBarY = 60, FightEnemyMargin = 40, FightEnemyNameY = 24;
-    public const float FightTipY = 250f, FightEndTextY = 300f;
+    public const float FightTipY = 252f, FightEndTextY = 300f;
 
     // --- Fight visual: popups (floating text positions) ---
-    public const float FightPopupCenterY = 250f;
+    public const float FightPopupCenterY = 200f;
     public static readonly Vector2 FightPopupPet = new(300, 200), FightPopupPetSub = new(300, 260);
     public static readonly Vector2 FightPopupEnemyDmg = new(1000, 150), FightPopupEnemyStatus = new(1000, 220);
 

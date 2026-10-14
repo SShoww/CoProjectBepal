@@ -26,6 +26,7 @@
   <ItemGroup>
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.*" />
     <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.*" />
+    <PackageReference Include="MonoGame.Extended" Version="6.1.1" />
   </ItemGroup>
   <!-- Bake the git short hash into InformationalVersion ("1.0.0+<hash>") so Telemetry's `build` field works in a published exe without git. -->
   <Target Name="SetSourceRevisionId" BeforeTargets="InitializeSourceControlInformation;GetAssemblyVersion">

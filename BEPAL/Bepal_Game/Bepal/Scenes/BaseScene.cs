@@ -386,7 +386,7 @@ public class BaseScene : Scene
             var size = Gfx.Small.MeasureString(text);
             Gfx.Rect(sb, pos.X - size.X / 2 - 10, pos.Y - 4, size.X + 20, size.Y + 8, Color.Black * (0.6f * fade));
             Gfx.Text(sb, Gfx.Small, text, new Vector2(pos.X, pos.Y), Palette.Warm * fade, 0.5f);
-            if (_near.Pet is { } np) CareSelectScene.PetStats(sb, np, new Rectangle(20, 470, 250, 210));
+            if (_near.Pet is { } np) CareSelectScene.PetStats(sb, np, new Rectangle(20, 490, CareSelectScene.StatsW, CareSelectScene.StatsH));
         }
 
         DrawHud(sb);
@@ -533,18 +533,17 @@ public class BaseScene : Scene
 
     void DrawHud(SpriteBatch sb)
     {
-        var r = new Rectangle(16, 14, 560, 64);
+        var r = new Rectangle(16, 14, 488, 64);
         Ui.Panel(sb, r, 0.85f);
         Gfx.Text(sb, Gfx.Font, $"Day {_gs.Day}", new Vector2(r.X + 16, r.Y + 8), Palette.Warm);
-        Gfx.Circle(sb, new Vector2(r.X + 118, r.Y + 22), 9, Palette.Coin);
-        Gfx.Text(sb, Gfx.Font, $"{_gs.Coin}", new Vector2(r.X + 134, r.Y + 8), Palette.Coin);
+        Gfx.Circle(sb, new Vector2(r.X + 100, r.Y + 22), 9, Palette.Coin);
+        Gfx.Text(sb, Gfx.Font, $"{_gs.Coin}", new Vector2(r.X + 116, r.Y + 8), Palette.Coin);
         Gfx.Text(sb, Gfx.Small, "Energy", new Vector2(r.X + 16, r.Y + 38), Palette.Dim);
         for (int i = 0; i < _gs.MaxEnergy; i++)
-            Gfx.Rect(sb, r.X + 96 + i * 20, r.Y + 41, 14, 14, i < _gs.Energy ? new Color(120, 240, 140) : new Color(50, 60, 50));
-        Gfx.Text(sb, Gfx.Font, $"Player LV. {_gs.PlayerLevel}", new Vector2(r.X + 240, r.Y + 8), Palette.Text);
-        Ui.Bar(sb, new Rectangle(r.X + 240, r.Y + 40, 180, 14), _expShown.Value, _gs.PlayerMaxExp, Palette.Progress);
-        Gfx.Text(sb, _gs.Points > 0 ? Gfx.Font : Gfx.Small, $"Points {_gs.Points}", new Vector2(r.X + 432, r.Y + (_gs.Points > 0 ? 28 : 36)),
-            _gs.Points > 0 ? Palette.Coin : Palette.Dim);
+            Gfx.Rect(sb, r.X + 88 + i * 20, r.Y + 41, 14, 14, i < _gs.Energy ? new Color(120, 240, 140) : new Color(50, 60, 50));
+        Gfx.Text(sb, Gfx.Font, $"Player LV. {_gs.PlayerLevel}", new Vector2(r.X + 228, r.Y + 8), Palette.Text);
+        Ui.Bar(sb, new Rectangle(r.X + 228, r.Y + 40, 150, 14), _expShown.Value, _gs.PlayerMaxExp, Palette.Progress);
+        Gfx.Text(sb, Gfx.Font, $"Points {_gs.Points}", new Vector2(r.X + 392, r.Y + 24), _gs.Points > 0 ? Palette.Coin : Palette.Dim);
 
         if (_near == null && M.Top == this) Ui.Hint(sb, "A / D  Walk     SHIFT  Run     SPACE  Interact     ESC  Pause");
     }

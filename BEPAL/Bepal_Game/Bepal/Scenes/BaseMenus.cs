@@ -66,10 +66,10 @@ public class UpgradeScene : Scene
         Ui.Dim(sb, 0.7f);
         var panel = new Rectangle(280, 110, 720, 520);
         Ui.Panel(sb, panel);
-        Gfx.Text(sb, Gfx.Big, "Upgrade", new Vector2(panel.X + 30, panel.Y + 10), Palette.Warm);
-        Gfx.Text(sb, Gfx.Font, $"Points : {_gs.Points}     Coin : {_gs.Coin}", new Vector2(panel.Right - 30, panel.Y + 30), Palette.Coin, 1f);
-        Gfx.Text(sb, Gfx.Small, "Points come from Player level-ups: keep caring for your pets (Train, Feed, Clean, Heal).",
-            new Vector2(panel.X + 30, panel.Y + 100), Palette.Dim);
+        Gfx.Text(sb, Gfx.Big, "Upgrade", new Vector2(panel.X + Ui.Pad + 6, panel.Y + Ui.Pad), Palette.Warm);
+        Gfx.Text(sb, Gfx.Font, $"Points : {_gs.Points}     Coin : {_gs.Coin}", new Vector2(panel.Right - Ui.Pad - 6, panel.Y + Ui.Pad + 8), Palette.Coin, 1f);
+        Gfx.Text(sb, Gfx.Small, Gfx.Wrap(Gfx.Small, "Points come from Player level-ups: keep caring for your pets (Train, Feed, Clean, Heal).", panel.Width - 2 * Ui.Pad - 12),
+            new Vector2(panel.X + Ui.Pad + 6, panel.Y + 84), Palette.Dim);
         var rows = Rows;
         for (int i = 0; i < 3; i++)
         {
@@ -203,7 +203,8 @@ public class NotebookScene : Scene
         var book = new Rectangle(160, 90, 960, 560);
         Gfx.Rect(sb, book, new Color(236, 222, 196));
         Gfx.Outline(sb, book, new Color(120, 70, 50), 6);
-        Gfx.Rect(sb, book.Center.X - 3, book.Y, 6, book.Height, new Color(190, 170, 140));
+        int spineTop = _tab == -1 ? book.Y + 190 : book.Y;   // cover page: keep the spine clear of the title
+        Gfx.Rect(sb, book.Center.X - 3, spineTop, 6, book.Bottom - spineTop, new Color(190, 170, 140));
         var ink = new Color(60, 40, 36);
 
         if (_tab == -1)

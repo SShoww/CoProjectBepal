@@ -1,0 +1,8 @@
+### 2026-10-14 — Q-20261014-ui-polish-extended — จัด UI/ฟอนต์/วงล้อ QTE + ทดลอง MonoGame.Extended
+- Status: ready-to-close
+- Owner: Claude Code (ตามคำสั่งผู้ใช้ 2026-10-14)
+- Goal: ลดขนาดฟอนต์และแก้ตำแหน่ง UI ให้ตรงหลัก UI/UX, แก้เส้นขีดในโซน QTE; ทดลองใช้ MonoGame.Extended บน feature/ui-polish-extended แล้วนำกลับ Develop เฉพาะส่วนที่ดีกว่าชัดเจน
+- Files: BEPAL/Bepal_Game/Bepal/Core/{Gfx,Ui}.cs, Scenes/**, Model/GameState.cs (Balance.Fight*), Content/Fonts/*.spritefont, Game1.cs, Bepal.csproj, BEPAL/Docs/GDD/14-audio-fonts-list.md, CLAUDE.md, Context/Status.md, BEPAL/Docs/Research/**, Context/**
+- Context: แผนที่ผู้ใช้อนุมัติ + ผลสำรวจ (Gfx.Arc ซ้อน alpha, Gfx.Text จัดกลางหลายบรรทัดผิด, Big 44/Main 18 ใหญ่) ทำใน git worktree ../CoProjectBepal-ui; ไฟล์ที่ผู้ใช้แก้ค้างใน working tree หลัก (GameState.cs, CareScenes.cs ฯลฯ) ไม่ถูกแตะ — จะชนตอน merge
+- Validation (2026-10-14, worktree ../CoProjectBepal-ui): build 0 warning/0 error; `--shots` 28 PNG เทียบ before/after ด้วยตา (06_care, 07_qte_Train, 08_fight, 10_upgrade, 13_shop, 15_choice, 19_options, 01_menu); `--autoplay` และ `--autoplay --refuse` -> reached To be continued. ยังไม่ได้เล่นจริง/ดูการเคลื่อนไหววงล้อ; shots สุดท้ายดู 01,03,06,07,08,09,10,11,13,13b,14,15,16,19 (ไม่ได้ดู 04,05,12*,17,18 หลังแก้); Extended: ใช้ NinePatch (กรอบมน) ได้ผล, VectorDraw ใช้ทำวงแหวนไม่ได้ (DrawArc=เส้น, DrawSolidArc=พาย) จึงไม่ใช้; ฟอนต์เปลี่ยน Segoe UI -> Tahoma เพราะ Segoe/Semibold เอียงทุกตัว (นอกเหนือจากที่ผู้ใช้เลือกไว้ ย้อนได้ที่ .spritefont)
+- Next action: ผู้ใช้เล่นจริงเช็กวงล้อตอนหมุน/ฟอนต์ Tahoma แล้วยืนยันปิด quest; ไฟล์ GameState.cs/CareScenes.cs ที่ค้างใน working tree หลักของผู้ใช้อาจชนหลัง merge
