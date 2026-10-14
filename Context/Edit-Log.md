@@ -3,6 +3,9 @@
 ล่าสุด 10 งาน งานละ 3 บรรทัด เขียนผ่าน `tools/context/log-edit.py` เท่านั้น — รายการเก่าอยู่ที่ [archive/edit-log/](archive/edit-log/)
 
 <!-- entries -->
+- **2026-10-14 13:24 · Q-20261014-custom-fonts** — ใช้ฟอนต์ Animal (title) + Butter Squishy (UI) จาก _candidates แทน Tahoma; เปลี่ยนป้าย [Space] เป็น (Space) เพราะฟอนต์ไม่มี [ ]
+  - Files: Content/Fonts/*, Core/Ui.cs, Scenes/{BaseScene, MenuScenes}.cs, CLAUDE.md, 14-audio-fonts-list.md, Status.md
+  - Validation: build 0 warning; autoplay + --refuse reached To be continued; shots ตรวจ 6 ภาพ; ยังไม่ได้เล่นจริง; license Butter Squishy ไม่มีบันทึก
 - **2026-10-14 12:36 · Q-20261014-ui-polish-extended** — ลดขนาดฟอนต์ (Tahoma, เพิ่ม Title) จัด layout UI แก้เส้นขีดวงล้อ QTE (Gfx.Arc เป็น mesh ไม่ซ้อน) และใช้ MonoGame.Extended NinePatch ทำกรอบมน
   - Files: BEPAL/Bepal_Game/Bepal/Core/{Gfx, Ui}.cs, Scenes/*, Content/Fonts/*, Bepal.csproj, CLAUDE.md, 14-audio-fonts-list.md, Status.md
   - Validation: build 0 warning; autoplay + --refuse reached To be continued; shots ตรวจด้วยตา; ยังไม่ได้เล่นจริง
@@ -30,6 +33,3 @@
 - **2026-10-13 19:06 · Q-20261013-art-pipeline** — Art.Pet/Enemy/Merchant/Doctor ใช้ texture optional ต่อ asset (null = primitive เดิม) วาดผ่าน SpriteMotion; เขียนขั้นตอนใส่ภาพใน README/asset-list
   - Files: BEPAL/Bepal_Game/Bepal/World/Art.cs, Core/Gfx.cs, Scenes/FightScene.cs, BEPAL/Assets/_candidates/README.md, BEPAL/Docs/GDD/05-asset-list.md
   - Validation: build 0 warn; ไม่มีไฟล์ -> shots+autoplay ผ่าน; ทดสอบด้วย PNG ชั่วคราวที่ไม่ commit
-- **2026-10-13 18:48 · Q-20261013-inventory-items** — ร้านเปิดหลัง Sell/Refuse, ของเข้า Box ใช้ผ่าน InventoryScene, เพิ่ม Cloudy Glasses/Ballet Shoes/Torn Notebook/Faded Ribbon, bot ซื้อ/ใช้ไอเทม
-  - Files: BEPAL/Bepal_Game/Bepal/Model/Items.cs, Model/GameState.cs, Scenes/BaseMenus.cs, Scenes/BaseScene.cs, Scenes/FightScene.cs, Scenes/DayEvents.cs, DevTools/AutoPlay.cs, GDD docs, CLAUDE.md
-  - Validation: build 0 warn; autoplay+refuse ผ่าน; batch 50 run ไม่ timeout item_use ครบ 7 ชนิด; validate.ps1 ไม่ได้รัน
