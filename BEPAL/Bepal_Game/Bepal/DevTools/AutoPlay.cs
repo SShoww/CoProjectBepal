@@ -188,7 +188,7 @@ public class AutoPlay
                 _cooldown = 3;
                 break;
             case ShopScene shop:
-                if ((Profile == "upgrade-first" || Human) && ShopBrain(shop.State)) _cooldown = 4;
+                if ((Profile == "upgrade-first" || Human) && ShopBrain(shop)) _cooldown = 4;
                 else
                 {
                     keys.Add(Keys.Escape);
@@ -198,7 +198,11 @@ public class AutoPlay
             case InventoryScene inv:
                 {
                     int use = Array.FindIndex(Items.All, it => WantItem(inv.State, it.Item));
-                    if (use >= 0) _click = InventoryScene.UseRect(use).Center;
+                    if (use >= 0)
+                    {
+                        inv.Focus(use);   // the carousel only lets the centred card be clicked
+                        _click = InventoryScene.UseRect.Center;
+                    }
                     else keys.Add(Keys.Escape);
                     _cooldown = 4;
                     break;
@@ -280,8 +284,9 @@ public class AutoPlay
     }
 
     /// <summary>Buy each shop item once per visit if affordable (Sea Tea, Tonic, Apple first, then the rest). Returns true if it clicked.</summary>
-    bool ShopBrain(GameState gs)
+    bool ShopBrain(ShopScene shop)
     {
+        var gs = shop.State;
         foreach (int i in new[] { 2, 1, 0, 3, 4, 5, 6 })
         {
             var it = Items.All[i];
@@ -289,7 +294,8 @@ public class AutoPlay
             if (i == 0 && !gs.Alive.Any()) continue;
             _shopMask |= 1 << i;
             if (Human && i < _shopP.Length && _prm.NextDouble() >= _shopP[i]) continue;
-            _click = ShopScene.BuyRect(i).Center;
+            shop.Focus(i);   // the carousel only lets the centred card be clicked
+            _click = ShopScene.BuyRect.Center;
             return true;
         }
         return false;

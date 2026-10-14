@@ -27,23 +27,25 @@ public static class Items
 
     public static ItemInfo Info(Item i) => All[(int)i];
 
-    // ---- card layout shared by the shop and the inventory (1280x720: 4 + 3 cards) ----
-    public const int CardW = 270, CardH = 230, CardGap = 20, Row1Y = 150, Row2Y = 400;
+    // ---- card layout shared by the shop and the inventory (1280x720: one horizontal track, see ItemTrack) ----
+    public const int CardW = 270, CardH = 230, CardCenterY = 305;
 
-    public static Rectangle CardRect(int i)
+    /// <summary>Card of size <paramref name="scale"/> centred at (<paramref name="cx"/>, <see cref="CardCenterY"/>).</summary>
+    public static Rectangle ScaledCard(float cx, float scale)
     {
-        int perRow = i < 4 ? 4 : Count - 4;
-        int x0 = Gfx.W / 2 - (perRow * CardW + (perRow - 1) * CardGap) / 2;
-        int col = i < 4 ? i : i - 4;
-        return new Rectangle(x0 + col * (CardW + CardGap), i < 4 ? Row1Y : Row2Y, CardW, CardH);
+        int w = (int)MathF.Round(CardW * scale), h = (int)MathF.Round(CardH * scale);
+        return new Rectangle((int)MathF.Round(cx - w / 2f), CardCenterY - h / 2, w, h);
     }
 
-    /// <summary>Buy / Use button of card <paramref name="i"/> (also used by the autoplay bot).</summary>
-    public static Rectangle ButtonRect(int i)
+    /// <summary>Buy / Use button inside <paramref name="card"/> (scales with the card).</summary>
+    public static Rectangle ButtonRect(Rectangle card)
     {
-        var c = CardRect(i);
-        return new Rectangle(c.X + 25, c.Y + CardH - 52, CardW - 50, 40);
+        float s = card.Width / (float)CardW;
+        return new Rectangle(card.X + (int)(25 * s), card.Bottom - (int)(52 * s), card.Width - (int)(50 * s), (int)(40 * s));
     }
+
+    /// <summary>Button of the centred (hero) card once the track has settled (also used by the autoplay bot).</summary>
+    public static Rectangle HeroButtonRect => ButtonRect(ScaledCard(Gfx.W / 2f, 1f));
 
     /// <summary>Why the item can't be used right now, or null if it can.</summary>
     public static string? UseBlock(GameState gs, Item item) => item switch

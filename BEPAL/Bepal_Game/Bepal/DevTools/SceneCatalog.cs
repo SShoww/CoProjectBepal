@@ -52,6 +52,7 @@ public static class SceneCatalog
         Add("12b_notebook_pet_lv1", () => { var g = Gs(); return S(new BaseScene(g), new NotebookScene(g, 0)); }, 0.2f);
         Add("12c_notebook_pet_lv2", () => { var g = Gs(); g.Pets[0].Level = Balance.PassiveLevel; return S(new BaseScene(g), new NotebookScene(g, 0)); }, 0.2f);
         Add("13_shop", () => { var g = Gs(3); return S(new BaseScene(g), new ShopScene(g)); }, 0.2f);
+        Add("13d_shop_scrolled", () => { var g = Gs(3); var shop = new ShopScene(g); shop.Focus(3); return S(new BaseScene(g), shop); }, 0.2f);
         Add("13b_inventory", () =>
         {
             var g = Gs(3);

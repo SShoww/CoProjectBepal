@@ -264,14 +264,121 @@ public class NotebookScene : Scene
 /// <summary>Item card shared by the shop and the inventory.</summary>
 static class ItemCards
 {
+    /// <summary>Draws the card into <paramref name="card"/>; offsets scale with the card, the text wraps at a fixed width so it never re-wraps mid-animation.</summary>
     public static void Draw(SpriteBatch sb, ItemInfo it, Rectangle card, int owned)
     {
+        float s = card.Width / (float)Items.CardW;
         Ui.Panel(sb, card);
-        Gfx.Circle(sb, new Vector2(card.Center.X, card.Y + 42), 26, it.Color);
-        Gfx.Circle(sb, new Vector2(card.Center.X - 8, card.Y + 33), 7, Color.White * 0.4f);
-        Gfx.Text(sb, Gfx.Font, it.Name, new Vector2(card.Center.X, card.Y + 78), Palette.Text, 0.5f);
-        Gfx.Text(sb, Gfx.Small, Gfx.Wrap(Gfx.Small, it.Desc, card.Width - 40), new Vector2(card.Center.X, card.Y + 108), Palette.Dim, 0.5f);
+        Gfx.Circle(sb, new Vector2(card.Center.X, card.Y + 42 * s), 26 * s, it.Color);
+        Gfx.Circle(sb, new Vector2(card.Center.X - 8 * s, card.Y + 33 * s), 7 * s, Color.White * 0.4f);
+        Gfx.Text(sb, Gfx.Font, it.Name, new Vector2(card.Center.X, card.Y + 78 * s), Palette.Text, 0.5f);
+        Gfx.Text(sb, Gfx.Small, Gfx.Wrap(Gfx.Small, it.Desc, Items.CardW - 40), new Vector2(card.Center.X, card.Y + 108 * s), Palette.Dim, 0.5f);
         if (owned > 0) Gfx.Text(sb, Gfx.Small, $"x{owned}", new Vector2(card.Right - 14, card.Y + 10), Palette.Coin, 1f);
+    }
+}
+
+/// <summary>
+/// Horizontal item carousel shared by the shop and the inventory.
+/// Horizontal Scrub: drag maps 1:1 onto the track (one card stride per <see cref="Balance.TrackStride"/> px); wheel, A/D, arrows and a tap on a card step one card.
+/// Staging: the card nearest the centre is the hero (full size, bright, the only clickable one); the rest shrink to 0.9 and dim to 0.4.
+/// </summary>
+sealed class ItemTrack
+{
+    static readonly Rectangle Band = new(0, 150, Gfx.W, 290);
+    const int BarW = 360, BarY = 470;
+
+    readonly Button _prev = new(new Rectangle(Gfx.W / 2 - BarW / 2 - 84, BarY - 18, 68, 40), "<");
+    readonly Button _next = new(new Rectangle(Gfx.W / 2 + BarW / 2 + 16, BarY - 18, 68, 40), ">");
+    Smoothed _pos;
+    int _focus;
+    bool _press, _drag;
+    int _pressX;
+    float _pressPos;
+
+    public int Focus => _focus;
+
+    /// <summary>Centre card <paramref name="i"/> (snap = no animation, used by the autoplay bot and the shots).</summary>
+    public void SetFocus(int i, bool snap = false)
+    {
+        _focus = Math.Clamp(i, 0, Items.Count - 1);
+        if (snap) _pos.Snap(_focus);
+    }
+
+    /// <summary>Is card <paramref name="i"/> the one in the middle (and so clickable)?</summary>
+    public bool IsHero(int i) => MathF.Abs(i - _pos.Value) < 0.5f;
+
+    public Rectangle Card(int i)
+    {
+        float d = i - _pos.Value;
+        float hero = 1 - MathF.Min(MathF.Abs(d), 1);
+        return Items.ScaledCard(Gfx.W / 2f + d * Balance.TrackStride, MathHelper.Lerp(Balance.StageHeroScale, 1f, Ease.OutCubic(hero)));
+    }
+
+    int Nearest => Math.Clamp((int)MathF.Round(_pos.Value), 0, Items.Count - 1);
+
+    void Step(int dir)
+    {
+        int f = Math.Clamp(_focus + dir, 0, Items.Count - 1);
+        if (f == _focus) return;
+        _focus = f;
+        Audio.Play(Sfx.UiClick);
+    }
+
+    public void Update(float dt)
+    {
+        _prev.Enabled = _focus > 0;
+        _next.Enabled = _focus < Items.Count - 1;
+        if (_prev.Update()) { _focus--; }
+        if (_next.Update()) { _focus++; }
+        if (Input.Wheel != 0) Step(Input.Wheel > 0 ? -1 : 1);
+        if (Input.Pressed(Keys.A) || Input.Pressed(Keys.Left)) Step(-1);
+        if (Input.Pressed(Keys.D) || Input.Pressed(Keys.Right)) Step(1);
+
+        if (Input.Click && Band.Contains(Input.Mouse))
+        {
+            _press = true;
+            _drag = false;
+            _pressX = Input.Mouse.X;
+            _pressPos = _pos.Value;
+        }
+        if (_press)
+        {
+            float dx = Input.Mouse.X - _pressX;
+            if (!_drag && MathF.Abs(dx) > Balance.TrackDragSlop) _drag = true;
+            if (_drag) _pos.Snap(Math.Clamp(_pressPos - dx / Balance.TrackStride, 0, Items.Count - 1));
+            if (!Input.MouseHeld)
+            {
+                _press = false;
+                if (_drag) _focus = Nearest;
+                else
+                    for (int i = 0; i < Items.Count; i++)
+                        if (i != Nearest && Card(i).Contains(Input.Mouse)) _focus = i;
+                _drag = false;
+            }
+        }
+        if (!_drag) _pos.Update(_focus, Balance.TrackSnapK, dt);
+    }
+
+    /// <summary>Dim a card that isn't the hero (draw after the card and its button).</summary>
+    public void DrawDim(SpriteBatch sb, int i)
+    {
+        float hero = 1 - MathF.Min(MathF.Abs(i - _pos.Value), 1);
+        float a = (1 - Balance.StageDimAlpha) * (1 - Ease.OutCubic(hero));
+        if (a > 0.01f) Ui.Frame(sb, Card(i), Color.Black * a, Color.Transparent);
+    }
+
+    /// <summary>Progress cue: arrows, a thumb on a bar and "n / N".</summary>
+    public void DrawCue(SpriteBatch sb)
+    {
+        int x = Gfx.W / 2 - BarW / 2;
+        Gfx.Rect(sb, new Rectangle(x, BarY, BarW, 4), Palette.PanelEdge * 0.6f);
+        int thumbW = BarW / Items.Count;
+        float t = Items.Count > 1 ? Math.Clamp(_pos.Value / (Items.Count - 1), 0f, 1f) : 0f;
+        Gfx.Rect(sb, new Rectangle(x + (int)((BarW - thumbW) * t), BarY - 2, thumbW, 8), Palette.Warm);
+        _prev.Draw(sb);
+        _next.Draw(sb);
+        Gfx.Text(sb, Gfx.Small, $"{Nearest + 1} / {Items.Count}", new Vector2(Gfx.W / 2f, BarY + 18), Palette.Text, 0.5f);
+        Gfx.Text(sb, Gfx.Small, "Wheel / drag / A D  Browse", new Vector2(Gfx.W / 2f, BarY + 42), Palette.Dim, 0.5f);
     }
 }
 
@@ -284,6 +391,7 @@ public class ShopScene : Scene
     readonly Action? _onClose;
     public GameState State => _gs;
     readonly Popups _popups = new();
+    readonly ItemTrack _track = new();
     float _time;
 
     public override bool Overlay => true;
@@ -293,11 +401,14 @@ public class ShopScene : Scene
     {
         _gs = gs;
         _onClose = onClose;
-        for (int i = 0; i < Items.Count; i++) _buy[i] = new Button(BuyRect(i), $"Buy  {Items.All[i].Price}");
+        for (int i = 0; i < Items.Count; i++) _buy[i] = new Button(Items.HeroButtonRect, $"Buy  {Items.All[i].Price}");
     }
 
-    /// <summary>Hit box of the Buy button of item <paramref name="i"/> (also used by the autoplay bot).</summary>
-    public static Rectangle BuyRect(int i) => Items.ButtonRect(i);
+    /// <summary>Put item <paramref name="i"/> in the middle of the track (the autoplay bot and the shots use this before clicking <see cref="BuyRect"/>).</summary>
+    public void Focus(int i, bool snap = true) => _track.SetFocus(i, snap);
+
+    /// <summary>Hit box of the Buy button of the centred item (also used by the autoplay bot).</summary>
+    public static Rectangle BuyRect => Items.HeroButtonRect;
 
     void Close()
     {
@@ -309,10 +420,12 @@ public class ShopScene : Scene
     {
         _time += dt;
         _popups.Update(dt);
+        _track.Update(dt);
         for (int i = 0; i < Items.Count; i++)
         {
             var it = Items.All[i];
-            _buy[i].Enabled = _gs.Coin >= it.Price && _gs.Owned(it.Item) < Balance.ShopMaxOwned;
+            _buy[i].Rect = Items.ButtonRect(_track.Card(i));
+            _buy[i].Enabled = _track.IsHero(i) && _gs.Coin >= it.Price && _gs.Owned(it.Item) < Balance.ShopMaxOwned;
             if (!_buy[i].Update()) continue;
             _gs.SpendCoin(it.Price, ShopSink(it.Item));
             _gs.AddItem(it.Item);
@@ -343,9 +456,11 @@ public class ShopScene : Scene
         Gfx.Text(sb, Gfx.Small, $"Bought items go to the box in your base (max {Balance.ShopMaxOwned} of each).", new Vector2(Gfx.W / 2f, 124), Palette.Dim, 0.5f);
         for (int i = 0; i < Items.Count; i++)
         {
-            ItemCards.Draw(sb, Items.All[i], Items.CardRect(i), _gs.Owned(Items.All[i].Item));
+            ItemCards.Draw(sb, Items.All[i], _track.Card(i), _gs.Owned(Items.All[i].Item));
             _buy[i].Draw(sb);
+            _track.DrawDim(sb, i);
         }
+        _track.DrawCue(sb);
         _leave.Draw(sb);
         _popups.Draw(sb);
     }
@@ -357,6 +472,7 @@ public class InventoryScene : Scene
     readonly GameState _gs;
     readonly Button[] _use = new Button[Items.Count];
     readonly Popups _popups = new();
+    readonly ItemTrack _track = new();
     public GameState State => _gs;
 
     public override bool Overlay => true;
@@ -364,20 +480,25 @@ public class InventoryScene : Scene
     public InventoryScene(GameState gs)
     {
         _gs = gs;
-        for (int i = 0; i < Items.Count; i++) _use[i] = new Button(UseRect(i), "Use");
+        for (int i = 0; i < Items.Count; i++) _use[i] = new Button(Items.HeroButtonRect, "Use");
     }
 
-    /// <summary>Hit box of the Use button of item <paramref name="i"/> (also used by the autoplay bot).</summary>
-    public static Rectangle UseRect(int i) => Items.ButtonRect(i);
+    /// <summary>Put item <paramref name="i"/> in the middle of the track (the autoplay bot uses this before clicking <see cref="UseRect"/>).</summary>
+    public void Focus(int i, bool snap = true) => _track.SetFocus(i, snap);
+
+    /// <summary>Hit box of the Use button of the centred item (also used by the autoplay bot).</summary>
+    public static Rectangle UseRect => Items.HeroButtonRect;
 
     public override void Update(float dt)
     {
         _popups.Update(dt);
+        _track.Update(dt);
         for (int i = 0; i < Items.Count; i++)
         {
             var it = Items.All[i];
             string? block = Items.UseBlock(_gs, it.Item);
-            _use[i].Enabled = _gs.Owned(it.Item) > 0 && block == null;
+            _use[i].Rect = Items.ButtonRect(_track.Card(i));
+            _use[i].Enabled = _track.IsHero(i) && _gs.Owned(it.Item) > 0 && block == null;
             _use[i].Label = _gs.Owned(it.Item) == 0 ? "None" : block ?? "Use";
             if (!_use[i].Update()) continue;
             if (it.Item == Item.CrabApple)
@@ -401,9 +522,11 @@ public class InventoryScene : Scene
         Gfx.Text(sb, Gfx.Font, $"Energy {_gs.Energy}/{_gs.MaxEnergy}", new Vector2(Gfx.W / 2f, 96), Palette.Warm, 0.5f);
         for (int i = 0; i < Items.Count; i++)
         {
-            ItemCards.Draw(sb, Items.All[i], Items.CardRect(i), _gs.Owned(Items.All[i].Item));
+            ItemCards.Draw(sb, Items.All[i], _track.Card(i), _gs.Owned(Items.All[i].Item));
             _use[i].Draw(sb);
+            _track.DrawDim(sb, i);
         }
+        _track.DrawCue(sb);
         _popups.Draw(sb);
         Ui.Hint(sb, "Click Use   |   ESC  Back");
     }
