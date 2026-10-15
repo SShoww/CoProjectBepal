@@ -96,7 +96,7 @@ public static class Balance
     /// <summary>Attack shrinks at this fraction of the enemy's DodgeShrink.</summary>
     public const float AttackShrinkMul = 0.3f;
     /// <summary>Attack Perfect never shrinks below this half-width.</summary>
-    public const float AttackMinPerfect = 0.03f;
+    public const float AttackMinPerfect = 0.06f;
     /// <summary>Attack Great half-width at the start = Perfect + this; as Perfect shrinks, Great shrinks with the same ratio (start Great / start Perfect).</summary>
     public const float AttackGreatBand = 0.16f;
     /// <summary>Min distance (rad) from the needle / other zones when a new zone is placed.</summary>
