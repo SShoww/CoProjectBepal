@@ -102,7 +102,7 @@ public static class Balance
     /// <summary>Min distance (rad) from the needle / other zones when a new zone is placed.</summary>
     public const float DodgeSpawnGap = 1.2f, AttackSpawnGap = 0.8f;
     /// <summary>Blinkbun passive: after an Attack the needle warps so it reaches the Dodge centre this many seconds later (time, not angle: needle speed differs per enemy).</summary>
-    public const float BlinkbunLeadTime = 0.65f;
+    public const float BlinkbunLeadTime = 0.75f;
 
     // --- Fight: damage ---
     /// <summary>Share of ATK dealt by a Great hit (Perfect = 100%).</summary>
