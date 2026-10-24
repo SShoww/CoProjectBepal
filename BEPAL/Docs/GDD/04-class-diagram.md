@@ -6,7 +6,7 @@ date: 2026-10-13
 
 # Class Diagram — BePal Architecture (Prototype)
 
-Project: `BEPAL/Bepal_Game/Bepal/` — MonoGame DesktopGL 3.8.4, .NET 8, 1280x720. ภาพส่วนใหญ่ยังเป็น placeholder ที่วาดจากรูปทรง; sprite จริงมีเฉพาะ parallax 5 ชั้น, `fg_jungle`, `player.png` (สัตว์/ศัตรู/NPC โหลดรูปจริงได้ถ้ามีไฟล์ ไม่งั้น fallback เป็น primitive) · เสียงจริง: SFX 17 WAV + BGM 7 OGG + SpriteFont 3 ตัว (สถานะเต็มดู [05-asset-list.md](05-asset-list.md))
+Project: `BEPAL/Bepal_Game/Bepal/` — MonoGame DesktopGL 3.8.4, .NET 8, 1280x720. ภาพส่วนใหญ่ยังเป็น placeholder ที่วาดจากรูปทรง; sprite จริงมีเฉพาะ parallax 5 ชั้น, `fg_jungle`, `player.png`, `pet_mossling|nibbleclaw|blinkbun.png`, กรอบ status สัตว์ `ui_status_panel.png` (สัตว์ที่เหลือ/ศัตรู/NPC โหลดรูปจริงได้ถ้ามีไฟล์ ไม่งั้น fallback เป็น primitive) · เสียงจริง: SFX 17 WAV + BGM 7 OGG + SpriteFont 3 ตัว (สถานะเต็มดู [05-asset-list.md](05-asset-list.md))
 
 ## โครงสร้างโฟลเดอร์
 

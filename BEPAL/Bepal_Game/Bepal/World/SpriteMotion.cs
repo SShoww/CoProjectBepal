@@ -63,15 +63,16 @@ public class SpriteMotion
 
     /// <summary>
     /// Draw part <paramref name="src"/> of a single still <paramref name="tex"/> (origin = bottom centre of src) standing on
-    /// <paramref name="feet"/>, <paramref name="height"/> px tall. Point-sampled so pixel art stays crisp.
+    /// <paramref name="feet"/>, <paramref name="height"/> px tall. Point-sampled by default so pixel art stays crisp;
+    /// painted art passes <see cref="SamplerState.LinearClamp"/> (with mipmaps) so downscaling stays smooth.
     /// </summary>
-    public static void Draw(SpriteBatch sb, Texture2D tex, Rectangle src, Vector2 feet, float height, Pose p, float face, Color? tint = null)
+    public static void Draw(SpriteBatch sb, Texture2D tex, Rectangle src, Vector2 feet, float height, Pose p, float face, Color? tint = null, SamplerState? sampler = null)
     {
         float k = height / src.Height;
         // Negative scale gets culled by SpriteBatch, so flip with SpriteEffects; |face| still squashes the image through zero on a turn
         var scale = new Vector2(k * p.Scale.X * MathF.Abs(face), k * p.Scale.Y);
         sb.End();
-        Gfx.Begin(sb, null, SamplerState.PointClamp);
+        Gfx.Begin(sb, null, sampler ?? SamplerState.PointClamp);
         sb.Draw(tex, feet + p.Offset, src, tint ?? Color.White, p.Rot, new Vector2(src.Width / 2f, src.Height), scale, face < 0 ? SpriteEffects.FlipHorizontally : SpriteEffects.None, 0);
         sb.End();
         Gfx.Begin(sb);

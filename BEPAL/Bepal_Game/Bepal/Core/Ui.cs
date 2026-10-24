@@ -1,5 +1,6 @@
 using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended.Graphics;
 
@@ -125,6 +126,15 @@ public static class Ui
 
     /// <summary>Layout rhythm shared by the screens: safe margin from the screen edge, inner padding of a panel, gap under a title.</summary>
     public const int Margin = 32, Pad = 24, TitleGap = 16;
+
+    /// <summary>Pet status frame (Content/Sprites/ui_status_panel.png, 396x332: header + 4 bar slots); null = draw <see cref="Panel"/> instead.</summary>
+    public static Texture2D? StatusPanel;
+
+    public static void LoadOptional(ContentManager content)
+    {
+        try { StatusPanel = content.Load<Texture2D>("Sprites/ui_status_panel"); }
+        catch (ContentLoadException) { }   // no art: keep the nine-patch panel
+    }
 
     public static void Panel(SpriteBatch sb, Rectangle r, float alpha = 0.95f)
     {

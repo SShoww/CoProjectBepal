@@ -20,7 +20,8 @@ public class BaseScene : Scene
     // Hard walls stop the player; speed into a wall tapers to half between the soft line and the wall
     const float WallLeft = 120, SoftLeft = 630, SoftRight = 3400, WallRight = 3730;
     // The player's centre stops half a sprite width short of each wall so the sprite never pokes through
-    static readonly float MinX = WallLeft + Art.PlayerHalfWidth, MaxX = WallRight - Art.PlayerHalfWidth;
+    static float MinX => WallLeft + Art.PlayerHalfWidth;
+    static float MaxX => WallRight - Art.PlayerHalfWidth;
     // Big windows: centres 630 + 520*i, between the hanging lamps; last one ends ~160px short of the door
     const int WindowCount = 6;
     const float WindowW = 320, WindowH = 160, WindowTop = GroundY - 210;
@@ -345,7 +346,7 @@ public class BaseScene : Scene
         DrawObjects(sb);
 
         // Pets
-        var playerHead = new Vector2(Sx(_playerX), GroundY - 90);
+        var playerHead = new Vector2(Sx(_playerX), GroundY - Art.PlayerSpriteHeight + 15);
         foreach (var p in _gs.Pets)
         {
             var a = Actor(p);
@@ -386,7 +387,7 @@ public class BaseScene : Scene
             var size = Gfx.Small.MeasureString(text);
             Gfx.Rect(sb, pos.X - size.X / 2 - 10, pos.Y - 4, size.X + 20, size.Y + 8, Color.Black * (0.6f * fade));
             Gfx.Text(sb, Gfx.Small, text, new Vector2(pos.X, pos.Y), Palette.Warm * fade, 0.5f);
-            if (_near.Pet is { } np) CareSelectScene.PetStats(sb, np, new Rectangle(20, 490, CareSelectScene.StatsW, CareSelectScene.StatsH));
+            if (_near.Pet is { } np) CareSelectScene.PetStats(sb, np, new Rectangle(20, Gfx.H - 20 - CareSelectScene.StatsH, CareSelectScene.StatsW, CareSelectScene.StatsH));
         }
 
         DrawHud(sb);

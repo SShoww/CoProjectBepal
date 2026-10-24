@@ -40,6 +40,7 @@ public static class Gfx
         Backdrop.Load(content);
         Art.LoadPlayer(content);
         Art.LoadOptional(content);
+        Ui.LoadOptional(content);
     }
 
     /// <summary>Rounded rectangle (whole shape, or just its border) as an anti-aliased white mask cut into a nine-patch; the corners keep their size when the panel is stretched.</summary>
