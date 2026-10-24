@@ -3,6 +3,9 @@
 ล่าสุด 10 งาน งานละ 3 บรรทัด เขียนผ่าน `tools/context/log-edit.py` เท่านั้น — รายการเก่าอยู่ที่ [archive/edit-log/](archive/edit-log/)
 
 <!-- entries -->
+- **2026-10-24 19:50 · Q-20261024-pet-player-sprites-close** — ปิด quest pet-player-sprites (ย้ายไป archive ตามคำสั่งผู้ใช้)
+  - Files: Context/quests, Context/archive/quests
+  - Validation: merge แล้ว PR #37; ยังไม่ได้เล่นจริง
 - **2026-10-24 19:49 · Q-20261024-pet-player-sprites** — ใส่ sprite สัตว์ 3 ตัว + player ใหม่ (แก้หันผิดทาง) + กรอบ ui_status_panel แทน panel status สัตว์
   - Files: Content/Sprites/*.png, Content/Content.mgcb, World/Art.cs, World/SpriteMotion.cs, Core/Ui.cs, Core/Gfx.cs, Scenes/CareScenes.cs, Scenes/BaseScene.cs, docs
   - Validation: slnx build 0 warn/0 err; --autoplay reached To be continued; --shots 29 PNG; ยังไม่ได้เล่นจริงด้วยมือ
@@ -30,6 +33,3 @@
 - **2026-10-13 22:15 · Q-20261013-scene-jump** — เพิ่ม SceneCatalog + --scene <name> + เมนู F2 กระโดดไป scene ใดก็ได้ (dev); ShotRunner ใช้แคตตาล็อกร่วม
   - Files: DevTools/SceneCatalog.cs, DevTools/SceneJumpScene.cs, ShotRunner.cs, Game1.cs, CLAUDE.md, 04-class-diagram.md
   - Validation: build 0/0, --shots 28 PNG, --autoplay reached To be continued; F2 ยังไม่ได้ลองในเกมจริง
-- **2026-10-13 20:08 · Q-20261013-validate-ps1** — validate.ps1: พารามิเตอร์ -Raw/-Csv/-Out, รู้จัก starter, ราคา Point ใหม่, I09 ไม่ห้ามร้านหลัง Sell, เพิ่ม I16 ไอเทม, วันที่ invariant
-  - Files: BEPAL/Docs/Balance/tools/validate.ps1, BEPAL/Docs/Balance/telemetry-spec.md, Context/Status.md
-  - Validation: batch 50 run -> 16/16 PASS; ทดสอบด้านลบจับ I01/I16; ยังไม่ได้ลองกับ data คนจริง

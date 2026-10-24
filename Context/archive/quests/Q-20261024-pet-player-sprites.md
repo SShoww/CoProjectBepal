@@ -1,5 +1,5 @@
 ### 2026-10-24 — Q-20261024-pet-player-sprites — ใส่ sprite สัตว์ 3 ตัว + ผู้เล่นใหม่ + กรอบ status สัตว์เข้าเกม
-- Status: ready-to-close
+- Status: closed (ผู้ใช้สั่งปิด 2026-10-24, merge แล้ว PR #37)
 - Owner: Claude Code (ตามคำสั่งผู้ใช้ 2026-10-24)
 - Goal: ใช้ภาพจาก `BEPAL/Assets/_candidates/sprites/pet/` และ `player/` ในเกมแทน primitive / player pixel-art เดิม
 - Files: BEPAL/Bepal_Game/Bepal/Content/Sprites/{pet_mossling,pet_nibbleclaw,pet_blinkbun,player,ui_status_panel}.png, Core/Ui.cs, Core/Gfx.cs, Scenes/CareScenes.cs, Content/Content.mgcb, World/Art.cs, World/SpriteMotion.cs, Scenes/BaseScene.cs, CLAUDE.md, BEPAL/Docs/GDD/{04-class-diagram,05-asset-list}.md, BEPAL/Assets/_candidates/README.md
