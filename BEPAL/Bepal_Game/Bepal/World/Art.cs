@@ -61,7 +61,7 @@ public static class Art
         float dx = lookAt.X - feet.X;
         float breath = MathF.Sin(time * 2f) * Balance.BreathScale;
         var pose = new Pose { Offset = new Vector2(0, -MathF.Abs(MathF.Sin(time * 3f)) * bobPx), Scale = new Vector2(1 - breath * 0.6f, 1 + breath) };
-        SpriteMotion.Draw(sb, spr.Tex, spr.Src, feet, height, pose, dx < -8 ? -1 : 1, tint);
+        SpriteMotion.Draw(sb, spr.Tex, spr.Src, feet, height, pose, dx < -8 ? -1 : 1, tint, SamplerState.LinearClamp);
         return true;
     }
 
@@ -159,18 +159,22 @@ public static class Art
 
     /// <summary>The player's still image (null = draw the primitive character instead). Origin = bottom centre of <see cref="PlayerSpriteSrc"/>.</summary>
     public static Texture2D? PlayerSprite;
-    /// <summary>Opaque area inside player.png (the file has transparent padding); drawn at <see cref="PlayerSpriteHeight"/> px tall (3x = crisp pixels).</summary>
-    public static readonly Rectangle PlayerSpriteSrc = new(21, 9, 17, 33);
-    public const float PlayerSpriteHeight = 99;
+    /// <summary>Opaque area inside player.png (found at load, so padding in the file doesn't matter); drawn at <see cref="PlayerSpriteHeight"/> px tall.</summary>
+    public static Rectangle PlayerSpriteSrc { get; private set; } = new(0, 0, 1, 1);
+    public const float PlayerSpriteHeight = 140;
     /// <summary>Half of the drawn sprite width (px), so a wall can stop the sprite's edge instead of its centre.</summary>
-    public static readonly float PlayerHalfWidth = PlayerSpriteSrc.Width * PlayerSpriteHeight / PlayerSpriteSrc.Height / 2;
+    public static float PlayerHalfWidth => PlayerSpriteSrc.Width * PlayerSpriteHeight / PlayerSpriteSrc.Height / 2;
 
-    public static void LoadPlayer(ContentManager content) => PlayerSprite = content.Load<Texture2D>("Sprites/player");
+    public static void LoadPlayer(ContentManager content)
+    {
+        PlayerSprite = content.Load<Texture2D>("Sprites/player");
+        PlayerSpriteSrc = OpaqueBounds(PlayerSprite);
+    }
 
     public static void PlayerImage(SpriteBatch sb, Vector2 feet, Pose pose, float face)
     {
         Gfx.Ellipse(sb, feet + new Vector2(0, -2), 26, 6, Color.Black * 0.35f);
-        SpriteMotion.Draw(sb, PlayerSprite!, PlayerSpriteSrc, feet, PlayerSpriteHeight, pose, face);
+        SpriteMotion.Draw(sb, PlayerSprite!, PlayerSpriteSrc, feet, PlayerSpriteHeight, pose, face, null, SamplerState.LinearClamp);
     }
 
     /// <summary>The Lone Sanctuarist — a quiet humanoid in a hooded cloak.</summary>

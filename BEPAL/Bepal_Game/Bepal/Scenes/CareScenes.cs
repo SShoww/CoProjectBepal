@@ -94,10 +94,18 @@ public class CareSelectScene : Scene
         Ui.Hint(sb, "SPACE  Pick when the needle is on a choice   |   ESC  Back");
     }
 
-    public const int StatsW = 250, StatsH = 190;
+    /// <summary>2/3 of ui_status_panel.png (396x332), so the frame keeps its proportions.</summary>
+    public const int StatsW = 264, StatsH = 221;
+
+    // Layout inside ui_status_panel.png, in image pixels: header box, then the 4 bar slots (inside their borders)
+    static readonly Rectangle PanelHeader = new(20, 19, 356, 80);
+    static readonly int[] SlotTops = { 110, 154, 198, 242 };
+    const int SlotX = 26, SlotW = 344, SlotH = 32;
+    static readonly Color PanelInk = new(74, 44, 28), SlotTrack = new(158, 115, 88, 120);
 
     public static void PetStats(SpriteBatch sb, Pet p, Rectangle r)
     {
+        if (Ui.StatusPanel is { } tex) { PetStatsFramed(sb, p, r, tex); return; }
         Ui.Panel(sb, r, 0.9f);
         Gfx.Text(sb, Gfx.Font, $"{p.Name}  LV {p.Level}", new Vector2(r.X + 14, r.Y + 10), Palette.Text);
         Gfx.Text(sb, Gfx.Small, $"ATK {p.Atk}   {p.Element}", new Vector2(r.X + 14, r.Y + 40), Palette.Dim);
@@ -107,6 +115,34 @@ public class CareSelectScene : Scene
         Ui.Bar(sb, new Rectangle(r.X + 14, y + 56, w, 22), p.Clean, 100, Palette.CleanBar, $"Clean {(int)p.Clean}");
         Ui.Bar(sb, new Rectangle(r.X + 14, y + 84, w, 22), p.Progress, p.MaxProgress, Palette.Progress,
             $"Progress {(int)p.Progress}/{p.MaxProgress}");
+    }
+
+    static void PetStatsFramed(SpriteBatch sb, Pet p, Rectangle r, Texture2D tex)
+    {
+        float k = r.Width / (float)tex.Width;
+        Rectangle Map(int x, int y, int w, int h) => new(r.X + (int)(x * k), r.Y + (int)(y * k), (int)(w * k), (int)(h * k));
+        sb.Draw(tex, r, Color.White);
+
+        var head = Map(PanelHeader.X, PanelHeader.Y, PanelHeader.Width, PanelHeader.Height);
+        Gfx.Text(sb, Gfx.Font, $"{p.Name}  LV {p.Level}", new Vector2(head.X + 8, head.Y + 2), PanelInk, 0, false);
+        Gfx.Text(sb, Gfx.Small, $"ATK {p.Atk}   {p.Element}", new Vector2(head.X + 8, head.Bottom - Gfx.Small.LineSpacing - 2), PanelInk * 0.8f, 0, false);
+
+        (float v, float max, Color c, string label)[] bars =
+        {
+            (p.Hp, p.MaxHp, Palette.Hp, $"HP {p.HpShown}/{p.MaxHp}"),
+            (p.Stomach, 100, Palette.Stomach, $"Stomach {(int)p.Stomach}"),
+            (p.Clean, 100, Palette.CleanBar, $"Clean {(int)p.Clean}"),
+            (p.Progress, p.MaxProgress, Palette.Progress, $"Progress {(int)p.Progress}/{p.MaxProgress}"),
+        };
+        for (int i = 0; i < bars.Length; i++)
+        {
+            var slot = Map(SlotX, SlotTops[i], SlotW, SlotH);
+            var (v, max, c, label) = bars[i];
+            float t = max <= 0 ? 0 : MathHelper.Clamp(v / max, 0, 1);
+            Gfx.Rect(sb, slot, SlotTrack);
+            Gfx.Rect(sb, slot.X, slot.Y, slot.Width * t, slot.Height, c);
+            Gfx.Text(sb, Gfx.Small, Gfx.Fit(Gfx.Small, label, slot.Width - 12), new Vector2(slot.X + 6, slot.Y + (slot.Height - Gfx.Small.LineSpacing) / 2f), PanelInk, 0, false);
+        }
     }
 }
 

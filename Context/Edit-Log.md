@@ -3,6 +3,9 @@
 ล่าสุด 10 งาน งานละ 3 บรรทัด เขียนผ่าน `tools/context/log-edit.py` เท่านั้น — รายการเก่าอยู่ที่ [archive/edit-log/](archive/edit-log/)
 
 <!-- entries -->
+- **2026-10-24 19:49 · Q-20261024-pet-player-sprites** — ใส่ sprite สัตว์ 3 ตัว + player ใหม่ (แก้หันผิดทาง) + กรอบ ui_status_panel แทน panel status สัตว์
+  - Files: Content/Sprites/*.png, Content/Content.mgcb, World/Art.cs, World/SpriteMotion.cs, Core/Ui.cs, Core/Gfx.cs, Scenes/CareScenes.cs, Scenes/BaseScene.cs, docs
+  - Validation: slnx build 0 warn/0 err; --autoplay reached To be continued; --shots 29 PNG; ยังไม่ได้เล่นจริงด้วยมือ
 - **2026-10-14 15:09 · Q-20261014-toothless-defeat** — แพ้ Toothless (สัตว์ตายหมด) -> dialogue แล้วกลับฐานไปชุบกับหมอ แทน GameOverScene
   - Files: BEPAL/Bepal_Game/Bepal/Scenes/DayEvents.cs, Context/quests/Q-20261014-toothless-defeat.md
   - Validation: build 0 warn/0 err; autoplay + --refuse reached To be continued; ยังไม่ได้ทดสอบเส้นทางแพ้จริง
@@ -30,6 +33,3 @@
 - **2026-10-13 20:08 · Q-20261013-validate-ps1** — validate.ps1: พารามิเตอร์ -Raw/-Csv/-Out, รู้จัก starter, ราคา Point ใหม่, I09 ไม่ห้ามร้านหลัง Sell, เพิ่ม I16 ไอเทม, วันที่ invariant
   - Files: BEPAL/Docs/Balance/tools/validate.ps1, BEPAL/Docs/Balance/telemetry-spec.md, Context/Status.md
   - Validation: batch 50 run -> 16/16 PASS; ทดสอบด้านลบจับ I01/I16; ยังไม่ได้ลองกับ data คนจริง
-- **2026-10-13 19:45 · Q-20261013-options-menu** — เมนู Options ปรับ volume เพลง/SFX (slider เมาส์/คีย์), เก็บใน %APPDATA%/BePal/settings.txt, เปิดจาก Main Menu และ Pause
-  - Files: BEPAL/Bepal_Game/Bepal/Core/Settings.cs, Core/Ui.cs, Core/Audio.cs, Core/MusicPlayer.cs, Scenes/MenuScenes.cs, Scenes/BaseScene.cs, docs
-  - Validation: build 0 warn; ทดสอบ input จริงผ่าน harness ชั่วคราว; autoplay ไม่แตะ settings; ยังไม่ได้ฟัง/เปิดจาก Pause ด้วยมือ
