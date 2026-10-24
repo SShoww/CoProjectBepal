@@ -51,9 +51,9 @@ public static class Balance
     // Shop / inventory carousel: Staging (hero 0.9 -> 1.0, the rest dimmed to 0.4) + Horizontal Scrub (drag maps 1:1 onto the track)
     public const float StageHeroScale = 0.9f, StageDimAlpha = 0.4f, TrackSnapK = 14, TrackStride = 290, TrackDragSlop = 6;
     public const int StartCoin = 150;
-    public const int DailyCoin = 100;
+    public const int DailyCoin = 150;
     public const int ToothlessReward = 200;
-    public const int MerchantOffer = 5000;
+    public const int MerchantOffer = 1500;
     public const int ReviveCost = 250;
     public const int BaseEnergy = 3;
     public const int MaxEnergyCap = 6;
@@ -90,7 +90,7 @@ public static class Balance
     /// <summary>Dodge Perfect half-width when it appears; the Attack zone starts at the same size.</summary>
     public const float DodgeStart = 0.32f;
     /// <summary>Same, for the next fight after drinking Sea Tea (+20%).</summary>
-    public const float DodgeStartSeaTea = 0.38f;
+    public const float DodgeStartSeaTea = 0.35f;
     /// <summary>Dodge counts as "Too slow" (enemy hits) once it shrinks to this half-width.</summary>
     public const float DodgeVanish = 0.012f;
     /// <summary>Attack shrinks at this fraction of the enemy's DodgeShrink.</summary>
@@ -112,7 +112,7 @@ public static class Balance
     public const int ToothlessHp = 120, ToothlessAtk = 15;
     public const float ToothlessDodgeShrink = 0.1f, ToothlessNeedleSpeed = 2.4f;
     public const int BigZHp = 9999, BigZAtk = 20;
-    public const float BigZDodgeShrink = 0.2f, BigZNeedleSpeed = 3.4f;
+    public const float BigZDodgeShrink = 0.215f, BigZNeedleSpeed = 3.4f;
 
     // --- Fight visual: layout (pixels, 1280x720) ---
     public const float FightWheelY = 440f, FightWheelRadius = 150f, FightWheelThickness = 26f;
@@ -155,13 +155,13 @@ public static class Balance
     /// <summary>Feed: a Perfect speeds the needle up by this factor, capped at <see cref="FeedMaxSpeed"/>.</summary>
     public const float FeedPerfectSpeedMul = 1.15f, FeedMaxSpeed = 6f;
     /// <summary>Clean: the zone runs away at this fixed speed, always below the needle's base speed.</summary>
-    public const float CleanZoneSpeed = 4.8f;
+    public const float CleanZoneSpeed = 4f;
     /// <summary>Heal: needle fade cycle (lower = slower), its minimum alpha, and the zone shrink-rate multiplier (lower = dot lives longer).</summary>
     public const float HealFadeRate = 2f, HealMinAlpha = 0f, HealShrink = 0.5f;
     /// <summary>Heal: Perfect/Great half-widths lose this much per second (x HealShrink); the zone respawns once Perfect falls to the floor.</summary>
     public const float HealPerfectShrinkRate = 0.035f, HealGreatShrinkRate = 0.07f, HealZoneMin = 0.02f;
     /// <summary>Train zones (3 dots): Perfect/Great half-widths, min gap to the needle/other zones, and shrink per pet level (stops at LV 3).</summary>
-    public const float TrainPerfect = 0.07f, TrainGreat = 0.16f, TrainSpawnGap = 0.4f, TrainShrinkPerLevel = 0.15f;
+    public const float TrainPerfect = 0.07f, TrainGreat = 0.16f, TrainSpawnGap = 0.4f, TrainShrinkPerLevel = 0.1f;
     public const int TrainShrinkMaxLevel = 3;
     /// <summary>Feed/Clean/Heal zone: Perfect/Great half-widths and min spawn gap.</summary>
     public const float CareZonePerfect = 0.12f, CareZoneGreat = 0.27f, CareSpawnGap = 0.9f;
