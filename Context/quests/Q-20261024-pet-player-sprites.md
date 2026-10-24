@@ -6,4 +6,5 @@
 - Context: ภาพต้นฉบับเป็นภาพวาด (ไม่ใช่ pixel art) canvas ใหญ่ → crop, กลับด้านให้หันขวา (Mossling/Blinkbun; player ไม่กลับ — แก้ 2026-10-24 หลังผู้ใช้แจ้งว่าเดินขวาแต่หันซ้าย), ย่อ 256 px, mipmaps + `LinearClamp`; player สูง 140 px (เดิม 99), `PlayerSpriteSrc` หา opaque box ตอนโหลด; Toothless ยังไม่มีภาพ
 - Validation (2026-10-24): build 0 error; --shots 29 รูป (ดู choose/base/fight แล้ว); --autoplay reached To be continued. ยังไม่ได้เล่นจริงด้วยมือ, ความสูง player 140 / สัดส่วนสัตว์ทุกตัวเท่ากัน 90 เป็นค่าเดา
 - Status panel (2026-10-24): `ui_status_panel.png` แทน `Ui.Panel` ใน `PetStats` (ฐาน + CareSelect + QTE), ขนาด 264x221, ตัวหนังสือสีน้ำตาลเข้ม; build 0 error, --shots ดู base/care แล้ว, --autoplay reached To be continued
+- Gates (2026-10-24 19:49, clean worktree @ 09bab0b): slnx build 0 warn/0 err; --autoplay reached To be continued; --shots 29 PNG
 - Next action: ผู้ใช้ดูในเกมแล้วปรับขนาด (Art.PlayerSpriteHeight / PetSpriteHeight); ยืนยันปิด
