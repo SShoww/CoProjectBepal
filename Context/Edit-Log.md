@@ -3,6 +3,12 @@
 ล่าสุด 10 งาน งานละ 3 บรรทัด เขียนผ่าน `tools/context/log-edit.py` เท่านั้น — รายการเก่าอยู่ที่ [archive/edit-log/](archive/edit-log/)
 
 <!-- entries -->
+- **2026-10-25 20:05 · Q-20261025-font-size-docs** — Small font ตามจริง = 12 pt (Small.spritefont) แทน 15; CLAUDE.md นับ Sprites เป็น 14 PNG + ระบุ ui_item_* ของ Q-20261025-item-slot-ui
+  - Files: CLAUDE.md, BEPAL/Docs/GDD/14-audio-fonts-list.md
+  - Validation: เทียบกับ Content/Fonts/Small.spritefont และ ls Content/Sprites; แก้เฉพาะเอกสาร
+- **2026-10-25 19:52 · Q-20261025-item-slot-ui** — ใส่ภาพกรอบการ์ดไอเทม + ปุ่ม Buy/Use (normal/hold) ใน Shop/Box; Button รองรับ sprite skin
+  - Files: BEPAL/Bepal_Game/Bepal/Content/Sprites/ui_item_*.png, Content.mgcb, Core/Ui.cs, Model/Items.cs, Scenes/BaseMenus.cs, 05-asset-list.md, _candidates/README.md
+  - Validation: build 0/0; shots shop/inventory ok; autoplay ทั้ง 2 แบบ reached To be continued; ยังไม่ได้ดูปุ่ม hold ด้วยตา
 - **2026-10-24 19:50 · Q-20261024-pet-player-sprites-close** — ปิด quest pet-player-sprites (ย้ายไป archive ตามคำสั่งผู้ใช้)
   - Files: Context/quests, Context/archive/quests
   - Validation: merge แล้ว PR #37; ยังไม่ได้เล่นจริง
@@ -27,9 +33,3 @@
 - **2026-10-14 00:11 · Q-20261014-drawio-sync** — แก้ 6 diagram .drawio + PNG ให้ตรงโค้ด (ไม่มีปุ่ม E, Refuse = ร้านค้า, Day 4-5 Storm/Big Z, Options/Box/Shop); WinLose_CoreFlow ตรงอยู่แล้ว
   - Files: BEPAL/Docs/GDD/diagrams/**
   - Validation: render PNG ดูทุกไฟล์, XML parse ผ่าน, แก้เฉพาะเอกสาร ไม่รัน build/autoplay, ยังไม่เปิดใน VS Code จริง
-- **2026-10-13 22:46 · Q-20261013-gdd-sync** — ปรับ GDD 01-14, README, telemetry-spec, CLAUDE.md ให้ตรงโค้ด (Day1-5 ตายตัว, ร้าน 7 ไอเทม+Box, Options/BGM, dev tools)
-  - Files: BEPAL/Docs/GDD/*.md, BEPAL/Docs/Balance/telemetry-spec.md, CLAUDE.md
-  - Validation: dotnet build ผ่าน, แก้เฉพาะเอกสาร, ไม่รัน autoplay, ไม่ได้ตรวจ drawio/00-concept
-- **2026-10-13 22:15 · Q-20261013-scene-jump** — เพิ่ม SceneCatalog + --scene <name> + เมนู F2 กระโดดไป scene ใดก็ได้ (dev); ShotRunner ใช้แคตตาล็อกร่วม
-  - Files: DevTools/SceneCatalog.cs, DevTools/SceneJumpScene.cs, ShotRunner.cs, Game1.cs, CLAUDE.md, 04-class-diagram.md
-  - Validation: build 0/0, --shots 28 PNG, --autoplay reached To be continued; F2 ยังไม่ได้ลองในเกมจริง
