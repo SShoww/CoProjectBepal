@@ -41,7 +41,8 @@ public static class Items
     public static Rectangle ButtonRect(Rectangle card)
     {
         float s = card.Width / (float)CardW;
-        return new Rectangle(card.X + (int)(25 * s), card.Bottom - (int)(52 * s), card.Width - (int)(50 * s), (int)(40 * s));
+        var b = Ui.ItemButtonSrc;   // where the button sits on the card art
+        return new Rectangle(card.X + (int)(b.X * s), card.Y + (int)(b.Y * s), (int)(b.Width * s), (int)(b.Height * s));
     }
 
     /// <summary>Button of the centred (hero) card once the track has settled (also used by the autoplay bot).</summary>

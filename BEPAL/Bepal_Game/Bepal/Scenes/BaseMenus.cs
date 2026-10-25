@@ -268,12 +268,27 @@ static class ItemCards
     public static void Draw(SpriteBatch sb, ItemInfo it, Rectangle card, int owned)
     {
         float s = card.Width / (float)Items.CardW;
-        Ui.Panel(sb, card);
+        bool art = Ui.ItemSlot != null;
+        if (art) sb.Draw(Ui.ItemSlot, card, Color.White);
+        else Ui.Panel(sb, card);
         Gfx.Circle(sb, new Vector2(card.Center.X, card.Y + 42 * s), 26 * s, it.Color);
         Gfx.Circle(sb, new Vector2(card.Center.X - 8 * s, card.Y + 33 * s), 7 * s, Color.White * 0.4f);
-        Gfx.Text(sb, Gfx.Font, it.Name, new Vector2(card.Center.X, card.Y + 78 * s), Palette.Text, 0.5f);
-        Gfx.Text(sb, Gfx.Small, Gfx.Wrap(Gfx.Small, it.Desc, Items.CardW - 40), new Vector2(card.Center.X, card.Y + 108 * s), Palette.Dim, 0.5f);
-        if (owned > 0) Gfx.Text(sb, Gfx.Small, $"x{owned}", new Vector2(card.Right - 14, card.Y + 10), Palette.Coin, 1f);
+        Gfx.Text(sb, Gfx.Font, it.Name, new Vector2(card.Center.X, card.Y + 78 * s), art ? Ui.CardInk : Palette.Text, 0.5f);
+        Gfx.Text(sb, Gfx.Small, Gfx.Wrap(Gfx.Small, it.Desc, Items.CardW - 40), new Vector2(card.Center.X, card.Y + 108 * s), art ? Ui.CardInkDim : Palette.Dim, 0.5f);
+        if (owned > 0) Gfx.Text(sb, Gfx.Small, $"x{owned}", new Vector2(card.Right - 14, card.Y + 10), art ? Ui.CardInk : Palette.Coin, 1f);
+    }
+
+    /// <summary>Buy/Use button of a card (skinned with the card art when it loaded).</summary>
+    public static Button Button(string label)
+    {
+        var b = new Button(Items.HeroButtonRect, label);
+        if (Ui.ItemButton == null) return b;
+        b.Skin = Ui.ItemButton;
+        b.SkinHeld = Ui.ItemButtonHold;
+        b.SkinSrc = Ui.ItemButtonSrc;
+        b.Ink = Ui.CardInk;
+        b.InkDim = Ui.CardInkDim;
+        return b;
     }
 }
 
@@ -401,7 +416,7 @@ public class ShopScene : Scene
     {
         _gs = gs;
         _onClose = onClose;
-        for (int i = 0; i < Items.Count; i++) _buy[i] = new Button(Items.HeroButtonRect, $"Buy  {Items.All[i].Price}");
+        for (int i = 0; i < Items.Count; i++) _buy[i] = ItemCards.Button($"Buy  {Items.All[i].Price}");
     }
 
     /// <summary>Put item <paramref name="i"/> in the middle of the track (the autoplay bot and the shots use this before clicking <see cref="BuyRect"/>).</summary>
@@ -480,7 +495,7 @@ public class InventoryScene : Scene
     public InventoryScene(GameState gs)
     {
         _gs = gs;
-        for (int i = 0; i < Items.Count; i++) _use[i] = new Button(Items.HeroButtonRect, "Use");
+        for (int i = 0; i < Items.Count; i++) _use[i] = ItemCards.Button("Use");
     }
 
     /// <summary>Put item <paramref name="i"/> in the middle of the track (the autoplay bot uses this before clicking <see cref="UseRect"/>).</summary>

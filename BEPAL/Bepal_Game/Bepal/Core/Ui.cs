@@ -33,6 +33,10 @@ public class Button
     public string Label;
     public bool Enabled = true;
     public Color Accent = Palette.PanelEdge;
+    /// <summary>Sprite skin (normal / held while the mouse is down on it), drawn from <see cref="SkinSrc"/>; null = nine-patch.</summary>
+    public Texture2D? Skin, SkinHeld;
+    public Rectangle SkinSrc;
+    public Color Ink = Palette.Text, InkDim = Palette.Dim;
 
     public Button(Rectangle rect, string label)
     {
@@ -57,13 +61,21 @@ public class Button
         _hover = Ease.Damp(_hover, Hover ? 1 : 0, Balance.ButtonHoverK, Ui.Dt);
         var r = Rect;
         r.Y -= (int)MathF.Round(Balance.ButtonLiftPx * _hover);
-        var bg = !Enabled ? new Color(40, 36, 40) : Color.Lerp(Palette.Panel, Accent, 0.35f * _hover);
-        Ui.Frame(sb, r, bg * 0.95f, Enabled ? Color.Lerp(Accent, Palette.Warm, 0.4f * _hover) : new Color(80, 70, 70));
+        if (Skin != null)
+        {
+            var tex = Hover && Input.MouseHeld && SkinHeld != null ? SkinHeld : Skin;
+            sb.Draw(tex, r, SkinSrc, Enabled ? Color.White : new Color(120, 112, 108));
+        }
+        else
+        {
+            var bg = !Enabled ? new Color(40, 36, 40) : Color.Lerp(Palette.Panel, Accent, 0.35f * _hover);
+            Ui.Frame(sb, r, bg * 0.95f, Enabled ? Color.Lerp(Accent, Palette.Warm, 0.4f * _hover) : new Color(80, 70, 70));
+        }
         float room = r.Width - Ui.Pad;
         var font = Label.Length == 1 ? Gfx.Big                                   // glyph buttons ("+") need the big size to read
             : Gfx.Font.MeasureString(Label).X > room ? Gfx.Small : Gfx.Font;   // long label: drop to the small size first
         var label = Gfx.Fit(font, Label, room);
-        Gfx.Text(sb, font, label, new Vector2(r.Center.X, r.Center.Y - font.LineSpacing / 2f), Enabled ? Palette.Text : Palette.Dim, 0.5f);
+        Gfx.Text(sb, font, label, new Vector2(r.Center.X, r.Center.Y - font.LineSpacing / 2f), Enabled ? Ink : InkDim, 0.5f);
     }
 }
 
@@ -129,11 +141,24 @@ public static class Ui
 
     /// <summary>Pet status frame (Content/Sprites/ui_status_panel.png, 396x332: header + 4 bar slots); null = draw <see cref="Panel"/> instead.</summary>
     public static Texture2D? StatusPanel;
+    /// <summary>Shop/inventory item card (Content/Sprites/ui_item_slot.png, 270x230 = <see cref="Items.CardW"/>x<see cref="Items.CardH"/>) and its Buy/Use button, normal + held (full-card canvas, the button sits at <see cref="ItemButtonSrc"/>); null = nine-patch.</summary>
+    public static Texture2D? ItemSlot, ItemButton, ItemButtonHold;
+    public static readonly Rectangle ItemButtonSrc = new(25, 183, 220, 40);
+    /// <summary>Text on the light-brown item card art.</summary>
+    public static readonly Color CardInk = new(52, 32, 22), CardInkDim = new(86, 56, 38);
 
     public static void LoadOptional(ContentManager content)
     {
-        try { StatusPanel = content.Load<Texture2D>("Sprites/ui_status_panel"); }
-        catch (ContentLoadException) { }   // no art: keep the nine-patch panel
+        StatusPanel = Load(content, "ui_status_panel");
+        ItemSlot = Load(content, "ui_item_slot");
+        ItemButton = Load(content, "ui_item_button");
+        ItemButtonHold = Load(content, "ui_item_button_hold");
+    }
+
+    static Texture2D? Load(ContentManager content, string name)
+    {
+        try { return content.Load<Texture2D>("Sprites/" + name); }
+        catch (ContentLoadException) { return null; }   // no art: keep the nine-patch panel
     }
 
     public static void Panel(SpriteBatch sb, Rectangle r, float alpha = 0.95f)
