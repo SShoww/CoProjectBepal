@@ -27,7 +27,7 @@ project: BePal
 
 | สถานะ | รายการ |
 | --- | --- |
-| เสร็จ (อยู่ใน `Content/`) | parallax 5 ชั้น (`bg_parallax_{sky,clouds,hills,mid,near}.png`, 320x180 วาด 4x), `fg_jungle.png`, `player.png` (ภาพวาดนิ่งเดียว + `SpriteMotion` ขยับด้วยโค้ด), สัตว์ 3 ตัว `pet_mossling\|nibbleclaw\|blinkbun.png` (ภาพนิ่ง; Toothless ยังเป็น primitive), กรอบ status สัตว์ `ui_status_panel.png`, SFX 17 ไฟล์, **BGM 7 ไฟล์ `.ogg`** (`Content/Music/`), SpriteFont 3 ตัว (`Fonts/Main\|Big\|Small`) — ตาราง §2 ใน [14-audio-fonts-list.md](14-audio-fonts-list.md) |
+| เสร็จ (อยู่ใน `Content/`) | parallax 5 ชั้น (`bg_parallax_{sky,clouds,hills,mid,near}.png`, 320x180 วาด 4x), `fg_jungle.png`, `player.png` (ภาพวาดนิ่งเดียว + `SpriteMotion` ขยับด้วยโค้ด), สัตว์ 3 ตัว `pet_mossling\|nibbleclaw\|blinkbun.png` (ภาพนิ่ง; Toothless ยังเป็น primitive), กรอบ status สัตว์ `ui_status_panel.png`, การ์ดไอเทม Shop/Box `ui_item_slot.png` + ปุ่ม `ui_item_button(_hold).png`, SFX 17 ไฟล์, **BGM 7 ไฟล์ `.ogg`** (`Content/Music/`), SpriteFont 3 ตัว (`Fonts/Main\|Big\|Small`) — ตาราง §2 ใน [14-audio-fonts-list.md](14-audio-fonts-list.md) |
 | ยังไม่ทำ | sprite สัตว์เลี้ยง / ศัตรู / NPC (โค้ดรองรับแล้วแต่ยังไม่มีไฟล์; ตอนนี้วาดด้วยรูปทรงใน `World/Art.cs`), UI/ไอคอน/ไอเทมทั้งหมด (การ์ดไอเทมวาดด้วยโค้ด), ฟอนต์จริงนอกเหนือ SpriteFont 3 ตัว (`Segoe UI` ชั่วคราว) |
 
 > **หมายเหตุ as-built:** Content อยู่ในโฟลเดอร์แบน `Content/Sprites/`, `Content/Sfx/`, `Content/Music/`, `Content/Fonts/` — ชื่อโฟลเดอร์ย่อย (`player/`, `pet/`, `env/`, `ui/...`) และชื่อ `spr_*` ในตารางด้านล่างเป็นชื่อที่ส่งมอบจาก Art (จะ rename ตอนวางไฟล์เข้า `Content/Sprites/` ตามที่โค้ดคาดไว้ เช่น `pet_<species>.png`) · ไฟล์ orphan: `_candidates/sfx/sfx_qte_perfect.wav` (ไม่ได้โหลด — Perfect chime สังเคราะห์ตอนรัน)
