@@ -145,7 +145,7 @@ public static class Ui
     public static Texture2D? ItemSlot, ItemButton, ItemButtonHold;
     public static readonly Rectangle ItemButtonSrc = new(25, 183, 220, 40);
     /// <summary>Text on the light-brown item card art.</summary>
-    public static readonly Color CardInk = new(52, 32, 22), CardInkDim = new(86, 56, 38);
+    public static readonly Color CardInk = new(255, 248, 236), CardInkDim = new(246, 230, 210);
 
     public static void LoadOptional(ContentManager content)
     {
