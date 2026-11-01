@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended.Graphics;
+using MonoGame.Extended.ViewportAdapters;
 
 namespace Bepal;
 
@@ -104,8 +105,12 @@ public static class Gfx
     /// <summary>Extra view transform applied under the shake (set by SceneManager for overlay open animations).</summary>
     public static Matrix ViewExtra = Matrix.Identity;
 
-    /// <summary>View transform of the current frame: overlay scale (<see cref="ViewExtra"/>) under the screen shake.</summary>
-    static Matrix ViewMatrix => ViewExtra * Matrix.CreateTranslation(_shakeOffset.X, _shakeOffset.Y, 0);
+    /// <summary>Scales the fixed W x H game onto the window (letterboxed); null under --shots/--autoplay = drawn 1:1.</summary>
+    public static ViewportAdapter? Viewport;
+
+    /// <summary>View transform of the current frame: overlay scale (<see cref="ViewExtra"/>) under the screen shake, then window scale.</summary>
+    static Matrix ViewMatrix => ViewExtra * Matrix.CreateTranslation(_shakeOffset.X, _shakeOffset.Y, 0)
+        * (Viewport?.GetScaleMatrix() ?? Matrix.Identity);
 
     public static void Begin(SpriteBatch sb, BlendState? blend = null, SamplerState? sampler = null) =>
         sb.Begin(SpriteSortMode.Deferred, blend ?? BlendState.AlphaBlend, sampler ?? SamplerState.LinearClamp, null, null, null,

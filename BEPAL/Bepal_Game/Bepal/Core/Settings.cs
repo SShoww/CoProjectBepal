@@ -5,12 +5,13 @@ using System.IO;
 namespace Bepal;
 
 /// <summary>
-/// Player options: music and sound-effect volume (0..1, multiplied onto <see cref="Balance.MusicVolume"/> and each SFX's own volume).
+/// Player options: music and sound-effect volume (0..1, multiplied onto <see cref="Balance.MusicVolume"/> and each SFX's own volume) and full screen.
 /// Saved to %APPDATA%/BePal/settings.txt (<c>music=0.8</c> lines); never read or written under --autoplay / --shots (<see cref="Persist"/>).
 /// </summary>
 public static class Settings
 {
     public static float Music = 1f, Sfx = 1f;
+    public static bool Fullscreen;   // toggled with F11 / Alt+Enter (Game1.SetFullScreen)
     public static bool Persist;
 
     static string FilePath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "BePal", "settings.txt");
@@ -28,6 +29,7 @@ public static class Settings
                 v = Math.Clamp(v, 0f, 1f);
                 if (kv[0].Trim() == "music") Music = v;
                 else if (kv[0].Trim() == "sfx") Sfx = v;
+                else if (kv[0].Trim() == "fullscreen") Fullscreen = v >= 0.5f;
             }
         }
         catch (Exception e) { Console.WriteLine($"[settings] could not read: {e.Message}"); }
@@ -43,6 +45,7 @@ public static class Settings
             {
                 "music=" + Music.ToString("0.##", CultureInfo.InvariantCulture),
                 "sfx=" + Sfx.ToString("0.##", CultureInfo.InvariantCulture),
+                "fullscreen=" + (Fullscreen ? "1" : "0"),
             });
         }
         catch (Exception e) { Console.WriteLine($"[settings] could not save: {e.Message}"); }
