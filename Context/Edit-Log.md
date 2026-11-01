@@ -3,9 +3,9 @@
 ล่าสุด 10 งาน งานละ 3 บรรทัด เขียนผ่าน `tools/context/log-edit.py` เท่านั้น — รายการเก่าอยู่ที่ [archive/edit-log/](archive/edit-log/)
 
 <!-- entries -->
-- **2026-11-01 16:18 · Q-20261101-base-toothless-sprites** — ใส่ bg_base เป็นผนังฐาน (ย่อให้เท่าผนัง placeholder เดิม y350-600, ต่อซ้ำ+กลับด้านสลับ, หน้าต่างเลี่ยง Upgrade) และ pet_toothless (ใช้กับศัตรู Toothless ด้วย)
-  - Files: Content/Sprites/bg_base.png, Content/Sprites/pet_toothless.png, Content.mgcb, World/Backdrop.cs, World/Art.cs, Scenes/BaseScene.cs, 05-asset-list.md, _candidates/README.md, CLAUDE.md
-  - Validation: build 0/0; shots base/night/fight ok; autoplay reached To be continued; ยังไม่ได้ดู rain ด้วยตา
+- **2026-11-01 16:45 · Q-20261101-base-toothless-sprites** — แก้หน้าต่างบานที่ 3 โผล่ครึ่งบานข้างประตูขวา: BaseArtPhase 400 -> 250 (หน้าต่างอยู่ x≈655/≈2265, บานที่ 3 พ้น WallRight)
+  - Files: Scenes/BaseScene.cs, _candidates/README.md, Context/quests/Q-20261101-base-toothless-sprites.md
+  - Validation: build -o scratchpad 0/0 (เกมเปิดค้าง pid 39588 ล็อก bin); shots 04_base_door/05_base_bed_night ok; autoplay reached To be continued
 - **2026-10-25 20:05 · Q-20261025-font-size-docs** — Small font ตามจริง = 12 pt (Small.spritefont) แทน 15; CLAUDE.md นับ Sprites เป็น 14 PNG + ระบุ ui_item_* ของ Q-20261025-item-slot-ui
   - Files: CLAUDE.md, BEPAL/Docs/GDD/14-audio-fonts-list.md
   - Validation: เทียบกับ Content/Fonts/Small.spritefont และ ls Content/Sprites; แก้เฉพาะเอกสาร
