@@ -27,7 +27,7 @@ project: BePal
 
 | สถานะ | รายการ |
 | --- | --- |
-| เสร็จ (อยู่ใน `Content/`) | parallax 5 ชั้น (`bg_parallax_{sky,clouds,hills,mid,near}.png`, 320x180 วาด 4x), `fg_jungle.png`, `player.png` (ภาพวาดนิ่งเดียว + `SpriteMotion` ขยับด้วยโค้ด), สัตว์ 3 ตัว `pet_mossling\|nibbleclaw\|blinkbun.png` (ภาพนิ่ง; Toothless ยังเป็น primitive), กรอบ status สัตว์ `ui_status_panel.png`, การ์ดไอเทม Shop/Box `ui_item_slot.png` + ปุ่ม `ui_item_button(_hold).png`, SFX 17 ไฟล์, **BGM 7 ไฟล์ `.ogg`** (`Content/Music/`), SpriteFont 3 ตัว (`Fonts/Main\|Big\|Small`) — ตาราง §2 ใน [14-audio-fonts-list.md](14-audio-fonts-list.md) |
+| เสร็จ (อยู่ใน `Content/`) | parallax 5 ชั้น (`bg_parallax_{sky,clouds,hills,mid,near}.png`, 320x180 วาด 4x), `fg_jungle.png`, `player.png` (ภาพวาดนิ่งเดียว + `SpriteMotion` ขยับด้วยโค้ด), สัตว์ 4 ตัว `pet_mossling\|nibbleclaw\|blinkbun\|toothless.png` (ภาพนิ่ง; `pet_toothless` ใช้เป็นศัตรู Toothless ในฉากสู้ด้วย), ผนัง/พื้นฐาน `bg_base.png` (ย่อ x0.42 ให้สูงเท่าผนังเดิม y 350–600 แล้วต่อซ้ำ/กลับด้านสลับกันทั่วฐาน), กรอบ status สัตว์ `ui_status_panel.png`, การ์ดไอเทม Shop/Box `ui_item_slot.png` + ปุ่ม `ui_item_button(_hold).png`, SFX 17 ไฟล์, **BGM 7 ไฟล์ `.ogg`** (`Content/Music/`), SpriteFont 3 ตัว (`Fonts/Main\|Big\|Small`) — ตาราง §2 ใน [14-audio-fonts-list.md](14-audio-fonts-list.md) |
 | ยังไม่ทำ | sprite สัตว์เลี้ยง / ศัตรู / NPC (โค้ดรองรับแล้วแต่ยังไม่มีไฟล์; ตอนนี้วาดด้วยรูปทรงใน `World/Art.cs`), UI/ไอคอน/ไอเทมทั้งหมด (การ์ดไอเทมวาดด้วยโค้ด), ฟอนต์จริงนอกเหนือ SpriteFont 3 ตัว (`Segoe UI` ชั่วคราว) |
 
 > **หมายเหตุ as-built:** Content อยู่ในโฟลเดอร์แบน `Content/Sprites/`, `Content/Sfx/`, `Content/Music/`, `Content/Fonts/` — ชื่อโฟลเดอร์ย่อย (`player/`, `pet/`, `env/`, `ui/...`) และชื่อ `spr_*` ในตารางด้านล่างเป็นชื่อที่ส่งมอบจาก Art (จะ rename ตอนวางไฟล์เข้า `Content/Sprites/` ตามที่โค้ดคาดไว้ เช่น `pet_<species>.png`) · ไฟล์ orphan: `_candidates/sfx/sfx_qte_perfect.wav` (ไม่ได้โหลด — Perfect chime สังเคราะห์ตอนรัน)
@@ -79,7 +79,7 @@ project: BePal
 | **PET-10** | `pet/spr_blinkbun_attack.png` | **Blinkbun — Attack:** ตาที่สามเบิกกว้าง ปล่อยหมอกดำรอบตัว | 280×360 | P0 | 🔲 Not Started |
 | **PET-11** | `pet/spr_blinkbun_hurt.png` | **Blinkbun — Hurt:** หูพับ ตัวหด | 280×360 | P0 | 🔲 Not Started |
 | **PET-12** | `pet/spr_blinkbun_happy.png` | **Blinkbun — Happy:** หูลู่ ตาปิดสนิท ยิ้มสงบ | 280×360 | P1 | 🔲 Not Started |
-| **PET-13** | `pet/spr_toothless_idle.png` | **Toothless — Idle (ศัตรู Day 2):** สัตว์เลื้อยคลานดำทมิฬ ผิวลื่นไร้ฟัน ถุงกรดสีม่วงที่ลำคอ | 280×360 | P0 | 🔲 Not Started |
+| **PET-13** | `pet/spr_toothless_idle.png` | **Toothless — Idle (ศัตรู Day 2):** สัตว์เลื้อยคลานดำทมิฬ ผิวลื่นไร้ฟัน ถุงกรดสีม่วงที่ลำคอ | 280×360 | P0 | ✅ In game (2026-11-01, `pet_toothless.png`) |
 | **PET-14** | `pet/spr_toothless_attack.png` | **Toothless — Attack "Acid":** อ้าปากพ่นกรด ถุงกรดพองโต (ท่าศัตรูใน Fight) | 280×360 | P0 | 🔲 Not Started |
 | **PET-15** | `pet/spr_toothless_hurt.png` | **Toothless — Hurt** | 280×360 | P0 | 🔲 Not Started |
 | **PET-16** | `pet/spr_toothless_tamed.png` | **Toothless — Tamed:** หมอบลงอย่างว่าง่าย (หน้า "You got new pet !!!" และเดินในฐานหลัง Tame) | 280×360 | P0 | 🔲 Not Started |
@@ -120,7 +120,7 @@ project: BePal
 | **ENV-02** | `env/bg_sky_night.png` | ท้องฟ้ากลางคืน น้ำเงินเข้ม + ดาว (โค้ด fade จากกลางวันตอน End day) | 1280×720 | P0 | 🔲 Not Started |
 | **ENV-03** | `env/bg_mountain_far.png` | ภูเขาไกล สีม่วงหม่น (เลื่อน 0.25×) | 2560×720 | P0 | 🔲 Not Started |
 | **ENV-04** | `env/bg_mountain_near.png` | ภูเขาใกล้ สีม่วงเข้ม (เลื่อน 0.5×) | 3200×720 | P0 | 🔲 Not Started |
-| **ENV-05** | `env/bg_base.png` | ตัวฐาน ผนัง/โครงสร้างภายใน แสงส้มอุ่นกลางฐาน มืดลงที่ขอบซ้าย | 3840×720 | P0 | 🔲 Not Started |
+| **ENV-05** | `env/bg_base.png` | ตัวฐาน ผนัง/โครงสร้างภายใน แสงส้มอุ่นกลางฐาน มืดลงที่ขอบซ้าย | 3840×720 | P0 | ✅ In game (2026-11-01, `bg_base.png`) |
 | **ENV-06** | `env/bg_ground.png` | พื้นดินดาวรกร้าง (layer หน้าสุด) | 3840×160 | P0 | 🔲 Not Started |
 
 **วัตถุในฐาน** (ผู้เล่นเดินไปใกล้แล้วกด `Space`):

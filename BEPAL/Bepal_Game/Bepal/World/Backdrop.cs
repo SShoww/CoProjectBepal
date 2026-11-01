@@ -33,7 +33,10 @@ public class Backdrop
 
     static readonly Color NightTint = new(60, 70, 130);
 
-    static Texture2D? _sky, _clouds, _hills, _mid, _near, _fg;
+    static Texture2D? _sky, _clouds, _hills, _mid, _near, _fg, _base;
+
+    /// <summary>True when the painted base interior (<c>bg_base.png</c>, 3840x720 = BaseScene.WorldW) is loaded.</summary>
+    public static bool HasBaseInterior => _base != null;
 
     public static void Load(ContentManager content)
     {
@@ -43,6 +46,33 @@ public class Backdrop
         _mid = content.Load<Texture2D>("Sprites/bg_parallax_mid");
         _near = content.Load<Texture2D>("Sprites/bg_parallax_near");
         _fg = content.Load<Texture2D>("Sprites/fg_jungle");
+        try { _base = content.Load<Texture2D>("Sprites/bg_base"); }
+        catch (ContentLoadException) { }   // no art: BaseScene draws the primitive wall
+    }
+
+    const int BaseFloorRow = 596;                         // y of the floor line in bg_base.png
+    static readonly Color BaseFloorFill = new(133, 74, 45); // bg_base.png bottom rows, continues the floor below the art
+
+    /// <summary>Painted base interior, scaled uniformly so the wall (image rows 0..<see cref="BaseFloorRow"/>) spans <paramref name="top"/>..<paramref name="floorY"/>
+    /// (the old primitive wall's height) and tiled from <paramref name="left"/> to <paramref name="right"/> (screen px), the first tile starting <paramref name="phase"/> px early
+    /// (moves the windows clear of the props). Its window is transparent, so draw it over <see cref="Draw"/>.</summary>
+    public void DrawBaseInterior(SpriteBatch sb, float left, float right, float top, float floorY, float phase, float night)
+    {
+        if (_base == null) return;
+        var tint = Color.Lerp(Color.White, NightTint, MathHelper.Clamp(night, 0, 1) * 0.7f);
+        float s = (floorY - top) / BaseFloorRow;
+        Gfx.Rect(sb, 0, floorY, Gfx.W, Gfx.H - floorY, Color.Lerp(BaseFloorFill, Color.Black, MathHelper.Clamp(night, 0, 1) * 0.6f));
+        int k = 0;
+        for (float x = left - phase; x < right; x += _base.Width * s, k++)
+        {
+            float x0 = MathF.Max(x, left), x1 = MathF.Min(x + _base.Width * s, right);   // visible part of this tile
+            if (x1 <= x0 || x1 < 0 || x0 > Gfx.W) continue;
+            int a = (int)((x0 - x) / s), b = (int)((x1 - x) / s);                          // its columns in the (unflipped) tile
+            bool flip = (k & 1) == 1;   // mirror every other tile so the edges meet seamlessly
+            sb.Draw(_base, new Rectangle((int)MathF.Round(x0), (int)top, (int)MathF.Round(x1 - x0), (int)MathF.Round(_base.Height * s)),
+                new Rectangle(flip ? _base.Width - b : a, 0, b - a, _base.Height), tint, 0, Vector2.Zero,
+                flip ? SpriteEffects.FlipHorizontally : SpriteEffects.None, 0);
+        }
     }
 
     public void Draw(SpriteBatch sb, float camX, float night, float time, float groundY = 600)
