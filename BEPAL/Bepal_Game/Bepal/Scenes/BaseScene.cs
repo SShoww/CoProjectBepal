@@ -24,7 +24,7 @@ public class BaseScene : Scene
     static float MaxX => WallRight - Art.PlayerHalfWidth;
     // Big windows: centres 630 + 520*i, between the hanging lamps; last one ends ~160px short of the door
     const int WindowCount = 6;
-    const float BaseArtPhase = 400;   // bg_base.png tiles start this far left of the wall: its windows land at x≈500 and ≈2120, clear of Upgrade/Doctor
+    const float BaseArtPhase = 250;   // bg_base.png tiles start this far left of the wall: its windows land at x≈655 and ≈2265 (clear of Upgrade/Doctor); the 3rd (≈3880) is past WallRight, not cut in half at the door
     const float WindowW = 320, WindowH = 160, WindowTop = GroundY - 210;
     static float WindowX(int i) => 630 + 520 * i;
     static bool InWindow(float x)
