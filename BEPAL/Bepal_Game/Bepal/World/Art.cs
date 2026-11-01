@@ -133,7 +133,9 @@ public static class Art
     {
         if (e.Name == "Toothless")
         {
-            if (TryDrawSprite(sb, "enemy_toothless", feet, ToothlessEnemyHeight, time, lookAt, Color.Lerp(Color.White, new Color(255, 110, 110), flash), 4)) return;
+            var tint = Color.Lerp(Color.White, new Color(255, 110, 110), flash);
+            if (TryDrawSprite(sb, "enemy_toothless", feet, ToothlessEnemyHeight, time, lookAt, tint, 4)) return;
+            if (TryDrawSprite(sb, "pet_toothless", feet, ToothlessEnemyHeight, time, lookAt, tint, 4)) return;   // same creature: reuse the pet art
             Pet(sb, Species.Toothless, Color.Lerp(e.Color, Color.White, flash), feet, 1.6f, time, lookAt);
             return;
         }

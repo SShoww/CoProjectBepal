@@ -24,6 +24,7 @@ public class BaseScene : Scene
     static float MaxX => WallRight - Art.PlayerHalfWidth;
     // Big windows: centres 630 + 520*i, between the hanging lamps; last one ends ~160px short of the door
     const int WindowCount = 6;
+    const float BaseArtPhase = 400;   // bg_base.png tiles start this far left of the wall: its windows land at x≈500 and ≈2120, clear of Upgrade/Doctor
     const float WindowW = 320, WindowH = 160, WindowTop = GroundY - 210;
     static float WindowX(int i) => 630 + 520 * i;
     static bool InWindow(float x)
@@ -329,7 +330,8 @@ public class BaseScene : Scene
         SharedBackdrop.Draw(sb, _camX, night, _time, GroundY);
         Rain.DrawSky(sb);
 
-        DrawStructure(sb, night);
+        if (Backdrop.HasBaseInterior) SharedBackdrop.DrawBaseInterior(sb, Sx(WallLeft - 20), Sx(WallRight + 20), GroundY - 250, GroundY, BaseArtPhase, night);   // painted wall + floor (bg_base.png), same box as the primitive wall
+        else DrawStructure(sb, night);
 
         // Hearth light
         var hearth = new Vector2(Sx(HearthX), GroundY - 40);
@@ -367,9 +369,12 @@ public class BaseScene : Scene
                 lean: pose.Rot * 92f, bob: -pose.Offset.Y, faceScale: _motion.Face,
                 breath: (pose.Scale.Y - 1) * 32f);
 
-        // Ground, then the sprite foreground (parallax 1.3) in front of everything
-        Gfx.Rect(sb, 0, GroundY, Gfx.W, Gfx.H - GroundY, Gfx.Lerp(new Color(58, 40, 34), new Color(24, 18, 22), night));
-        Gfx.Rect(sb, 0, GroundY, Gfx.W, 4, Gfx.Lerp(new Color(110, 74, 56), new Color(44, 32, 36), night));
+        // Ground (the painted interior has its own floor), then the sprite foreground (parallax 1.3) in front of everything
+        if (!Backdrop.HasBaseInterior)
+        {
+            Gfx.Rect(sb, 0, GroundY, Gfx.W, Gfx.H - GroundY, Gfx.Lerp(new Color(58, 40, 34), new Color(24, 18, 22), night));
+            Gfx.Rect(sb, 0, GroundY, Gfx.W, 4, Gfx.Lerp(new Color(110, 74, 56), new Color(44, 32, 36), night));
+        }
         SharedBackdrop.DrawForeground(sb, _camX, night);
 
         // Darkness beyond the walls
