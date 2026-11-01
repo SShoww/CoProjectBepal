@@ -1,5 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Extended;
+using MonoGame.Extended.ViewportAdapters;
 
 namespace Bepal
 {
@@ -21,6 +23,8 @@ namespace Bepal
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
             Window.Title = "BePal";
+            Window.AllowUserResizing = true;
+            _graphics.HardwareModeSwitch = false;   // borderless full screen at desktop resolution
         }
 
         protected override void Initialize()
@@ -29,6 +33,17 @@ namespace Bepal
             _graphics.PreferredBackBufferHeight = Gfx.H;
             _graphics.ApplyChanges();
             base.Initialize();
+        }
+
+        /// <summary>Full screen keeps the game at W x H: <see cref="Gfx.Viewport"/> scales it up with black bars.</summary>
+        void SetFullScreen(bool on)
+        {
+            var mode = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode;
+            _graphics.PreferredBackBufferWidth = on ? mode.Width : Gfx.W;
+            _graphics.PreferredBackBufferHeight = on ? mode.Height : Gfx.H;
+            _graphics.IsFullScreen = on;
+            _graphics.ApplyChanges();
+            Settings.Fullscreen = on;
         }
 
         protected override void LoadContent()
@@ -87,6 +102,12 @@ namespace Bepal
                 Telemetry.Configure(telDir, _bot?.Profile ?? "human", auto ? "autoplay" : "play", Has("--refuse"), player);
                 Telemetry.SceneProbe = () => _scenes.Top?.GetType().Name ?? "";
             }
+
+            if (_shots == null && _bot == null)
+            {
+                Gfx.Viewport = new BoxingViewportAdapter(Window, GraphicsDevice, Gfx.W, Gfx.H);
+                if (Settings.Fullscreen) SetFullScreen(true);
+            }
         }
 
         protected override void OnExiting(object sender, ExitingEventArgs args)
@@ -126,6 +147,12 @@ namespace Bepal
             }
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
             Input.Update();
+            if (Gfx.Viewport != null && Input.ToggleFullScreen)
+            {
+                SetFullScreen(!_graphics.IsFullScreen);
+                Settings.Save();
+                Input.Consume();   // Alt+Enter must not also confirm in the scene
+            }
             if (_dev && Input.Pressed(Microsoft.Xna.Framework.Input.Keys.F2) && _scenes.Top is not SceneJumpScene)
                 _scenes.Push(new SceneJumpScene());
             Gfx.UpdateShake(dt);
@@ -139,6 +166,7 @@ namespace Bepal
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Black);
+            Gfx.Viewport?.Reset();   // boxed viewport (ApplyChanges resets it to the whole back buffer)
             Gfx.Begin(_spriteBatch);
             _scenes.Draw(_spriteBatch);
             _spriteBatch.End();
