@@ -3,6 +3,9 @@
 ล่าสุด 10 งาน งานละ 3 บรรทัด เขียนผ่าน `tools/context/log-edit.py` เท่านั้น — รายการเก่าอยู่ที่ [archive/edit-log/](archive/edit-log/)
 
 <!-- entries -->
+- **2026-11-01 16:18 · Q-20261101-base-toothless-sprites** — ใส่ bg_base เป็นผนังฐาน (ย่อให้เท่าผนัง placeholder เดิม y350-600, ต่อซ้ำ+กลับด้านสลับ, หน้าต่างเลี่ยง Upgrade) และ pet_toothless (ใช้กับศัตรู Toothless ด้วย)
+  - Files: Content/Sprites/bg_base.png, Content/Sprites/pet_toothless.png, Content.mgcb, World/Backdrop.cs, World/Art.cs, Scenes/BaseScene.cs, 05-asset-list.md, _candidates/README.md, CLAUDE.md
+  - Validation: build 0/0; shots base/night/fight ok; autoplay reached To be continued; ยังไม่ได้ดู rain ด้วยตา
 - **2026-10-25 20:05 · Q-20261025-font-size-docs** — Small font ตามจริง = 12 pt (Small.spritefont) แทน 15; CLAUDE.md นับ Sprites เป็น 14 PNG + ระบุ ui_item_* ของ Q-20261025-item-slot-ui
   - Files: CLAUDE.md, BEPAL/Docs/GDD/14-audio-fonts-list.md
   - Validation: เทียบกับ Content/Fonts/Small.spritefont และ ls Content/Sprites; แก้เฉพาะเอกสาร
@@ -30,6 +33,3 @@
 - **2026-10-14 00:36 · Q-20261013-bgm** — Day 4 เล่น bgm_thunderstorm ทั้งวัน (เดิมเฉพาะหลังเปิดประตู)
   - Files: BEPAL/Bepal_Game/Bepal/Scenes/BaseScene.cs, BEPAL/Docs/GDD/14-audio-fonts-list.md
   - Validation: build 0 warning/0 error; --autoplay -> RESULT: reached To be continued; ยังไม่ได้ฟังด้วยหู
-- **2026-10-14 00:11 · Q-20261014-drawio-sync** — แก้ 6 diagram .drawio + PNG ให้ตรงโค้ด (ไม่มีปุ่ม E, Refuse = ร้านค้า, Day 4-5 Storm/Big Z, Options/Box/Shop); WinLose_CoreFlow ตรงอยู่แล้ว
-  - Files: BEPAL/Docs/GDD/diagrams/**
-  - Validation: render PNG ดูทุกไฟล์, XML parse ผ่าน, แก้เฉพาะเอกสาร ไม่รัน build/autoplay, ยังไม่เปิดใน VS Code จริง
