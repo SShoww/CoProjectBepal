@@ -3,6 +3,9 @@
 ล่าสุด 10 งาน งานละ 3 บรรทัด เขียนผ่าน `tools/context/log-edit.py` เท่านั้น — รายการเก่าอยู่ที่ [archive/edit-log/](archive/edit-log/)
 
 <!-- entries -->
+- **2026-11-01 17:02 · Q-20261101-fullscreen-close** — ปิด quest fullscreen (ย้ายไป archive ตามคำสั่งผู้ใช้)
+  - Files: Context/quests, Context/archive/quests
+  - Validation: merge แล้ว PR #42; ผู้ใช้ทดสอบ F11 แล้ว
 - **2026-11-01 17:00 · Q-20261101-fullscreen** — Full screen F11/Alt+Enter ด้วย BoxingViewportAdapter — เกมยังวาด 1280x720 ขยายคงสัดส่วน+แถบดำ, เมาส์แปลงพิกัดกลับ, จำใน settings.txt
   - Files: Game1.cs, Core/Gfx.cs, Core/Input.cs, Core/Settings.cs, CLAUDE.md, 04-class-diagram.md, Context/quests/Q-20261101-fullscreen.md
   - Validation: slnx build 0/0; shots 29 PNG 1280x720; autoplay reached To be continued; ผู้ใช้ทดสอบ F11 แล้วผ่าน
@@ -30,6 +33,3 @@
 - **2026-10-14 13:54 · Q-20261014-custom-fonts** — ปิด quest custom-fonts (ย้ายไป archive ตามคำสั่งผู้ใช้)
   - Files: Context/quests, Context/archive/quests
   - Validation: merge แล้ว PR #31; ยังไม่ได้เล่นจริง
-- **2026-10-14 13:54 · Q-20261014-ui-polish-extended** — ปิด quest ui-polish-extended (ย้ายไป archive ตามคำสั่งผู้ใช้)
-  - Files: Context/quests, Context/archive/quests
-  - Validation: merge แล้ว PR #30; ยังไม่ได้เล่นจริง
