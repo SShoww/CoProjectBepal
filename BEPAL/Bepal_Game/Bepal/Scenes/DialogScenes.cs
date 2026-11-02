@@ -31,12 +31,14 @@ public class DialogueScene : Scene
     public static DialogueScene Say(string speaker, Action? onDone, params string[] texts) =>
         new(texts.Select(t => new Line(speaker, t)), onDone);
 
-    string Current => Gfx.Wrap(Gfx.Font, _lines[_index].Text, 1060);
+    string Current => Gfx.Wrap(Gfx.Font, _lines[_index].Text, 940);
 
     public override void Update(float dt)
     {
         _time += dt;
-        _chars += dt * 55f;
+        int before = (int)_chars;
+        _chars += dt * Balance.TextSpeed;
+        TypeSound(before);
         if (Input.Confirm || Input.Click)
         {
             if (_chars < Current.Length) _chars = Current.Length;
@@ -49,23 +51,47 @@ public class DialogueScene : Scene
         }
     }
 
+    /// <summary>Tick on every 2nd revealed letter (spaces are silent); pitch wobbles slightly so it doesn't drone.</summary>
+    void TypeSound(int before)
+    {
+        string text = Current;
+        int now = Math.Min((int)_chars, text.Length);
+        for (int i = before; i < now; i++)
+            if (!char.IsWhiteSpace(text[i]) && i % 2 == 0)
+                Audio.Play(Sfx.Typewriter, 0.085f, (i * 7 % 5 - 2) * 0.04f, minGap: 0);
+    }
+
     public override void Draw(SpriteBatch sb)
     {
         Ui.Dim(sb, 0.35f);
         _portrait?.Invoke(sb, _time);
         var box = new Rectangle(80, 500, 1120, 180);
-        Ui.Panel(sb, box);
         var line = _lines[Math.Min(_index, _lines.Count - 1)];
-        if (line.Speaker.Length > 0)
+        bool art = Ui.Dialog != null;
+        if (Ui.Dialog is { } dialog)
         {
-            var tag = new Rectangle(100, 478, (int)Gfx.Font.MeasureString(line.Speaker).X + 30, 38);
-            Ui.Panel(sb, tag);
-            Gfx.Text(sb, Gfx.Font, line.Speaker, new Vector2(tag.X + 15, tag.Y + 6), Palette.Warm);
+            sb.Draw(dialog, new Rectangle(box.X, box.Bottom - dialog.Height, dialog.Width, dialog.Height), Color.White);   // the art's name tab sits above the box
+            if (line.Speaker.Length > 0)
+            {
+                var tag = new Rectangle(box.X + 20, box.Bottom - dialog.Height, 101, 37);   // tab in the art
+                var font = Gfx.Font.MeasureString(line.Speaker).X > tag.Width - 8 ? Gfx.Small : Gfx.Font;
+                Gfx.Text(sb, font, Gfx.Fit(font, line.Speaker, tag.Width - 8), new Vector2(tag.Center.X, tag.Center.Y - font.LineSpacing / 2f), Ui.Ink, 0.5f, false);
+            }
+        }
+        else
+        {
+            Ui.Panel(sb, box);
+            if (line.Speaker.Length > 0)
+            {
+                var tag = new Rectangle(100, 478, (int)Gfx.Font.MeasureString(line.Speaker).X + 30, 38);
+                Ui.Panel(sb, tag);
+                Gfx.Text(sb, Gfx.Font, line.Speaker, new Vector2(tag.X + 15, tag.Y + 6), Palette.Warm);
+            }
         }
         var text = Current;
-        Gfx.Text(sb, Gfx.Font, text[..Math.Min(text.Length, (int)_chars)], new Vector2(110, 530), Palette.Text);
+        Gfx.Text(sb, Gfx.Font, text[..Math.Min(text.Length, (int)_chars)], new Vector2(110, 530), art ? Ui.Ink : Palette.Text, 0, !art);
         if (_chars >= text.Length && MathF.Sin(_time * 6) > 0)
-            Gfx.Text(sb, Gfx.Small, "Space >", new Vector2(1180, 650), Palette.Warm, 1f);
+            Gfx.Text(sb, Gfx.Small, "Space >", new Vector2(box.Right - Ui.Pad, box.Bottom - Ui.Pad - 14), art ? Ui.Ink : Palette.Warm, 1f, !art);
     }
 }
 
@@ -79,19 +105,22 @@ public class ChoiceScene : Scene
     readonly List<Option> _options;
     readonly List<Button> _buttons = new();
     readonly bool _cancellable;
+    readonly Texture2D? _panel;
 
     public override bool Overlay => true;
 
-    public ChoiceScene(string prompt, IEnumerable<Option> options, bool cancellable = false)
+    /// <param name="pause">Use the pause-menu art (ui_pause*) instead of the choice art.</param>
+    public ChoiceScene(string prompt, IEnumerable<Option> options, bool cancellable = false, bool pause = false)
     {
         _prompt = prompt;
         _options = options.ToList();
         _cancellable = cancellable;
+        _panel = pause ? Ui.Pause : Ui.Choice;
         int w = 220, gap = 30;
         int total = _options.Count * w + (_options.Count - 1) * gap;
         for (int i = 0; i < _options.Count; i++)
-            _buttons.Add(new Button(new Rectangle(Gfx.W / 2 - total / 2 + i * (w + gap), 400, w, 60), _options[i].Label)
-                { Enabled = _options[i].Enabled });
+            _buttons.Add(Ui.Skin(new Button(new Rectangle(Gfx.W / 2 - total / 2 + i * (w + gap), 400, w, 60), _options[i].Label)
+                { Enabled = _options[i].Enabled }, pause ? Ui.PauseButton : Ui.ChoiceButton));
     }
 
     public override void Update(float dt)
@@ -112,8 +141,8 @@ public class ChoiceScene : Scene
     {
         Ui.Dim(sb, 0.55f);
         var box = new Rectangle(240, 240, 800, 260);
-        Ui.Panel(sb, box);
-        Gfx.Text(sb, Gfx.Font, Gfx.Wrap(Gfx.Font, _prompt, 740), new Vector2(Gfx.W / 2f, 280), Palette.Text, 0.5f);
+        bool art = Ui.Skin(sb, _panel, box);
+        Gfx.Text(sb, Gfx.Font, Gfx.Wrap(Gfx.Font, _prompt, 740), new Vector2(Gfx.W / 2f, 280), art ? Ui.Ink : Palette.Text, 0.5f, !art);
         foreach (var b in _buttons) b.Draw(sb);
     }
 }
@@ -178,14 +207,18 @@ public class PetPickScene : Scene
             var r = Card(i);
             bool ok = _enabled(p);
             bool hover = ok && r.Contains(Input.Mouse);
-            Ui.Panel(sb, r, ok ? 0.95f : 0.6f);
-            if (hover) Gfx.Outline(sb, r, Palette.Warm, 4);
+            bool art = Ui.PetCard != null;
+            if (Ui.PetCard is { } card) sb.Draw(card, r, ok ? Color.White : new Color(150, 140, 136));
+            else Ui.Panel(sb, r, ok ? 0.95f : 0.6f);
+            if (hover) Gfx.Outline(sb, r, art ? Color.White : Palette.Warm, 4);
             Art.Pet(sb, p.Species, p.Color, new Vector2(r.Center.X, r.Y + 190), 1.3f, _time, Input.Mouse.ToVector2(),
                 ok ? 1f : 0.5f, p.Dead, hover);
-            Gfx.Text(sb, Gfx.Font, p.Name, new Vector2(r.Center.X, r.Y + 210), ok ? Palette.Text : Palette.Dim, 0.5f);
+            Gfx.Text(sb, Gfx.Font, p.Name, new Vector2(r.Center.X, r.Y + 210), art ? (ok ? Ui.Ink : Ui.InkDim) : ok ? Palette.Text : Palette.Dim, 0.5f, !art);
             var sub = _subtitle?.Invoke(p) ?? $"LV {p.Level}  HP {p.HpShown}/{p.MaxHp}  ATK {p.Atk}";
-            Gfx.Text(sb, Gfx.Small, sub, new Vector2(r.Center.X, r.Y + 246), Palette.Dim, 0.5f);
-            Ui.Bar(sb, new Rectangle(r.X + 20, r.Y + 280, r.Width - 40, 18), p.Hp, p.MaxHp, Palette.Hp);
+            Gfx.Text(sb, Gfx.Small, sub, new Vector2(r.Center.X, r.Y + 246), art ? Ui.Ink : Palette.Dim, 0.5f, !art);
+            if (art)   // the card art has its own bar frame at (20, 280) 210x18
+                Gfx.Rect(sb, r.X + 22, r.Y + 282, 206 * MathHelper.Clamp(p.Hp / (float)Math.Max(1, p.MaxHp), 0, 1), 14, Palette.Hp);
+            else Ui.Bar(sb, new Rectangle(r.X + 20, r.Y + 280, r.Width - 40, 18), p.Hp, p.MaxHp, Palette.Hp);
             if (p.Dead) Gfx.Text(sb, Gfx.Font, "FALLEN", new Vector2(r.Center.X, r.Y + 120), Palette.Danger, 0.5f);
         }
         if (_onCancel != null) Ui.Hint(sb, "Click a pet (or 1-4)   |   ESC  Back");

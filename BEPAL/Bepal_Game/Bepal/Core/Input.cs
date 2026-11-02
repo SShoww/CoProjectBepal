@@ -36,9 +36,17 @@ public static class Input
 
     public static bool Down(Keys key) => _k.IsKeyDown(key);
     public static bool Pressed(Keys key) => _k.IsKeyDown(key) && !_pk.IsKeyDown(key);
-    public static Point Mouse => _m.Position;
+    /// <summary>Cursor in game coordinates (0..W, 0..H), mapped back through the window scale.</summary>
+    public static Point Mouse => Gfx.Viewport?.PointToScreen(_m.Position) ?? _m.Position;
+    /// <summary>Left button is down (for dragging sliders); <see cref="Click"/> is the press edge.</summary>
+    public static bool MouseHeld => _m.LeftButton == ButtonState.Pressed;
     public static bool Click => _m.LeftButton == ButtonState.Pressed && _pm.LeftButton == ButtonState.Released;
+
+    /// <summary>Mouse wheel ticks this frame in raw units (120 per notch, positive = wheel up).</summary>
+    public static int Wheel => _m.ScrollWheelValue - _pm.ScrollWheelValue;
 
     public static bool Confirm => Pressed(Keys.Space) || Pressed(Keys.Enter);
     public static bool Back => Pressed(Keys.Escape);
+    public static bool ToggleFullScreen => Pressed(Keys.F11)
+        || (Pressed(Keys.Enter) && (Down(Keys.LeftAlt) || Down(Keys.RightAlt)));
 }

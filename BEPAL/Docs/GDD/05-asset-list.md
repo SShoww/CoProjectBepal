@@ -1,15 +1,17 @@
 ---
 type: asset-list
-version: 3.0
-date: 2026-09-28
+version: 3.2
+date: 2026-10-13
 project: BePal
 ---
 
-# Asset List — BePal (Master Asset & Image Checklist v3.0)
+# Asset List — BePal (Master Asset & Image Checklist v3.2)
 
 รายการ Asset ทั้งหมดของ BePal — **ภาพ 2D สำหรับ ธัญญรัตน์ (เดียร์)**, **เสียง SFX & BGM สำหรับ ปีย์ตะวัน (ซุง) และ ภูมิพัฒน์ (ภูมิ)**, และ**ฟอนต์สำหรับ ภูมิพัฒน์ (ภูมิ)**
 
-อ้างอิงขอบเขตจาก [06-vertical-slice.md](06-vertical-slice.md) (Day 1–5, side-scroller สไตล์ Kingdom: Classic), ชื่อสัตว์จาก [00-concept.md](00-concept.md) และ Art ต่อ scene จาก [01-core-loop.md](01-core-loop.md) (Scene 1–20 ใน Figma)
+อ้างอิงขอบเขตจาก [06-vertical-slice.md](06-vertical-slice.md) (Day 1–5, side-scroller สไตล์ Kingdom: Classic), ชื่อสัตว์จาก [11-narrative-world.md](11-narrative-world.md) และ Art ต่อ scene จาก [13-scene-breakdown.md](13-scene-breakdown.md) (Scene 1–20 ใน Figma)
+
+> **หมายเหตุ:** รายการเสียง (SFX/BGM) และฟอนต์ (§2–§3) ย้ายไป [14-audio-fonts-list.md](14-audio-fonts-list.md) เมื่อ 2026-10-07 — ไฟล์นี้เก็บเฉพาะ §1 ภาพ และ §4 Pipeline
 
 ### Priority
 
@@ -19,7 +21,18 @@ project: BePal
 | **P1** | มีแล้วดีใน Prototype — อยู่ในฉากที่อาจโดนตัด (สมุด → Upgrade → ร้านค้า → หมอ ตาม 06 §6) |
 | **Later** | เกมเต็ม / นอกขอบเขต Prototype (06 §5) |
 
-> **สถานะปัจจุบัน:** ในโค้ดยังไม่มีไฟล์ภาพ/เสียงเลย — ตัวละครทั้งหมดวาดด้วยรูปทรงใน `World/Art.cs` และฉากหลัง parallax ใน `World/Backdrop.cs` · ฟอนต์ใช้ `Segoe UI` ชั่วคราว
+> **สถานะปัจจุบัน (2026-10-07):** ดูหัวข้อ "สถานะ" ด้านล่าง · ฟอนต์ใช้ `Segoe UI` ชั่วคราว
+
+### สถานะ (as-built, 2026-10-13)
+
+| สถานะ | รายการ |
+| --- | --- |
+| เสร็จ (อยู่ใน `Content/`) | parallax 5 ชั้น (`bg_parallax_{sky,clouds,hills,mid,near}.png`, 320x180 วาด 4x), `fg_jungle.png`, `player.png` (ภาพวาดนิ่งเดียว + `SpriteMotion` ขยับด้วยโค้ด), สัตว์ 4 ตัว `pet_mossling\|nibbleclaw\|blinkbun\|toothless.png` (ภาพนิ่ง; `pet_toothless` ใช้เป็นศัตรู Toothless ในฉากสู้ด้วย), ของในฐาน `prop_{bed,hearth,upgrade,notebook,door}.png` (crop + ย่อด้านยาว 512, `Art.Prop`), ผนัง/พื้นฐาน `bg_base.png` (ย่อ x0.42 ให้สูงเท่าผนังเดิม y 350–600 แล้วต่อซ้ำ/กลับด้านสลับกันทั่วฐาน), กรอบ status สัตว์ `ui_status_panel.png`, การ์ดไอเทม Shop/Box `ui_item_slot.png` + ปุ่ม `ui_item_button(_hold).png`, UI ชุดสีพีช (2026-11-02): แถบสถานะผู้เล่น `ui_player_info.png` + ไอคอน `ui_energy_full\|empty.png`, กล่องบทสนทนา `ui_dialog.png`, กล่องเลือก `ui_choice(_button).png`, เมนูหยุด `ui_pause(_button).png`, Options `ui_options(_button).png`, ปุ่มเมนูหลัก `ui_menu_button.png`, สมุด `ui_notebook(_button).png`, การ์ดเลือกสัตว์ `ui_pet_card.png`, ป้าย `ui_knock.png` (ประตูมีคนเคาะ), SFX 17 ไฟล์, **BGM 7 ไฟล์ `.ogg`** (`Content/Music/`), SpriteFont 3 ตัว (`Fonts/Main\|Big\|Small`) — ตาราง §2 ใน [14-audio-fonts-list.md](14-audio-fonts-list.md) |
+| ยังไม่ทำ | sprite สัตว์เลี้ยง / ศัตรู / NPC (โค้ดรองรับแล้วแต่ยังไม่มีไฟล์; ตอนนี้วาดด้วยรูปทรงใน `World/Art.cs`), UI/ไอคอน/ไอเทมทั้งหมด (การ์ดไอเทมวาดด้วยโค้ด), ฟอนต์จริงนอกเหนือ SpriteFont 3 ตัว (`Segoe UI` ชั่วคราว) |
+
+> **หมายเหตุ as-built:** Content อยู่ในโฟลเดอร์แบน `Content/Sprites/`, `Content/Sfx/`, `Content/Music/`, `Content/Fonts/` — ชื่อโฟลเดอร์ย่อย (`player/`, `pet/`, `env/`, `ui/...`) และชื่อ `spr_*` ในตารางด้านล่างเป็นชื่อที่ส่งมอบจาก Art (จะ rename ตอนวางไฟล์เข้า `Content/Sprites/` ตามที่โค้ดคาดไว้ เช่น `pet_<species>.png`) · ไฟล์ orphan: `_candidates/sfx/sfx_qte_perfect.wav` (ไม่ได้โหลด — Perfect chime สังเคราะห์ตอนรัน)
+
+ขั้นตอนนำ asset เข้าเกม: [_candidates/README.md](../../Assets/_candidates/README.md) · ชื่อ asset ใช้ตามตารางในไฟล์นี้ (เจ้าของหัวข้อ naming)
 
 ### ข้อกำหนดทั่วไปสำหรับภาพ
 
@@ -50,6 +63,8 @@ project: BePal
 
 "น่ารักแต่แอบผิดปกติ (Uncanny)" — ดวงตาจ้องตามผู้เล่นตลอด (ถ้าวาดตาแยก layer ได้ โค้ดจะขยับตาให้)
 
+> **การใส่ภาพเข้าเกม (2026-10-13):** โค้ดรองรับภาพจริงแล้วสำหรับสัตว์/ศัตรู/พ่อค้า/หมอ (ภาพนิ่งเดียวต่อตัว หันขวา, ใช้เฉพาะท่า idle) — วางเป็น `Content/Sprites/pet_<species>.png`, `enemy_toothless.png`, `enemy_bigz.png`, `npc_merchant.png`, `npc_doctor.png` แล้วลงทะเบียนใน `Content.mgcb`; ถ้าไม่มีไฟล์จะวาด primitive เดิม ขั้นตอนเต็มใน [_candidates/README.md](../../Assets/_candidates/README.md) ท่า attack/hurt/happy ยังไม่ได้ต่อโค้ด
+
 | รหัส Asset | ชื่อไฟล์ | คำอธิบาย & รายละเอียดทางภาพ | ขนาด | Priority | สถานะ |
 | --- | --- | --- | --- | --- | --- |
 | **PET-01** | `pet/spr_mossling_idle.png` | **Mossling (ไอ่แดง) — Idle/Walk:** สิ่งมีชีวิตกึ่งพืช นุ่มฟูคล้ายตะไคร่น้ำ ตากลมโต มีดอกไม้ตูมบนหัว รักสงบ ตกใจง่าย | 280×360 | P0 | 🔲 Not Started |
@@ -64,7 +79,7 @@ project: BePal
 | **PET-10** | `pet/spr_blinkbun_attack.png` | **Blinkbun — Attack:** ตาที่สามเบิกกว้าง ปล่อยหมอกดำรอบตัว | 280×360 | P0 | 🔲 Not Started |
 | **PET-11** | `pet/spr_blinkbun_hurt.png` | **Blinkbun — Hurt:** หูพับ ตัวหด | 280×360 | P0 | 🔲 Not Started |
 | **PET-12** | `pet/spr_blinkbun_happy.png` | **Blinkbun — Happy:** หูลู่ ตาปิดสนิท ยิ้มสงบ | 280×360 | P1 | 🔲 Not Started |
-| **PET-13** | `pet/spr_toothless_idle.png` | **Toothless — Idle (ศัตรู Day 2):** สัตว์เลื้อยคลานดำทมิฬ ผิวลื่นไร้ฟัน ถุงกรดสีม่วงที่ลำคอ | 280×360 | P0 | 🔲 Not Started |
+| **PET-13** | `pet/spr_toothless_idle.png` | **Toothless — Idle (ศัตรู Day 2):** สัตว์เลื้อยคลานดำทมิฬ ผิวลื่นไร้ฟัน ถุงกรดสีม่วงที่ลำคอ | 280×360 | P0 | ✅ In game (2026-11-01, `pet_toothless.png`) |
 | **PET-14** | `pet/spr_toothless_attack.png` | **Toothless — Attack "Acid":** อ้าปากพ่นกรด ถุงกรดพองโต (ท่าศัตรูใน Fight) | 280×360 | P0 | 🔲 Not Started |
 | **PET-15** | `pet/spr_toothless_hurt.png` | **Toothless — Hurt** | 280×360 | P0 | 🔲 Not Started |
 | **PET-16** | `pet/spr_toothless_tamed.png` | **Toothless — Tamed:** หมอบลงอย่างว่าง่าย (หน้า "You got new pet !!!" และเดินในฐานหลัง Tame) | 280×360 | P0 | 🔲 Not Started |
@@ -77,10 +92,10 @@ project: BePal
 
 | รหัส Asset | ชื่อไฟล์ | คำอธิบาย & ท่าทาง | ขนาด | Priority | สถานะ |
 | --- | --- | --- | --- | --- | --- |
-| **NPC-01** | `npc/spr_doctor.png` | **หมอ:** ยืนประจำจุดหมอในฐาน (S3) และในหน้า Doctor (S13) | 320×400 | P1 | 🔲 Not Started |
+| **NPC-01** | `npc/spr_doctor.png` | **หมอ:** ยืนประจำจุดหมอในฐาน (S3) และในหน้า Doctor (S13) | 320×400 | P1 | ✅ In game (2026-11-02, `npc_doctor.png` จาก `player/Docter.png`) |
 | **NPC-02** | `npc/spr_merchant_idle.png` | **The Traveling Collector (Idle):** ชายร่างสูงชุดคลุมทมิฬ หมวกปีกกว้าง รอยยิ้มฟันทอง (Day 3) | 320×400 | P0 | 🔲 Not Started |
 | **NPC-03** | `npc/spr_merchant_talk.png` | **The Traveling Collector (Talk):** ยื่นมือสวมถุงมือหนังตอนเสนอซื้อสัตว์ 5,000 coin | 320×400 | P1 | 🔲 Not Started |
-| **NPC-04** | `npc/spr_bigz_idle.png` | **Big Z (บอส Day 5, HP 9999):** ศัตรูที่ใหญ่และน่ากลัวกว่า Toothless ชัดเจน — ⚠️ ยังไม่มี concept ใน GDD/Figma ต้องให้ภูมิกำหนด | 480×520 | P0 | 🔲 Not Started |
+| **NPC-04** | `npc/spr_bigz_idle.png` | **Big Z (บอส Day 5, HP 9999):** ศัตรูที่ใหญ่และน่ากลัวกว่า Toothless ชัดเจน — ⚠️ ยังไม่มี concept ใน GDD/Figma ต้องให้ภูมิกำหนด | 480×520 | P0 | ✅ In game (2026-11-02, `enemy_bigz.png` จาก `Enemy/Big-Z.png` — ไวรัสสีแดงยิ้ม) |
 | **NPC-05** | `npc/spr_bigz_attack.png` | **Big Z — Attack:** ท่าโจมตีใน Fight | 480×520 | P0 | 🔲 Not Started |
 | **NPC-06** | `npc/spr_merchant_angry.png` | Merchant (Angry) — ชักดาบซ่อนในไม้เท้า | 320×400 | Later | 🔲 Not Started |
 | **NPC-07** | `npc/spr_merchant_flask.png`, `_gatling.png`, `_cane.png`, `_defeat.png` | Merchant Boss Fight 3 เฟส + ท่าแพ้ (Prototype ปฏิเสธพ่อค้า = เปิดร้าน ไม่มี Boss Fight) | 320×400 | Later | 🔲 Not Started |
@@ -92,10 +107,12 @@ project: BePal
 ฐานกว้างประมาณ **3 หน้าจอ (3840 px)** ประตูอยู่ขวาสุด (06 §2):
 
 ```
-[ขอบมืด] — เตียง (End day) — Upgrade — [Core Hearth + สัตว์เดินไปมา] — หมอ — สมุด — [ประตูแดง]
+[ขอบมืด] — เตียง (End day, x=300) — กล่อง/Box (600) — Upgrade (900) — [Core Hearth (1900) + สัตว์เดินไปมา] — หมอ (2650) — สมุด (3100) — [ประตูแดง (3640)]  · โลกกว้าง 3840
 ```
 
 **Parallax layers** (วาดแยก layer, PNG โปร่งใส ยกเว้นท้องฟ้า · ต้องต่อขอบซ้าย–ขวาได้ถ้าสั้นกว่า 3840):
+
+> **As built:** ENV-01..06 ถูกแทนด้วย parallax 5 ชั้น `bg_parallax_{sky,clouds,hills,mid,near}.png` (320×180 วาด 4x, factor 0.03/0.10/0.28/0.48/0.70, clouds drift 6 px/s) + `fg_jungle.png` (2x, factor 1.3) — กลางคืน = tint (60,70,130) ไม่ใช่รูปท้องฟ้าแยก; ฝน/ฟ้าแลบ Day 4 วาดด้วยโค้ด (`World/Rain.cs`). แถวด้านล่างเป็นสเปกเดิม
 
 | รหัส Asset | ชื่อไฟล์ | คำอธิบาย | ขนาด | Priority | สถานะ |
 | --- | --- | --- | --- | --- | --- |
@@ -103,20 +120,20 @@ project: BePal
 | **ENV-02** | `env/bg_sky_night.png` | ท้องฟ้ากลางคืน น้ำเงินเข้ม + ดาว (โค้ด fade จากกลางวันตอน End day) | 1280×720 | P0 | 🔲 Not Started |
 | **ENV-03** | `env/bg_mountain_far.png` | ภูเขาไกล สีม่วงหม่น (เลื่อน 0.25×) | 2560×720 | P0 | 🔲 Not Started |
 | **ENV-04** | `env/bg_mountain_near.png` | ภูเขาใกล้ สีม่วงเข้ม (เลื่อน 0.5×) | 3200×720 | P0 | 🔲 Not Started |
-| **ENV-05** | `env/bg_base.png` | ตัวฐาน ผนัง/โครงสร้างภายใน แสงส้มอุ่นกลางฐาน มืดลงที่ขอบซ้าย | 3840×720 | P0 | 🔲 Not Started |
+| **ENV-05** | `env/bg_base.png` | ตัวฐาน ผนัง/โครงสร้างภายใน แสงส้มอุ่นกลางฐาน มืดลงที่ขอบซ้าย | 3840×720 | P0 | ✅ In game (2026-11-01, `bg_base.png`) |
 | **ENV-06** | `env/bg_ground.png` | พื้นดินดาวรกร้าง (layer หน้าสุด) | 3840×160 | P0 | 🔲 Not Started |
 
 **วัตถุในฐาน** (ผู้เล่นเดินไปใกล้แล้วกด `Space`):
 
 | รหัส Asset | ชื่อไฟล์ | คำอธิบาย | ขนาด | Priority | สถานะ |
 | --- | --- | --- | --- | --- | --- |
-| **ENV-07** | `env/spr_core_hearth.png` | **Core Hearth:** แกนกลางฐาน แสงไฟส้มอุ่น จุดศูนย์กลางของชีวิตในฐาน (2–4 เฟรมไฟกะพริบ) | 240×280 | P0 | 🔲 Not Started |
-| **ENV-08** | `env/spr_bed.png` | **เตียง:** จุด End day (ซ้ายสุดของฐาน) | 240×140 | P0 | 🔲 Not Started |
-| **ENV-09** | `env/spr_door_red.png` | **ประตูเหล็กแดง (The Red Door):** ขวาสุดของฐาน — สถานะปิด | 220×360 | P0 | 🔲 Not Started |
+| **ENV-07** | `env/spr_core_hearth.png` | **Core Hearth:** แกนกลางฐาน แสงไฟส้มอุ่น จุดศูนย์กลางของชีวิตในฐาน (2–4 เฟรมไฟกะพริบ) | 240×280 | P0 | ✅ In game (2026-11-02, `prop_hearth.png`) |
+| **ENV-08** | `env/spr_bed.png` | **เตียง:** จุด End day (ซ้ายสุดของฐาน) | 240×140 | P0 | ✅ In game (2026-11-02, `prop_bed.png`) |
+| **ENV-09** | `env/spr_door_red.png` | **ประตูเหล็กแดง (The Red Door):** ขวาสุดของฐาน — สถานะปิด | 220×360 | P0 | ✅ In game (2026-11-02, `prop_door.png`) |
 | **ENV-10** | `env/spr_door_red_knock.png` | ประตูแดงตอนมี Event (สั่น/มีแสงแดงรั่ว) — ใช้คู่กับไอคอน Knock | 220×360 | P1 | 🔲 Not Started |
-| **ENV-11** | `env/spr_upgrade_station.png` | **สถานี Upgrade** | 200×240 | P1 | 🔲 Not Started |
-| **ENV-12** | `env/spr_notebook_desk.png` | **โต๊ะสมุด** (เปิดสมุด S9) | 180×180 | P1 | 🔲 Not Started |
-| **ENV-13** | `env/spr_doctor_station.png` | **มุมหมอ** (เตียงพยาบาล/ตู้ยา — หมอยืนข้างๆ) | 220×240 | P1 | 🔲 Not Started |
+| **ENV-11** | `env/spr_upgrade_station.png` | **สถานี Upgrade** | 200×240 | P1 | ✅ In game (2026-11-02, `prop_upgrade.png`) |
+| **ENV-12** | `env/spr_notebook_desk.png` | **โต๊ะสมุด** (เปิดสมุด S9) | 180×180 | P1 | ✅ In game (2026-11-02, `prop_notebook.png`) |
+| **ENV-13** | `env/spr_doctor_station.png` | **มุมหมอ** (เตียงพยาบาล/ตู้ยา — หมอยืนข้างๆ) | 220×240 | P1 | ✅ In game (2026-11-02, `prop_doctor.png` = ป้ายกาชาด+ม่าน+เตียง จากแผ่นเดียวกับหมอ) |
 | **ENV-14** | `env/spr_merchant_cart.png` | **เกวียนพ่อค้า** จอดหน้าประตู (Day 3) | 400×300 | P1 | 🔲 Not Started |
 | **ENV-15** | `env/spr_acid_puddle.png` | คราบกรดสีม่วงหน้าประตู (หลัง Toothless บุก) | 160×48 | Later | 🔲 Not Started |
 
@@ -148,7 +165,7 @@ project: BePal
 | รหัส Asset | ชื่อไฟล์ | คำอธิบาย | ขนาด | Scene | Priority | สถานะ |
 | --- | --- | --- | --- | --- | --- | --- |
 | **UI-01** | `ui/menu/logo_bepal.png` | โลโก้ชื่อเกม "BePal" | 640×220 | S1 | P0 | 🔲 Not Started |
-| **UI-02** | `ui/menu/btn_play.png`, `btn_option.png`, `btn_quit.png` | ปุ่ม Play / Option / Quit (ปกติ + hover) — Option ยังไม่ทำงานใน Prototype | 240×64 | S1 | P1 | 🔲 Not Started |
+| **UI-02** | `ui/menu/btn_play.png`, `btn_option.png`, `btn_quit.png` | ปุ่ม Play / Option / Quit (ปกติ + hover) — Option ทำงานแล้ว (volume เพลง/SFX) | 240×64 | S1 | P1 | 🔲 Not Started |
 | **UI-03** | `ui/keys/key_space.png`, `key_a.png`, `key_d.png`, `key_esc.png` | รูปปุ่มคีย์บอร์ด Space / A / D / ESC (หน้าเมนู + tutorial Day 1) | 64×64 (Space 160×64) | S1 | P1 | 🔲 Not Started |
 | **UI-04** | `ui/prompt/prompt_space.png` | ป้าย `[Space]` ลอยเหนือของที่อยู่ใกล้ผู้เล่น | 96×40 | S3 | P0 | 🔲 Not Started |
 | **UI-05** | `ui/dialogue/frame_textbox.png` | กรอบกล่องข้อความ (9-slice) โปร่งแสง ขอบไม้ | 1160×180 | S2, S15, S20 | P0 | 🔲 Not Started |
@@ -210,76 +227,31 @@ project: BePal
 
 ### 1.10 ไอเทม (Items — 48×48 px)
 
-Prototype มีร้านค้า 3 ชิ้น (ซื้อแล้วใช้ทันที ไม่มีกระเป๋า — 06 §3.4)
+Prototype มีร้านค้า **7 ชิ้น** (Crab Apple 25 · Caffeine Tonic 40 · Sea Tea 18 · Cloudy Glasses 30 · Ballet Shoes 50 · Torn Notebook 55 · Faded Ribbon 35) ซื้อแล้วเข้ากล่อง (Box) ในฐาน — 06 §3.4 · ตอนนี้การ์ดไอเทมวาดด้วยโค้ด (270×230) ยังไม่มีไอคอนจริง · Toy Knife ไม่มีในโค้ด
 
 | รหัส Asset | ชื่อไฟล์ | คำอธิบาย & การใช้งาน | ราคา | Priority | สถานะ |
 | --- | --- | --- | --- | --- | --- |
 | **ITM-01** | `ui/items/item_crab_apple.png` | **Crab Apple:** แอปเปิลทะเลสีแดงสด — สัตว์ 1 ตัว +18 HP, +20 Stomach | 25 | P1 | 🔲 Not Started |
 | **ITM-02** | `ui/items/item_caffeine_tonic.png` | **Caffeine Tonic:** ยาชูกำลังสีอำพัน — Energy +2 วันนี้ | 40 | P1 | 🔲 Not Started |
 | **ITM-03** | `ui/items/item_sea_tea.png` | **Sea Tea:** ชาน้ำทะเลสีฟ้าใส — Dodge zone +20% ใน Fight ครั้งถัดไป | 18 | P1 | 🔲 Not Started |
-| **ITM-04** | `ui/items/item_cloudy_glasses.png` | Cloudy Glasses — โล่ป้องกัน 2 ครั้ง | — | Later | 🔲 Not Started |
-| **ITM-05** | `ui/items/item_torn_notebook.png` | Torn Notebook — EXP Train +50% | — | Later | 🔲 Not Started |
-| **EQP-01** | `ui/items/eqp_ballet_shoes.png` | Ballet Shoes — Perfect Zone +15% | — | Later | 🔲 Not Started |
-| **EQP-02** | `ui/items/eqp_toy_knife.png` | Toy Knife — ATK สวนกลับ +35% | — | Later | 🔲 Not Started |
-| **EQP-03** | `ui/items/eqp_faded_ribbon.png` | Faded Ribbon — Clean Decay −30% | — | Later | 🔲 Not Started |
+| **ITM-04** | `ui/items/item_cloudy_glasses.png` | Cloudy Glasses — โล่ป้องกัน 2 ครั้ง (ในร้านแล้ว 30) | 30 | P1 | 🔲 Not Started |
+| **ITM-05** | `ui/items/item_torn_notebook.png` | Torn Notebook — Progress Train +50% วันนี้ (ในร้านแล้ว) | 55 | P1 | 🔲 Not Started |
+| **EQP-01** | `ui/items/eqp_ballet_shoes.png` | Ballet Shoes — Perfect Zone +15% (ในร้านแล้ว) | 50 | P1 | 🔲 Not Started |
+| **EQP-02** | `ui/items/eqp_toy_knife.png` | Toy Knife — ATK สวนกลับ +35% (ไม่มีในโค้ด) | — | Later | 🔲 Not Started |
+| **EQP-03** | `ui/items/eqp_faded_ribbon.png` | Faded Ribbon — Clean Decay −30% (ในร้านแล้ว) | 35 | P1 | 🔲 Not Started |
 | **ITM-06** | `ui/items/slot_frame.png` | กรอบช่องไอเทมในร้าน (+ ป้ายราคา) | 96×120 | P1 | 🔲 Not Started |
 
 ---
 
 ## 🔊 2. รายการเสียงสำหรับ ซุง & ภูมิ (Audio)
 
-### 2.1 Sound Effects (SFX — WAV 44.1kHz 16-bit PCM)
-
-| รหัส Audio | ชื่อไฟล์ | บริบทการเล่น | คำอธิบายอารมณ์เสียง | Priority |
-| --- | --- | --- | --- | --- |
-| **SFX-01** | `sfx/sfx_qte_perfect.wav` | กด Space โดน Perfect | ปิ๊งแก้วใสคมชัด น่าพึงพอใจ | P0 |
-| **SFX-02** | `sfx/sfx_qte_great.wav` | กด Space โดน Great | เคาะไม้ทุ้มปานกลาง | P0 |
-| **SFX-03** | `sfx/sfx_qte_miss.wav` | กดพลาด | Buzzer ทึบสั้นๆ | P0 |
-| **SFX-04** | `sfx/sfx_wheel_select.wav` | เลือก choice บนวงล้อ Care สำเร็จ (จอสั่น) | ตุ้บหนักแน่น | P1 |
-| **SFX-05** | `sfx/sfx_footstep.wav` | ผู้เล่นเดินในฐาน (สุ่ม pitch) | ก้าวเท้าเบาๆ บนพื้นดิน/ไม้ | P1 |
-| **SFX-06** | `sfx/sfx_interact.wav` | กด `Space` ใช้ของในฐาน | ป๊อปเบาๆ | P1 |
-| **SFX-07** | `sfx/sfx_ui_click.wav` | คลิกปุ่ม UI / ESC | คลิกนุ่ม | P0 |
-| **SFX-08** | `sfx/sfx_knock.wav` | "Knock Knock !!" ที่ประตูแดง | เคาะประตูเหล็กสองครั้ง ก้องๆ | P0 |
-| **SFX-09** | `sfx/sfx_door_open.wav` | เปิดประตูแดง | ประตูเหล็กหนักเลื่อนเปิด | P1 |
-| **SFX-10** | `sfx/sfx_sleep.wav` | End day ที่เตียง (เข้ากลางคืน) | ระฆังลมเบาๆ / เสียงผ้าห่ม | P1 |
-| **SFX-11** | `sfx/sfx_dodge_success.wav` | Dodge สำเร็จ | ลมวูบ (Whoosh) / Metallic Parry | P0 |
-| **SFX-12** | `sfx/sfx_attack_hit.wav` | Attack โดนศัตรู | กระแทกหนักแน่น | P0 |
-| **SFX-13** | `sfx/sfx_pet_hurt.wav` | สัตว์เราโดนโจมตี | ร้องเจ็บสั้นๆ แปลกๆ (uncanny) | P0 |
-| **SFX-14** | `sfx/sfx_acid_spit.wav` | Toothless ใช้ท่า Acid | ของเหลวเดือดสาดกระเซ็น (Sizzle Splat) | P1 |
-| **SFX-15** | `sfx/sfx_bigz_roar.wav` | Big Z ปรากฏ / โจมตี | คำรามต่ำ ทุ้มหนัก | P1 |
-| **SFX-16** | `sfx/sfx_coin.wav` | ได้/จ่าย coin (รายได้เช้า, ร้าน, หมอ, ขายสัตว์) | เหรียญกระทบกัน | P0 |
-| **SFX-17** | `sfx/sfx_level_up.wav` | Player LV up (+1 Point) | ไล่โน้ตขึ้นสดใส | P1 |
-| **SFX-18** | `sfx/sfx_new_pet.wav` | "You got new pet !!!" | Jingle สั้นเฉลิมฉลอง | P1 |
-| **SFX-19** | `sfx/sfx_thunder.wav` | หน้าข้อความพายุ Day 4 | ฟ้าผ่าเปรี้ยง + ฝน | P1 |
-| **SFX-20** | `sfx/sfx_eat.wav`, `sfx_bubble.wav` | QTE Feed (เคี้ยวกรุบกรอบ) / QTE Clean (หยดน้ำ/สบู่) | ตาม 00-concept | Later |
-| **SFX-21** | `sfx/sfx_typewriter_key.wav` | ตัวอักษรขึ้นใน dialogue | แป้นพิมพ์ดีดนุ่มๆ | Later |
-| **SFX-22** | `sfx/sfx_coin_gatling.wav`, `sfx_cane_strike.wav` | Merchant Boss Fight | — | Later |
-
-### 2.2 Background Music (BGM — OGG Looping)
-
-| รหัส Audio | ชื่อไฟล์ | บริบทของฉาก | สไตล์และอารมณ์ดนตรี | Priority |
-| --- | --- | --- | --- | --- |
-| **BGM-01** | `music/bgm_menu.ogg` | Main Menu / เลือกสัตว์ | เงียบ ลึกลับ อบอุ่น | P1 |
-| **BGM-02** | `music/bgm_base_cozy.ogg` | ฐาน (Day 1–5) + Care/QTE | อะคูสติกกีตาร์ + เปียโนไฟฟ้า Lo-Fi สบายๆ แต่มีโน้ตแปลกแทรก | P0 |
-| **BGM-03** | `music/bgm_fight.ogg` | Fight กับ Toothless (Day 2) | ตึงเครียด จังหวะเร็ว | P0 |
-| **BGM-04** | `music/bgm_merchant.ogg` | พ่อค้า + ร้านค้า (Day 3) | แจ๊ซหม่นๆ เจ้าเล่ห์ | P1 |
-| **BGM-05** | `music/bgm_thunderstorm.ogg` | หน้าพายุ (Day 4) | ambient ฝนตก ฟ้าร้อง | P1 |
-| **BGM-06** | `music/bgm_boss_bigz.ogg` | Fight กับ Big Z (Day 5) | หนักหน่วง สิ้นหวัง | P1 |
-| **BGM-07** | `music/bgm_to_be_continued.ogg` | หน้า "To be continued..." | เปียโนเดี่ยว ค้างคา | P1 |
-| **BGM-08** | `music/bgm_ending_bittersweet.ogg`, `bgm_ending_heroic.ogg` | ฉากจบ A/B ของ Merchant arc (เกมเต็ม) | — | Later |
-
-> MonoGame เล่น `Song` จาก `.ogg` / `.mp3` ได้ แต่แนะนำ `.ogg` สำหรับ DesktopGL
+→ ดู [14-audio-fonts-list.md](14-audio-fonts-list.md) (ย้ายไปไฟล์แยก 2026-10-07)
 
 ---
 
 ## 🔤 3. ฟอนต์สำหรับ ภูมิ
 
-ข้อความในเกมเป็นภาษาอังกฤษทั้งหมด — ไม่ต้องใช้ฟอนต์ไทย · ต้องเป็นฟอนต์ที่ **อนุญาตให้ใช้ในเกมได้** (เช่น Google Fonts / OFL)
-
-| รหัส Font | ไฟล์ | บริบทการใช้งาน | สไตล์ฟอนต์ | ปัจจุบันในโค้ด | Priority |
-| --- | --- | --- | --- | --- | --- |
-| **FNT-01** | `Fonts/fnt_title_display.ttf` → `Big.spritefont` (44 pt) | โลโก้, หัวข้อหน้าจอ, "Knock Knock !!", "To be continued...", Perfect/Great/Miss | ตัวหนา กึ่งลึกลับ มีเอกลักษณ์ | `Segoe UI` 44 | P1 |
-| **FNT-02** | `Fonts/fnt_ui_cozy.ttf` → `Main.spritefont` (18 pt) + `Small.spritefont` (14 pt) | Dialogue, ปุ่ม, HUD, คำอธิบายไอเทม | Sans-serif มน อบอุ่น อ่านง่าย | `Segoe UI` 18 / 14 | P1 |
+→ ดู [14-audio-fonts-list.md](14-audio-fonts-list.md) (ย้ายไปไฟล์แยก 2026-10-07)
 
 ---
 
@@ -287,13 +259,13 @@ Prototype มีร้านค้า 3 ชิ้น (ซื้อแล้ว�
 
 ```mermaid
 flowchart LR
-    A[Staging<br>docs/02_Assets/_candidates/] --> B[Review โดย ภูมิ + เดียร์]
+    A[Staging<br>BEPAL/Assets/_candidates/] --> B[Review โดย ภูมิ + เดียร์]
     B --> C[วางไฟล์ใน<br>BEPAL/Bepal_Game/Bepal/Content/]
     C --> D[เพิ่มใน Content.mgcb<br>MonoGame Content Builder]
     D --> E[Runtime<br>Content.Load&lt;T&gt;&#40;&#41;]
 ```
 
-- โฟลเดอร์ใน `Content/` ใช้ตามชื่อไฟล์ในตาราง (`player/`, `pet/`, `npc/`, `env/`, `bg/`, `ui/...`, `sfx/`, `music/`, `Fonts/`)
+- **As built:** โฟลเดอร์ใน `Content/` คือ `Sprites/` (แบน), `Sfx/`, `Music/`, `Fonts/` — ชื่อโฟลเดอร์ย่อยในตารางเป็นชื่อส่งมอบจาก Art ไม่ใช่โครงสร้างจริง; ชื่อไฟล์ที่โค้ดโหลด: `pet_<species>.png`, `enemy_*.png`, `npc_*.png`, `bg_parallax_*.png`, `fg_*.png`, `player.png`, `sfx_<area>_<action>.wav` (area: event/fight/qte/ui/world), `bgm_*.ogg`
 - ส่งไฟล์ตามชื่อในตารางเป๊ะๆ — โค้ดจะเปลี่ยนจาก placeholder เป็นภาพจริงได้ทีละชิ้นโดยไม่ต้องรอครบชุด
 - Sprite sheet แบบหลายเฟรม: เรียงแนวนอน ขนาดเฟรมเท่ากันทุกเฟรม แจ้งจำนวนเฟรมในชื่อไฟล์หรือแจ้งโชว์
 

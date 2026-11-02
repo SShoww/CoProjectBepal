@@ -1,0 +1,231 @@
+
+=== A. Coin sources/sinks per run (mean) ===
+human          n=40 IN daily 385.0 toothless 90.0 merchant 1,000.0 | OUT upgrade 196.5 apple 10.0 tea 7.7 tonic 19.0 revive 0.0 | final 1,391.8
+perfect        n=40 IN daily 400.0 toothless 200.0 merchant 5,000.0 | OUT upgrade 0.0 apple 0.0 tea 0.0 tonic 0.0 revive 0.0 | final 5,750.0
+sloppy         n=40 IN daily 325.0 toothless 150.0 merchant 3,750.0 | OUT upgrade 0.0 apple 0.0 tea 0.0 tonic 0.0 revive 0.0 | final 4,375.0
+upgrade-first  n=40 IN daily 400.0 toothless 200.0 merchant 0.0 | OUT upgrade 300.0 apple 25.0 tea 18.0 tonic 40.0 revive 0.0 | final 367.0
+caring         n=40 IN daily 400.0 toothless 200.0 merchant 5,000.0 | OUT upgrade 0.0 apple 0.0 tea 0.0 tonic 0.0 revive 0.0 | final 5,750.0
+
+=== B. Coin at day_end (before the nightly +100) per profile/day ===
+human          d1 coin: 93.5 (med 50, min 50, max 150, n=40)
+human          d2 coin: 235.3 (med 250, min 50, max 450, n=38)
+human          d3 coin: 1,291.2 (med 225, min 25, max 5550, n=38)
+human          d4 coin: 1,354.6 (med 282, min 85, max 5650, n=38)
+perfect        d1 coin: 150.0 (med 150, min 150, max 150, n=40)
+perfect        d2 coin: 450.0 (med 450, min 450, max 450, n=40)
+perfect        d3 coin: 5,550.0 (med 5550, min 5550, max 5550, n=40)
+perfect        d4 coin: 5,650.0 (med 5650, min 5650, max 5650, n=40)
+sloppy         d1 coin: 150.0 (med 150, min 150, max 150, n=40)
+sloppy         d2 coin: 450.0 (med 450, min 450, max 450, n=30)
+sloppy         d3 coin: 5,550.0 (med 5550, min 5550, max 5550, n=30)
+sloppy         d4 coin: 5,650.0 (med 5650, min 5650, max 5650, n=30)
+upgrade-first  d1 coin: 50.0 (med 50, min 50, max 50, n=40)
+upgrade-first  d2 coin: 150.0 (med 150, min 150, max 150, n=40)
+upgrade-first  d3 coin: 167.0 (med 167, min 167, max 167, n=40)
+upgrade-first  d4 coin: 267.0 (med 267, min 267, max 267, n=40)
+caring         d1 coin: 150.0 (med 150, min 150, max 150, n=40)
+caring         d2 coin: 450.0 (med 450, min 450, max 450, n=40)
+caring         d3 coin: 5,550.0 (med 5550, min 5550, max 5550, n=40)
+caring         d4 coin: 5,650.0 (med 5650, min 5650, max 5650, n=40)
+human          finalCoin: 1,391.8 (med 382, min 150, max 5750, n=40)
+perfect        finalCoin: 5,750.0 (med 5750, min 5750, max 5750, n=40)
+sloppy         finalCoin: 4,375.0 (med 5750, min 250, max 5750, n=40)
+upgrade-first  finalCoin: 367.0 (med 367, min 367, max 367, n=40)
+caring         finalCoin: 5,750.0 (med 5750, min 5750, max 5750, n=40)
+human merchant=sell n=8 finalCoin: 5,538.8 (med 5450, min 5450, max 5750, n=8)  spent: 241.4 (med 300, min 40, max 300, n=7)
+human merchant=refuse n=30 finalCoin: 365.5 (med 367, min 185, max 672, n=30)  spent: 251.2 (med 265, min 40, max 383, n=30)
+human merchantChoice values: n/a=2, refuse=30, sell=8
+human          merchantChoice: n/a=2, refuse=30, sell=8
+perfect        merchantChoice: sell=40
+sloppy         merchantChoice: n/a=10, sell=30
+upgrade-first  merchantChoice: refuse=40
+caring         merchantChoice: sell=40
+
+=== C. Upgrades: day_end snapshots (not maxed): affordable-now / coin-limited / point-limited ===
+human          QTE      snapshots=126: affordable-now 37, coin-limited 5, point-limited 55, neither 29
+human          Energy   snapshots=154: affordable-now 0, coin-limited 0, point-limited 106, neither 48
+human          Progress snapshots=150: affordable-now 12, coin-limited 0, point-limited 138, neither 0
+perfect        QTE      snapshots=160: affordable-now 160, coin-limited 0, point-limited 0, neither 0
+perfect        Energy   snapshots=160: affordable-now 120, coin-limited 0, point-limited 40, neither 0
+perfect        Progress snapshots=160: affordable-now 160, coin-limited 0, point-limited 0, neither 0
+sloppy         QTE      snapshots=130: affordable-now 130, coin-limited 0, point-limited 0, neither 0
+sloppy         Energy   snapshots=130: affordable-now 60, coin-limited 0, point-limited 70, neither 0
+sloppy         Progress snapshots=130: affordable-now 90, coin-limited 0, point-limited 40, neither 0
+upgrade-first  QTE      snapshots=40: affordable-now 0, coin-limited 40, point-limited 0, neither 0
+upgrade-first  Energy   snapshots=160: affordable-now 0, coin-limited 0, point-limited 120, neither 40
+upgrade-first  Progress snapshots=160: affordable-now 0, coin-limited 0, point-limited 160, neither 0
+caring         QTE      snapshots=160: affordable-now 160, coin-limited 0, point-limited 0, neither 0
+caring         Energy   snapshots=160: affordable-now 120, coin-limited 0, point-limited 40, neither 0
+caring         Progress snapshots=160: affordable-now 160, coin-limited 0, point-limited 0, neither 0
+human          upgrades bought 2.0 (med 2, min 0, max 3, n=40) | pointsLeft 0.3 (med 0, min 0, max 2, n=40) | playerLevel 4.0 (med 4, min 1, max 5, n=40) | pointsSpent 2.6 (med 3, min 0, max 4, n=40)
+perfect        upgrades bought 0.0 (med 0, min 0, max 0, n=40) | pointsLeft 4.0 (med 4, min 4, max 4, n=40) | playerLevel 5.0 (med 5, min 5, max 5, n=40) | pointsSpent 0.0 (med 0, min 0, max 0, n=40)
+sloppy         upgrades bought 0.0 (med 0, min 0, max 0, n=40) | pointsLeft 2.6 (med 3, min 1, max 4, n=40) | playerLevel 3.6 (med 4, min 2, max 5, n=40) | pointsSpent 0.0 (med 0, min 0, max 0, n=40)
+upgrade-first  upgrades bought 3.0 (med 3, min 3, max 3, n=40) | pointsLeft 1.0 (med 1, min 1, max 1, n=40) | playerLevel 5.0 (med 5, min 5, max 5, n=40) | pointsSpent 3.0 (med 3, min 3, max 3, n=40)
+caring         upgrades bought 0.0 (med 0, min 0, max 0, n=40) | pointsLeft 4.0 (med 4, min 4, max 4, n=40) | playerLevel 5.0 (med 5, min 5, max 5, n=40) | pointsSpent 0.0 (med 0, min 0, max 0, n=40)
+Everything-bought total: QTE 3x100 + Energy 3x150 + Progress 2x20 = 790 coin; points 3x1 + 3x3 + 2x2 = 16
+
+=== C2. upgrade_buy by name/day ===
+human          Energy, 3=5; Energy, 4=3; Progress, 1=3; Progress, 3=3; Progress, 4=2; QTE, 1=22; QTE, 2=20; QTE, 3=14; QTE, 4=9
+perfect        
+sloppy         
+upgrade-first  QTE, 1=40; QTE, 2=80
+caring         
+
+=== C3. shop_buy by item/day ===
+human          Caffeine Tonic, 3=19; Crab Apple, 3=16; Sea Tea, 3=17
+perfect        
+sloppy         
+upgrade-first  Caffeine Tonic, 3=40; Crab Apple, 3=40; Sea Tea, 3=40
+caring         
+
+=== D. Merchant Sell vs Refuse outcomes ===
+sell   human          n=8 finalCoin 5,538.8 (med 5450, min 5450, max 5750, n=8) | spent 241.4 (med 300, min 40, max 300, n=7) | bigzDmg 176.1 (med 154, min 48, max 274, n=8) | playerLv 4.2 (med 4, min 3, max 5, n=8) | petsFinal 1.0 (med 1, min 1, max 1, n=8) | outcome to_be_continued=8
+sell   perfect        n=40 finalCoin 5,750.0 (med 5750, min 5750, max 5750, n=40) | spent n/a | bigzDmg 388.1 (med 375, min 150, max 825, n=40) | playerLv 5.0 (med 5, min 5, max 5, n=40) | petsFinal 1.0 (med 1, min 1, max 1, n=40) | outcome to_be_continued=40
+sell   sloppy         n=30 finalCoin 5,750.0 (med 5750, min 5750, max 5750, n=30) | spent n/a | bigzDmg 77.6 (med 71, min 19, max 204, n=29) | playerLv 4.2 (med 4, min 4, max 5, n=30) | petsFinal 1.0 (med 1, min 1, max 1, n=30) | outcome to_be_continued=30
+sell   caring         n=40 finalCoin 5,750.0 (med 5750, min 5750, max 5750, n=40) | spent n/a | bigzDmg 663.0 (med 600, min 300, max 1230, n=40) | playerLv 5.0 (med 5, min 5, max 5, n=40) | petsFinal 1.0 (med 1, min 1, max 1, n=40) | outcome to_be_continued=40
+refuse human          n=30 finalCoin 365.5 (med 367, min 185, max 672, n=30) | spent 251.2 (med 265, min 40, max 383, n=30) | bigzDmg 246.0 (med 146, min 30, max 1100, n=30) | playerLv 4.1 (med 4, min 3, max 5, n=30) | petsFinal 1.3 (med 1, min 1, max 2, n=30) | outcome to_be_continued=30
+refuse upgrade-first  n=40 finalCoin 367.0 (med 367, min 367, max 367, n=40) | spent 383.0 (med 383, min 383, max 383, n=40) | bigzDmg 1,330.2 (med 1168, min 640, max 2956, n=40) | playerLv 5.0 (med 5, min 5, max 5, n=40) | petsFinal 2.0 (med 2, min 2, max 2, n=40) | outcome to_be_continued=40
+
+=== D3. Coin right before merchant (refuse runs) ===
+human          coin before merchant (refuse runs): 312.0 (med 350, min 150, max 550, n=30)
+upgrade-first  coin before merchant (refuse runs): 250.0 (med 250, min 250, max 250, n=40)
+
+=== E. Energy per day: used / left at day_end (day 5 from run_summary) ===
+human          d1: used 2.0 (med 2, min 1, max 3, n=40) | left 0.9 (med 1, min 0, max 2, n=40) | max 3.0 (med 3, min 3, max 3, n=40) | runs left>0: 28/40
+human          d2: used 1.9 (med 2, min 0, max 3, n=40) | left 1.1 (med 1, min 0, max 3, n=40) | max 3.0 (med 3, min 3, max 3, n=38) | runs left>0: 29/40
+human          d3: used 3.2 (med 3, min 1, max 6, n=38) | left 0.9 (med 1, min 0, max 2, n=38) | max 3.1 (med 3, min 3, max 4, n=38) | runs left>0: 27/38
+human          d4: used 2.2 (med 2, min 1, max 4, n=38) | left 1.0 (med 1, min 0, max 2, n=38) | max 3.2 (med 3, min 3, max 4, n=38) | runs left>0: 29/38
+human          d5: used 0.0 (med 0, min 0, max 0, n=38) | left 3.2 (med 3, min 3, max 4, n=38) | max n/a | runs left>0: 38/38
+perfect        d1: used 3.0 (med 3, min 3, max 3, n=40) | left 0.0 (med 0, min 0, max 0, n=40) | max 3.0 (med 3, min 3, max 3, n=40) | runs left>0: 0/40
+perfect        d2: used 3.0 (med 3, min 3, max 3, n=40) | left 0.0 (med 0, min 0, max 0, n=40) | max 3.0 (med 3, min 3, max 3, n=40) | runs left>0: 0/40
+perfect        d3: used 3.0 (med 3, min 3, max 3, n=40) | left 0.0 (med 0, min 0, max 0, n=40) | max 3.0 (med 3, min 3, max 3, n=40) | runs left>0: 0/40
+perfect        d4: used 3.0 (med 3, min 3, max 3, n=40) | left 0.0 (med 0, min 0, max 0, n=40) | max 3.0 (med 3, min 3, max 3, n=40) | runs left>0: 0/40
+perfect        d5: used 0.0 (med 0, min 0, max 0, n=40) | left 3.0 (med 3, min 3, max 3, n=40) | max n/a | runs left>0: 40/40
+sloppy         d1: used 3.0 (med 3, min 3, max 3, n=40) | left 0.0 (med 0, min 0, max 0, n=40) | max 3.0 (med 3, min 3, max 3, n=40) | runs left>0: 0/40
+sloppy         d2: used 2.2 (med 3, min 0, max 3, n=40) | left 0.8 (med 0, min 0, max 3, n=40) | max 3.0 (med 3, min 3, max 3, n=30) | runs left>0: 10/40
+sloppy         d3: used 3.0 (med 3, min 3, max 3, n=30) | left 0.0 (med 0, min 0, max 0, n=30) | max 3.0 (med 3, min 3, max 3, n=30) | runs left>0: 0/30
+sloppy         d4: used 3.0 (med 3, min 3, max 3, n=30) | left 0.0 (med 0, min 0, max 0, n=30) | max 3.0 (med 3, min 3, max 3, n=30) | runs left>0: 0/30
+sloppy         d5: used 0.0 (med 0, min 0, max 0, n=30) | left 3.0 (med 3, min 3, max 3, n=30) | max n/a | runs left>0: 30/30
+upgrade-first  d1: used 3.0 (med 3, min 3, max 3, n=40) | left 0.0 (med 0, min 0, max 0, n=40) | max 3.0 (med 3, min 3, max 3, n=40) | runs left>0: 0/40
+upgrade-first  d2: used 3.0 (med 3, min 3, max 3, n=40) | left 0.0 (med 0, min 0, max 0, n=40) | max 3.0 (med 3, min 3, max 3, n=40) | runs left>0: 0/40
+upgrade-first  d3: used 5.0 (med 5, min 5, max 5, n=40) | left 0.0 (med 0, min 0, max 0, n=40) | max 3.0 (med 3, min 3, max 3, n=40) | runs left>0: 0/40
+upgrade-first  d4: used 3.0 (med 3, min 3, max 3, n=40) | left 0.0 (med 0, min 0, max 0, n=40) | max 3.0 (med 3, min 3, max 3, n=40) | runs left>0: 0/40
+upgrade-first  d5: used 0.0 (med 0, min 0, max 0, n=40) | left 3.0 (med 3, min 3, max 3, n=40) | max n/a | runs left>0: 40/40
+caring         d1: used 3.0 (med 3, min 3, max 3, n=40) | left 0.0 (med 0, min 0, max 0, n=40) | max 3.0 (med 3, min 3, max 3, n=40) | runs left>0: 0/40
+caring         d2: used 3.0 (med 3, min 3, max 3, n=40) | left 0.0 (med 0, min 0, max 0, n=40) | max 3.0 (med 3, min 3, max 3, n=40) | runs left>0: 0/40
+caring         d3: used 3.0 (med 3, min 3, max 3, n=40) | left 0.0 (med 0, min 0, max 0, n=40) | max 3.0 (med 3, min 3, max 3, n=40) | runs left>0: 0/40
+caring         d4: used 3.0 (med 3, min 3, max 3, n=40) | left 0.0 (med 0, min 0, max 0, n=40) | max 3.0 (med 3, min 3, max 3, n=40) | runs left>0: 0/40
+caring         d5: used 0.0 (med 0, min 0, max 0, n=40) | left 3.0 (med 3, min 3, max 3, n=40) | max n/a | runs left>0: 40/40
+
+=== E2. Tonic effect and maxEnergy effect (per day_end, days 1-4) ===
+human          tonics=0: days 135 avg used 2.13 avg max 3.07 avg left 0.94
+human          tonics=1: days 19 avg used 4.05 avg max 3.16 avg left 1.11
+human          maxEnergy=3: days 141 avg used 2.24 avg left 0.99
+human          maxEnergy=4: days 13 avg used 3.77 avg left 0.69
+perfect        tonics=0: days 160 avg used 3.00 avg max 3.00 avg left 0.00
+perfect        maxEnergy=3: days 160 avg used 3.00 avg left 0.00
+sloppy         tonics=0: days 130 avg used 3.00 avg max 3.00 avg left 0.00
+sloppy         maxEnergy=3: days 130 avg used 3.00 avg left 0.00
+upgrade-first  tonics=0: days 120 avg used 3.00 avg max 3.00 avg left 0.00
+upgrade-first  tonics=1: days 40 avg used 5.00 avg max 3.00 avg left 0.00
+upgrade-first  maxEnergy=3: days 160 avg used 3.50 avg left 0.00
+caring         tonics=0: days 160 avg used 3.00 avg max 3.00 avg left 0.00
+caring         maxEnergy=3: days 160 avg used 3.00 avg left 0.00
+
+=== F. Return per Energy by care type (per qte_end) ===
+human          Train n=98 exp/E 9.60 | progress 99.4 | stomach -8.7 | clean 0.0 | hp 5.3 | perfect 9.1
+human          Feed  n=108 exp/E 8.95 | progress 0.0 | stomach 25.5 | clean 0.0 | hp 0.0 | perfect 8.9
+human          Clean n=73 exp/E 8.41 | progress 0.0 | stomach -4.0 | clean 30.2 | hp 0.0 | perfect 8.4
+human          Heal  n=86 exp/E 8.21 | progress 0.0 | stomach -4.7 | clean 0.0 | hp 5.3 | perfect 8.1
+perfect        Train n=480 exp/E 10.00 | progress 91.9 | stomach -5.0 | clean 0.0 | hp 4.2 | perfect 8.4
+sloppy         Train n=236 exp/E 8.27 | progress 68.6 | stomach -8.7 | clean 0.0 | hp 3.6 | perfect 5.4
+sloppy         Feed  n=99 exp/E 7.63 | progress 0.0 | stomach 23.5 | clean 0.0 | hp 0.0 | perfect 2.5
+sloppy         Clean n=43 exp/E 7.72 | progress 0.0 | stomach -4.0 | clean 27.7 | hp 0.0 | perfect 2.1
+sloppy         Heal  n=12 exp/E 6.58 | progress 0.0 | stomach -4.6 | clean 0.0 | hp 19.2 | perfect 2.3
+upgrade-first  Train n=560 exp/E 10.00 | progress 100.0 | stomach -5.8 | clean 0.0 | hp 4.2 | perfect 10.0
+caring         Train n=320 exp/E 10.00 | progress 93.0 | stomach -10.0 | clean 0.0 | hp 5.0 | perfect 8.6
+caring         Feed  n=80 exp/E 10.00 | progress 0.0 | stomach 57.5 | clean 0.0 | hp 0.0 | perfect 10.0
+caring         Clean n=80 exp/E 10.00 | progress 0.0 | stomach -5.0 | clean 60.0 | hp 0.0 | perfect 10.0
+
+=== F2. Care mix (care_select ok) ===
+human          total 365: Clean=73 (20%), Feed=108 (30%), Heal=86 (24%), Train=98 (27%)
+perfect        total 480: Train=480 (100%)
+sloppy         total 390: Clean=43 (11%), Feed=99 (25%), Heal=12 (3%), Train=236 (61%)
+upgrade-first  total 560: Train=560 (100%)
+caring         total 480: Clean=80 (17%), Feed=80 (17%), Train=320 (67%)
+
+=== F3. playerLevel / points at day_end ===
+human          d1 playerLevel 2.0 (med 2, min 1, max 3, n=40) | points 0.3 (med 0, min 0, max 1, n=40)
+human          d2 playerLevel 2.8 (med 3, min 2, max 4, n=38) | points 0.5 (med 0, min 0, max 2, n=38)
+human          d3 playerLevel 3.5 (med 4, min 2, max 5, n=38) | points 0.3 (med 0, min 0, max 2, n=38)
+human          d4 playerLevel 4.1 (med 4, min 3, max 5, n=38) | points 0.4 (med 0, min 0, max 2, n=38)
+perfect        d1 playerLevel 3.0 (med 3, min 3, max 3, n=40) | points 2.0 (med 2, min 2, max 2, n=40)
+perfect        d2 playerLevel 4.0 (med 4, min 4, max 4, n=40) | points 3.0 (med 3, min 3, max 3, n=40)
+perfect        d3 playerLevel 4.0 (med 4, min 4, max 4, n=40) | points 3.0 (med 3, min 3, max 3, n=40)
+perfect        d4 playerLevel 5.0 (med 5, min 5, max 5, n=40) | points 4.0 (med 4, min 4, max 4, n=40)
+sloppy         d1 playerLevel 2.0 (med 2, min 2, max 2, n=40) | points 1.0 (med 1, min 1, max 1, n=40)
+sloppy         d2 playerLevel 3.0 (med 3, min 3, max 3, n=30) | points 2.0 (med 2, min 2, max 2, n=30)
+sloppy         d3 playerLevel 4.0 (med 4, min 4, max 4, n=30) | points 3.0 (med 3, min 3, max 3, n=30)
+sloppy         d4 playerLevel 4.2 (med 4, min 4, max 5, n=30) | points 3.2 (med 3, min 3, max 4, n=30)
+upgrade-first  d1 playerLevel 3.0 (med 3, min 3, max 3, n=40) | points 1.0 (med 1, min 1, max 1, n=40)
+upgrade-first  d2 playerLevel 4.0 (med 4, min 4, max 4, n=40) | points 0.0 (med 0, min 0, max 0, n=40)
+upgrade-first  d3 playerLevel 5.0 (med 5, min 5, max 5, n=40) | points 1.0 (med 1, min 1, max 1, n=40)
+upgrade-first  d4 playerLevel 5.0 (med 5, min 5, max 5, n=40) | points 1.0 (med 1, min 1, max 1, n=40)
+caring         d1 playerLevel 3.0 (med 3, min 3, max 3, n=40) | points 2.0 (med 2, min 2, max 2, n=40)
+caring         d2 playerLevel 4.0 (med 4, min 4, max 4, n=40) | points 3.0 (med 3, min 3, max 3, n=40)
+caring         d3 playerLevel 4.0 (med 4, min 4, max 4, n=40) | points 3.0 (med 3, min 3, max 3, n=40)
+caring         d4 playerLevel 5.0 (med 5, min 5, max 5, n=40) | points 4.0 (med 4, min 4, max 4, n=40)
+
+=== G. Upkeep: living pet snapshots at day_end (NightScene) ===
+human          n=192: stomach avg 65 (=0: 7%), clean avg 62 (<=50: 29%, <=25: 13%)
+perfect        n=200: stomach avg 22 (=0: 60%), clean avg 45 (<=50: 40%, <=25: 20%)
+sloppy         n=160: stomach avg 52 (=0: 11%), clean avg 60 (<=50: 21%, <=25: 12%)
+upgrade-first  n=280: stomach avg 24 (=0: 42%), clean avg 39 (<=50: 57%, <=25: 29%)
+caring         n=200: stomach avg 63 (=0: 0%), clean avg 76 (<=50: 0%, <=25: 0%)
+Pet snapshots at fight_start:
+human          n=58 stomach 46 clean 41 clean<=50 45% clean<=25 41%
+perfect        n=80 stomach 15 clean 28 clean<=50 50% clean<=25 50%
+sloppy         n=69 stomach 39 clean 39 clean<=50 41% clean<=25 39%
+upgrade-first  n=80 stomach 15 clean 28 clean<=50 50% clean<=25 50%
+caring         n=80 stomach 28 clean 68 clean<=50 0% clean<=25 0%
+
+=== G2. starve events ===
+human          starve events 14 over 40 runs (runs with >=1: 10); by day: d3=6 d4=8; died: 0
+perfect        starve events 120 over 40 runs (runs with >=1: 40); by day: d2=40 d3=40 d4=40; died: 0
+sloppy         starve events 17 over 40 runs (runs with >=1: 12); by day: d3=7 d4=10; died: 1
+upgrade-first  starve events 119 over 40 runs (runs with >=1: 40); by day: d2=39 d3=40 d4=40; died: 0
+caring         starve events 0 over 40 runs (runs with >=1: 0); by day: ; died: 0
+
+=== G3. Deaths by cause/day, revives, game over ===
+human          pet_death: boss, 5=48; fight, 2=2; revives 0; game_over 2/40
+perfect        pet_death: boss, 5=40; revives 0; game_over 0/40
+sloppy         pet_death: boss, 5=29; fight, 2=10; starve, 4=1; revives 0; game_over 10/40
+upgrade-first  pet_death: boss, 5=80; revives 0; game_over 0/40
+caring         pet_death: boss, 5=40; revives 0; game_over 0/40
+game_over detail:
+sloppy seed 1 cause fight day 2 scene FightScene coinAtDeath 250 (revive 250)
+sloppy seed 9 cause fight day 2 scene FightScene coinAtDeath 250 (revive 250)
+sloppy seed 12 cause fight day 2 scene FightScene coinAtDeath 250 (revive 250)
+sloppy seed 21 cause fight day 2 scene FightScene coinAtDeath 250 (revive 250)
+sloppy seed 24 cause fight day 2 scene FightScene coinAtDeath 250 (revive 250)
+sloppy seed 25 cause fight day 2 scene FightScene coinAtDeath 250 (revive 250)
+sloppy seed 26 cause fight day 2 scene FightScene coinAtDeath 250 (revive 250)
+sloppy seed 37 cause fight day 2 scene FightScene coinAtDeath 250 (revive 250)
+sloppy seed 38 cause fight day 2 scene FightScene coinAtDeath 250 (revive 250)
+sloppy seed 40 cause fight day 2 scene FightScene coinAtDeath 250 (revive 250)
+human seed 24 cause fight day 2 scene FightScene coinAtDeath 250 (revive 250)
+human seed 35 cause fight day 2 scene FightScene coinAtDeath 150 (revive 250)
+
+=== G4. Pet deaths before day 5 (any) ===
+human          2
+perfect        0
+sloppy         11
+upgrade-first  0
+caring         0
+
+=== G5. Toothless ===
+human          toothlessWon 18/18
+perfect        toothlessWon 40/40
+sloppy         toothlessWon 30/30
+upgrade-first  toothlessWon 40/40
+caring         toothlessWon 40/40

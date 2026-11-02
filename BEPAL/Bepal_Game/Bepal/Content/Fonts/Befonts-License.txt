@@ -1,0 +1,5 @@
+License: Personal Use Only
+Link: https://befonts.com/baby-animal-handwritten-font.html
+Link: https://befonts.com/animal-simple-handmade-font.html
+
+NOTE: this file covers Animal (fnt_title_display.otf) only. The UI font fnt_ui_cozy.ttf is Patrick Hand SC under the SIL OFL 1.1 - see PatrickHandSC-OFL.txt.

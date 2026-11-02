@@ -11,8 +11,9 @@ public class CareSelectScene : Scene
 {
     readonly GameState _gs;
     readonly Pet _pet;
+    public Pet Pet => _pet;
     public Wheel Wheel => _wheel;
-    readonly Wheel _wheel = new(new Vector2(Gfx.W / 2f, 330), 170) { Speed = 2.2f };
+    readonly Wheel _wheel = new(new Vector2(Gfx.W / 2f, 330), 170) { Speed = Balance.CareSelectSpeed };
     readonly Popups _popups = new();
     float _time;
     float _openDelay = -1;
@@ -29,10 +30,14 @@ public class CareSelectScene : Scene
             (Care.Train, Palette.Train), (Care.Feed, Palette.Feed), (Care.Clean, Palette.Clean), (Care.Heal, Palette.Heal),
         };
         for (int i = 0; i < 4; i++)
+        {
+            bool healFull = choices[i].care == Care.Heal && _pet.Hp >= _pet.MaxHp;   // nothing to heal: faded, acts like a gap
             _wheel.Zones.Add(new Zone
             {
-                Center = i * MathHelper.PiOver2, Perfect = 0.62f, Great = 0, Color = choices[i].col, Label = choices[i].care.ToString(),
+                Center = i * MathHelper.PiOver2, Perfect = Balance.CareSelectZone, Great = 0, Color = choices[i].col,
+                Label = healFull ? "Heal (HP full)" : choices[i].care.ToString(), Disabled = healFull,
             });
+        }
     }
 
     public override void Update(float dt)
@@ -58,18 +63,20 @@ public class CareSelectScene : Scene
         }
         if (!Input.Confirm) return;
 
-        if (_gs.Energy <= 0)
+        if (_gs.Energy <= 0) return;   // BaseScene doesn't open this scene without Energy; guard only
+        var (hit, zone) = _wheel.Evaluate();
+        if (hit == Hit.Miss || zone == null)   // Figma: pressing a gap does nothing
         {
-            _popups.Add("No energy left!", Palette.Danger, new Vector2(Gfx.W / 2f, 120));
+            Telemetry.Emit("care_select", "pet", _pet.Name, "result", "gap", "care", "", "hit", "Miss", "energyAfter", _gs.Energy);
             return;
         }
-        var (hit, zone) = _wheel.Evaluate();
-        if (hit == Hit.Miss || zone == null) return;   // Figma: pressing a gap does nothing
 
         _chosen = Enum.Parse<Care>(zone.Label!);
-        _gs.Energy--;
+        _gs.AddEnergy(-1, "care");
+        Telemetry.Emit("care_select", "pet", _pet.Name, "result", "ok", "care", zone.Label, "hit", hit.ToString(), "energyAfter", _gs.Energy);
+        Audio.Play(Sfx.QteSelect);
         Gfx.Shake(10, 0.3f);
-        _popups.Add(zone.Label!, zone.Color, new Vector2(Gfx.W / 2f, 120));
+        _popups.Add(zone.Label!, zone.Color, new Vector2(Gfx.W / 2f, 250));
         _openDelay = 0.4f;
     }
 
@@ -80,15 +87,25 @@ public class CareSelectScene : Scene
         Art.Pet(sb, _pet.Species, _pet.Color, new Vector2(_wheel.Center.X, _wheel.Center.Y + 115), 0.8f, _time,
             Gfx.OnWheel(_wheel.Center, 200, _wheel.Needle));
         _wheel.Draw(sb);
-        PetStats(sb, _pet, new Rectangle(40, 200, 250, 210));
-        Gfx.Text(sb, Gfx.Font, $"Energy {_gs.Energy}/{_gs.MaxEnergy}", new Vector2(Gfx.W - 60, 210), Palette.Warm, 1f);
-        Gfx.Text(sb, Gfx.Small, "Each care costs 1 Energy", new Vector2(Gfx.W - 60, 244), Palette.Dim, 1f);
+        PetStats(sb, _pet, new Rectangle(Ui.Margin, 200, StatsW, StatsH));
+        Gfx.Text(sb, Gfx.Font, $"Energy {_gs.Energy}/{_gs.MaxEnergy}", new Vector2(Gfx.W - Ui.Margin - 8, 210), Palette.Warm, 1f);
+        Gfx.Text(sb, Gfx.Small, "Each care costs 1 Energy", new Vector2(Gfx.W - Ui.Margin - 8, 238), Palette.Dim, 1f);
         _popups.Draw(sb);
         Ui.Hint(sb, "SPACE  Pick when the needle is on a choice   |   ESC  Back");
     }
 
+    /// <summary>2/3 of ui_status_panel.png (396x332), so the frame keeps its proportions.</summary>
+    public const int StatsW = 264, StatsH = 221;
+
+    // Layout inside ui_status_panel.png, in image pixels: header box, then the 4 bar slots (inside their borders)
+    static readonly Rectangle PanelHeader = new(20, 19, 356, 80);
+    static readonly int[] SlotTops = { 110, 154, 198, 242 };
+    const int SlotX = 26, SlotW = 344, SlotH = 32;
+    static readonly Color PanelInk = new(74, 44, 28), SlotTrack = new(158, 115, 88, 120);
+
     public static void PetStats(SpriteBatch sb, Pet p, Rectangle r)
     {
+        if (Ui.StatusPanel is { } tex) { PetStatsFramed(sb, p, r, tex); return; }
         Ui.Panel(sb, r, 0.9f);
         Gfx.Text(sb, Gfx.Font, $"{p.Name}  LV {p.Level}", new Vector2(r.X + 14, r.Y + 10), Palette.Text);
         Gfx.Text(sb, Gfx.Small, $"ATK {p.Atk}   {p.Element}", new Vector2(r.X + 14, r.Y + 40), Palette.Dim);
@@ -98,6 +115,34 @@ public class CareSelectScene : Scene
         Ui.Bar(sb, new Rectangle(r.X + 14, y + 56, w, 22), p.Clean, 100, Palette.CleanBar, $"Clean {(int)p.Clean}");
         Ui.Bar(sb, new Rectangle(r.X + 14, y + 84, w, 22), p.Progress, p.MaxProgress, Palette.Progress,
             $"Progress {(int)p.Progress}/{p.MaxProgress}");
+    }
+
+    static void PetStatsFramed(SpriteBatch sb, Pet p, Rectangle r, Texture2D tex)
+    {
+        float k = r.Width / (float)tex.Width;
+        Rectangle Map(int x, int y, int w, int h) => new(r.X + (int)(x * k), r.Y + (int)(y * k), (int)(w * k), (int)(h * k));
+        sb.Draw(tex, r, Color.White);
+
+        var head = Map(PanelHeader.X, PanelHeader.Y, PanelHeader.Width, PanelHeader.Height);
+        Gfx.Text(sb, Gfx.Font, $"{p.Name}  LV {p.Level}", new Vector2(head.X + 8, head.Y + 2), PanelInk, 0, false);
+        Gfx.Text(sb, Gfx.Small, $"ATK {p.Atk}   {p.Element}", new Vector2(head.X + 8, head.Bottom - Gfx.Small.LineSpacing - 2), PanelInk * 0.8f, 0, false);
+
+        (float v, float max, Color c, string label)[] bars =
+        {
+            (p.Hp, p.MaxHp, Palette.Hp, $"HP {p.HpShown}/{p.MaxHp}"),
+            (p.Stomach, 100, Palette.Stomach, $"Stomach {(int)p.Stomach}"),
+            (p.Clean, 100, Palette.CleanBar, $"Clean {(int)p.Clean}"),
+            (p.Progress, p.MaxProgress, Palette.Progress, $"Progress {(int)p.Progress}/{p.MaxProgress}"),
+        };
+        for (int i = 0; i < bars.Length; i++)
+        {
+            var slot = Map(SlotX, SlotTops[i], SlotW, SlotH);
+            var (v, max, c, label) = bars[i];
+            float t = max <= 0 ? 0 : MathHelper.Clamp(v / max, 0, 1);
+            Gfx.Rect(sb, slot, SlotTrack);
+            Gfx.Rect(sb, slot.X, slot.Y, slot.Width * t, slot.Height, c);
+            Gfx.Text(sb, Gfx.Small, Gfx.Fit(Gfx.Small, label, slot.Width - 12), new Vector2(slot.X + 6, slot.Y + (slot.Height - Gfx.Small.LineSpacing) / 2f), PanelInk, 0, false);
+        }
     }
 }
 
@@ -115,12 +160,6 @@ public class QteScene : Scene
     float _finish = -1;
     int _perfects, _greats, _levelUps;
     bool _playerLevelUp;
-    const float BaseSpeed = 2.4f;
-    const float TrainSpeed = 3.6f;
-    const float CleanZoneSpeed = 4.8f;   // Clean: fixed run-away speed, always below the needle's BaseSpeed
-    const float HealFadeRate = 1.5f;     // Heal: needle fade cycle (lower = slower, easier to read)
-    const float HealMinAlpha = 0.3f;     // Heal: needle never fades below this
-    const float HealShrink = 0.5f;       // Heal: zone shrink rate multiplier (lower = dot lives longer)
 
     public override bool Overlay => true;
 
@@ -132,16 +171,21 @@ public class QteScene : Scene
         _ => Palette.Heal,
     };
 
+    // Telemetry: pet stats at the start, to report deltas in qte_end
+    readonly float _t0Stomach, _t0Clean, _t0Hp;
+    float _progressGain;
+
     public QteScene(GameState gs, Pet pet, Care care)
     {
         _gs = gs;
         _pet = pet;
         _care = care;
-        _wheel.Speed = care == Care.Train ? TrainSpeed : BaseSpeed;
+        (_t0Stomach, _t0Clean, _t0Hp) = (pet.Stomach, pet.Clean, pet.Hp);
+        _wheel.Speed = care == Care.Train ? Balance.QteTrainSpeed : Balance.QteBaseSpeed;
 
         // Metabolic burn (GDD 03 §2.2): Train -10 Stomach, Clean/Heal -5.
-        if (care == Care.Train) _pet.Stomach -= 10;
-        if (care is Care.Clean or Care.Heal) _pet.Stomach -= 5;
+        if (care == Care.Train) _pet.Stomach -= Balance.TrainStomachCost;
+        if (care is Care.Clean or Care.Heal) _pet.Stomach -= Balance.CleanHealStomachCost;
         _pet.ClampStats();
 
         if (care == Care.Train)
@@ -150,16 +194,17 @@ public class QteScene : Scene
     }
 
     /// <summary>Train dots shrink as the pet levels (stops at LV 3); the QTE upgrade widens them.</summary>
-    float TrainScale => _gs.QteZoneMultiplier / (1f + 0.15f * (Math.Min(_pet.Level, 3) - 1));
+    float TrainScale => _gs.QteZoneMultiplier / (1f + Balance.TrainShrinkPerLevel * (Math.Min(_pet.Level, Balance.TrainShrinkMaxLevel) - 1));
 
     void SpawnZone(Zone? replace = null)
     {
         if (replace != null) _wheel.Zones.Remove(replace);
         var z = _care == Care.Train
-            ? new Zone { Perfect = 0.07f * TrainScale, Great = 0.16f * TrainScale }
-            : new Zone { Perfect = 0.12f, Great = 0.27f };
+            ? new Zone { Perfect = Balance.TrainPerfect * TrainScale, Great = Balance.TrainGreat * TrainScale }
+            : new Zone { Perfect = Balance.CareZonePerfect, Great = Balance.CareZoneGreat };
+        if (_gs.BalletActive) z.Perfect *= 1f + Balance.BalletPerfectBonus;   // Ballet Shoes: bigger Perfect zone today
         z.Color = Col;
-        z.Center = _wheel.FreeAngle(_care == Care.Train ? 0.4f : 0.9f);
+        z.Center = _wheel.FreeAngle(_care == Care.Train ? Balance.TrainSpawnGap : Balance.CareSpawnGap);
         _wheel.Zones.Add(z);
     }
 
@@ -172,16 +217,16 @@ public class QteScene : Scene
         switch (_care)
         {
             case Care.Clean:   // zone runs away in the needle's direction, slower than the needle
-                foreach (var z in _wheel.Zones) z.Center += _wheel.Dir * CleanZoneSpeed * dt;
+                foreach (var z in _wheel.Zones) z.Center += _wheel.Dir * Balance.CleanZoneSpeed * dt;
                 break;
             case Care.Heal:    // needle fades in and out (never fully gone); zone slowly shrinks, respawns when gone
-                float f = MathF.Cos(_time * HealFadeRate);
-                _wheel.NeedleAlpha = MathHelper.Clamp(0.6f + f * 0.7f, HealMinAlpha, 1);
+                float f = MathF.Cos(_time * Balance.HealFadeRate);
+                _wheel.NeedleAlpha = MathHelper.Clamp(0.6f + f * 0.7f, Balance.HealMinAlpha, 1);
                 foreach (var z in _wheel.Zones.ToArray())
                 {
-                    z.Perfect -= 0.035f * HealShrink * dt;
-                    z.Great -= 0.07f * HealShrink * dt;
-                    if (z.Perfect <= 0.02f) SpawnZone(z);
+                    z.Perfect -= Balance.HealPerfectShrinkRate * Balance.HealShrink * dt;
+                    z.Great -= Balance.HealGreatShrinkRate * Balance.HealShrink * dt;
+                    if (z.Perfect <= Balance.HealZoneMin) SpawnZone(z);
                 }
                 break;
         }
@@ -196,8 +241,10 @@ public class QteScene : Scene
 
         _attempts--;
         var (hit, zone) = _wheel.Evaluate();
-        _popups.Add(hit, new Vector2(Gfx.W / 2f, 150));
+        _popups.Add(hit, new Vector2(Gfx.W / 2f, 250));
         Apply(hit, zone);
+        Telemetry.Emit("qte_press", "pet", _pet.Name, "care", _care.ToString(), "idx", Balance.Attempts - _attempts, "hit", hit.ToString(),
+            "expGain", hit == Hit.Miss ? 0 : hit == Hit.Perfect ? Balance.PlayerExpPerfect : Balance.PlayerExpGreat);
         if (_attempts == 0) _finish = 0.9f;
     }
 
@@ -205,29 +252,34 @@ public class QteScene : Scene
     {
         if (hit == Hit.Miss)
         {
-            if (_care == Care.Feed) _wheel.Speed = BaseSpeed;
+            Audio.Play(Sfx.QteMiss);
+            if (_care == Care.Feed) _wheel.Speed = Balance.QteBaseSpeed;
             return;
         }
 
         bool perfect = hit == Hit.Perfect;
+        if (perfect) Audio.Play(Sfx.QtePerfect, Balance.PerfectVolume, Balance.PerfectPitch);
+        else Audio.Play(Sfx.QteGreat);
         if (perfect) _perfects++; else _greats++;
-        if (_gs.AddExp(1)) _playerLevelUp = true;   // player EXP: every successful press
+        if (_gs.AddExp(perfect ? Balance.PlayerExpPerfect : Balance.PlayerExpGreat)) _playerLevelUp = true;   // player EXP: every successful press
 
         switch (_care)
         {
             case Care.Train:
-                _levelUps += _pet.AddProgress((perfect ? 10 : 5) * _gs.TrainGainMultiplier);
+                float gain = (perfect ? Balance.TrainPerfectGain : Balance.TrainGreatGain) * _gs.TrainGainMultiplier;
+                _progressGain += gain;
+                _levelUps += _pet.AddProgress(gain);
                 break;
             case Care.Feed:
-                _pet.Stomach += perfect ? 6 : 3;
+                _pet.Stomach += perfect ? Balance.FeedPerfect : Balance.FeedGreat;
                 _wheel.Dir = -_wheel.Dir;                                   // hit flips the spin
-                if (perfect) _wheel.Speed = MathF.Min(_wheel.Speed * 1.15f, 6f);
+                if (perfect) _wheel.Speed = MathF.Min(_wheel.Speed * Balance.FeedPerfectSpeedMul, Balance.FeedMaxSpeed);
                 break;
             case Care.Clean:
-                _pet.Clean += perfect ? 6 : 3;
+                _pet.Clean += perfect ? Balance.CleanPerfect : Balance.CleanGreat;
                 break;
             case Care.Heal:
-                _pet.Hp += perfect ? 6 : 3;
+                _pet.Hp += perfect ? Balance.HealPerfect : Balance.HealGreat;
                 break;
         }
         _pet.ClampStats();
@@ -237,7 +289,12 @@ public class QteScene : Scene
 
     void Close()
     {
+        Telemetry.Emit("qte_end", "pet", _pet.Name, "care", _care.ToString(), "perfect", _perfects, "great", _greats,
+            "miss", Balance.Attempts - _perfects - _greats, "attempts", Balance.Attempts, "progressDelta", _progressGain,
+            "stomachDelta", _pet.Stomach - _t0Stomach, "cleanDelta", _pet.Clean - _t0Clean, "hpDelta", _pet.Hp - _t0Hp,
+            "petLevelUps", _levelUps, "playerLevelUp", _playerLevelUp);
         M.Remove(this);
+        if (_levelUps > 0 || _playerLevelUp) Audio.Play(Sfx.UiLevelUp);
         var lines = new System.Collections.Generic.List<string>
         {
             $"{_care} finished: {_perfects} Perfect, {_greats} Great, {Balance.Attempts - _perfects - _greats} Miss.",
@@ -246,6 +303,11 @@ public class QteScene : Scene
         if (_pet.Level >= 3 && _levelUps > 0 && _pet.Level - _levelUps < 3)
             lines.Add($"{_pet.Name} learned a new move! (coming soon)");
         if (_playerLevelUp) lines.Add($"You reached Player LV {_gs.PlayerLevel}! +1 Point for upgrades.");
+        if (_playerLevelUp && !_gs.PointHintShown)
+        {
+            _gs.PointHintShown = true;
+            lines.Add("Spend it at the Upgrade station (the console on the left side of the base).");
+        }
         M.Push(DialogueScene.Say("", null, lines.ToArray()));
     }
 
@@ -256,7 +318,7 @@ public class QteScene : Scene
         Art.Pet(sb, _pet.Species, _pet.Color, new Vector2(_wheel.Center.X, _wheel.Center.Y + 115), 0.8f, _time,
             Gfx.OnWheel(_wheel.Center, 200, _wheel.Needle));
         _wheel.Draw(sb);
-        CareSelectScene.PetStats(sb, _pet, new Rectangle(40, 200, 250, 210));
+        CareSelectScene.PetStats(sb, _pet, new Rectangle(Ui.Margin, 200, CareSelectScene.StatsW, CareSelectScene.StatsH));
 
         var ar = new Rectangle(Gfx.W - 290, 200, 250, 120);
         Ui.Panel(sb, ar, 0.9f);

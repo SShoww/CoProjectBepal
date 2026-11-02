@@ -6,20 +6,24 @@ using Microsoft.Xna.Framework.Graphics;
 namespace Bepal;
 
 /// <summary>
-/// Figma Scene 18. Dodge zone = Perfect only and keeps shrinking; when it vanishes (or you press on nothing)
-/// your pet gets hit. Attack zone = Perfect 100% / Great 75% of ATK. A fallen pet is swapped out and
+/// Figma Scene 18. Two alternating phases on the wheel: Attack (Perfect 100% / Great 75% of ATK) first; a landed
+/// Attack that doesn't kill swaps it for a Dodge (Perfect only, keeps shrinking) — when it vanishes (or you press
+/// on nothing) your pet gets hit. A missed Attack also gets your pet hit. A fallen pet is swapped out and
 /// the enemy keeps its damage. All pets down = defeat.
 /// </summary>
 public class FightScene : Scene
 {
+    public override string? Music => _enemy.IsBoss ? Bgm.Boss : Bgm.Fight;
+
     readonly GameState _gs;
     readonly Enemy _enemy;
     readonly Action<bool> _onEnd;
     Pet _pet;
     public Wheel Wheel => _wheel;
-    readonly Wheel _wheel = new(new Vector2(Gfx.W / 2f, 440), 150);
+    readonly Wheel _wheel = new(new Vector2(Gfx.W / 2f, Balance.FightWheelY), Balance.FightWheelRadius);
     readonly Popups _popups = new();
-    Zone _dodge = null!;
+    static Vector2 CenterPopup => new(Gfx.W / 2f, Balance.FightPopupCenterY);
+    Zone? _dodge;   // non-null only during the Dodge phase
     Zone _attack = null!;
     readonly float _dodgeStart;
     float _time;
@@ -27,6 +31,12 @@ public class FightScene : Scene
     float _end = -1;
     bool _won;
     bool _waitingForSwap;
+    bool _poisoned;
+    int _combo;   // Nibbleclaw: consecutive Attack hits
+    int _shield;  // Cloudy Glasses hits left to block
+
+    // Telemetry counters (fight_end)
+    int _tAtkHit, _tAtkMiss, _tDodgeOk, _tTooSlow, _tMissPress, _tDmgDealt, _tDmgTaken, _tPetsLost;
 
     public FightScene(GameState gs, Enemy enemy, Pet pet, Action<bool> onEnd)
     {
@@ -35,56 +45,85 @@ public class FightScene : Scene
         _pet = pet;
         _onEnd = onEnd;
         _wheel.Speed = enemy.NeedleSpeed;
-        _dodgeStart = gs.SeaTea ? 0.38f : 0.32f;   // Sea Tea: Dodge zone +20% for this fight
+        bool seaTea = gs.SeaTea;
+        _dodgeStart = gs.SeaTea ? Balance.DodgeStartSeaTea : Balance.DodgeStart;   // Sea Tea: Dodge zone +20% for this fight
         gs.SeaTea = false;
-        _attack = new Zone { Perfect = 0.08f, Great = 0.19f, Color = Palette.Heal, Label = "Attack" };
-        _wheel.Zones.Add(_attack);
-        _attack.Center = _wheel.FreeAngle(1.0f);
-        NewDodge();
+        _shield = gs.GlassesShield;   // Cloudy Glasses: blocks this many hits in this fight only
+        gs.GlassesShield = 0;
+        Telemetry.Emit("fight_start", "enemy", enemy.Name, "pet", pet.Name, "petHp", pet.HpShown, "petMaxHp", pet.MaxHp, "petAtk", pet.Atk,
+            "seaTea", seaTea, "dodgeStart", _dodgeStart);
+        Telemetry.Snapshot(pet);
+        if (enemy.IsBoss) Audio.Play(Sfx.FightBossRoar);
+        _attack = new Zone { Color = Palette.Heal, Label = "Attack" };
+        StartAttack();
     }
 
-    void NewDodge()
+    void StartDodge()
     {
-        if (_dodge != null) _wheel.Zones.Remove(_dodge);
+        _wheel.Zones.Remove(_attack);
         _dodge = new Zone { Perfect = _dodgeStart, Great = 0, Color = Palette.Feed, Label = "Dodge" };
-        _dodge.Center = _wheel.FreeAngle(1.2f);
+        _dodge.Center = _wheel.FreeAngle(Balance.DodgeSpawnGap);
         _wheel.Zones.Add(_dodge);
     }
 
-    void MoveAttack()
+    void StartAttack()
     {
+        if (_dodge != null) _wheel.Zones.Remove(_dodge);
+        _dodge = null;
         _wheel.Zones.Remove(_attack);
-        _attack.Center = _wheel.FreeAngle(0.8f);
+        _attack.Perfect = _dodgeStart - Balance.AttackGreatBand;
+        _attack.Great = _dodgeStart;
+        _attack.Center = _wheel.FreeAngle(Balance.AttackSpawnGap);
         _wheel.Zones.Add(_attack);
     }
 
-    void EnemyHits()
+    void EnemyHits(string cause)
     {
-        _pet.Hp -= _enemy.Atk;
+        if (_shield > 0)
+        {
+            _shield--;
+            if (cause == "too_slow") _tTooSlow++; else _tMissPress++;
+            Telemetry.Emit("fight_hurt", "cause", cause, "dmgTaken", 0, "hpLost", 0, "petHp", _pet.HpShown, "pet", _pet.Name, "shielded", true);
+            Audio.Play(Sfx.FightDodge);
+            _popups.Add($"Blocked! ({_shield} left)", Palette.Clean, Balance.FightPopupPet);
+            StartAttack();
+            return;
+        }
+        int dmg = (int)MathF.Round(_enemy.Atk * (_poisoned ? Balance.PoisonDealtMul : 1f));
+        float hpBefore = _pet.Hp;
+        _pet.Hp -= dmg;
         _pet.ClampStats();
+        _tDmgTaken += dmg;
+        if (cause == "too_slow") _tTooSlow++; else _tMissPress++;
+        Telemetry.Emit("fight_hurt", "cause", cause, "dmgTaken", dmg, "hpLost", (int)MathF.Round(hpBefore - _pet.Hp), "petHp", _pet.HpShown, "pet", _pet.Name);
+        if (_pet.Dead) Telemetry.PetDeath(_pet, _enemy.IsBoss ? "boss" : "fight", hpBefore);
         _petFlash = 1;
         _lunge = 1;
-        Gfx.Shake(14, 0.35f);
-        _popups.Add($"{_enemy.AttackName}! -{_enemy.Atk}", Palette.Danger, new Vector2(300, 200));
-        NewDodge();
+        Audio.Play(Sfx.FightPetHurt);
+        Gfx.Shake(Balance.FightHurtShake, Balance.FightHurtShakeTime);
+        _popups.Add($"{_enemy.AttackName}! -{dmg}", Palette.Danger, Balance.FightPopupPet);
+        StartAttack();
         if (_pet.Dead) PetFell();
     }
 
     void PetFell()
     {
+        _tPetsLost++;
         var alive = _gs.Alive.ToList();
         if (alive.Count == 0)
         {
-            _end = 1.5f;
+            _end = Balance.FightEndDelay;
             _won = false;
             return;
         }
         _waitingForSwap = true;
         M.Push(new PetPickScene($"{_pet.Name} has fallen! Send another pet", alive, p =>
         {
+            Telemetry.Emit("fight_swap", "fromPet", _pet.Name, "toPet", p.Name);
             _pet = p;
+            _combo = 0;
             _waitingForSwap = false;
-            NewDodge();
+            StartAttack();
         }));
     }
 
@@ -92,15 +131,18 @@ public class FightScene : Scene
     {
         _time += dt;
         _popups.Update(dt);
-        _enemyFlash = MathF.Max(0, _enemyFlash - dt * 4);
-        _petFlash = MathF.Max(0, _petFlash - dt * 4);
-        _lunge = MathF.Max(0, _lunge - dt * 3);
+        _enemyFlash = MathF.Max(0, _enemyFlash - dt * Balance.FightFlashFade);
+        _petFlash = MathF.Max(0, _petFlash - dt * Balance.FightFlashFade);
+        _lunge = MathF.Max(0, _lunge - dt * Balance.FightLungeFade);
 
         if (_end >= 0)
         {
             _end -= dt;
             if (_end < 0)
             {
+                Telemetry.Emit("fight_end", "enemy", _enemy.Name, "won", _won, "rounds", _tAtkHit, "attackHits", _tAtkHit, "attackMiss", _tAtkMiss,
+                    "dodgeOk", _tDodgeOk, "tooSlow", _tTooSlow, "missPress", _tMissPress, "dmgDealt", _tDmgDealt, "dmgTaken", _tDmgTaken,
+                    "petsLost", _tPetsLost, "durationSim", _time);
                 M.Remove(this);
                 _onEnd(_won);
             }
@@ -109,40 +151,84 @@ public class FightScene : Scene
         if (_waitingForSwap) return;
 
         _wheel.Update(dt);
-        _dodge.Perfect -= _enemy.DodgeShrink * dt;
-        if (_dodge.Perfect <= 0.012f)
+        if (_dodge == null)
         {
-            _popups.Add("Too slow!", Palette.Danger, new Vector2(Gfx.W / 2f, 250));
-            EnemyHits();
-            return;
+            _attack.Perfect = MathF.Max(Balance.AttackMinPerfect, _attack.Perfect - _enemy.DodgeShrink * Balance.AttackShrinkMul * dt);
+            _attack.Great = _attack.Perfect * _dodgeStart / (_dodgeStart - Balance.AttackGreatBand);   // Great keeps its starting ratio to Perfect (2x) while shrinking
+        }
+        else
+        {
+            _dodge.Perfect -= _enemy.DodgeShrink * dt;
+            if (_dodge.Perfect <= Balance.DodgeVanish)
+            {
+                _popups.Add("Too slow!", Palette.Danger, CenterPopup);
+                EnemyHits("too_slow");
+                return;
+            }
         }
 
         if (!Input.Confirm) return;
         var (hit, zone) = _wheel.Evaluate();
-        if (zone == _dodge)
+        if (zone != null && zone == _dodge)
         {
-            _popups.Add("Dodge!", Palette.Feed, new Vector2(300, 200));
-            NewDodge();
+            _tDodgeOk++;
+            Telemetry.Emit("fight_press", "kind", "dodge", "hit", hit.ToString(), "dmgDealt", 0, "combo", _combo, "petHp", _pet.HpShown,
+                "enemyHp", (int)_enemy.Hp, "poisoned", _poisoned);
+            Audio.Play(Sfx.FightDodge);
+            _popups.Add("Dodge!", Palette.Feed, Balance.FightPopupPet);
+            StartAttack();
         }
         else if (zone == _attack)
         {
-            float dmg = _pet.Atk * (hit == Hit.Perfect ? 1f : 0.75f);
+            float dmg = _pet.Atk * (hit == Hit.Perfect ? 1f : Balance.AttackGreatDmgMul) * (_poisoned ? Balance.PoisonTakenMul : 1f);
+            if (_pet.Has(Species.Nibbleclaw))
+            {
+                dmg *= 1 + _combo * Balance.NibbleComboStep;
+                _combo++;
+                if (_combo > 1) _popups.Add($"Combo x{_combo}", Palette.Coin, Balance.FightPopupPetSub);
+            }
             _enemy.Hp = MathF.Max(0, _enemy.Hp - dmg);
+            _tAtkHit++;
+            _tDmgDealt += (int)dmg;
+            Telemetry.Emit("fight_press", "kind", "attack", "hit", hit.ToString(), "dmgDealt", (int)dmg, "combo", _combo, "petHp", _pet.HpShown,
+                "enemyHp", (int)_enemy.Hp, "poisoned", _poisoned);
             _enemyFlash = 1;
-            Gfx.Shake(8, 0.2f);
-            _popups.Add(hit, new Vector2(Gfx.W / 2f, 250));
-            _popups.Add($"-{(int)dmg}", Palette.Text, new Vector2(1000, 150));
-            MoveAttack();
+            Audio.Play(Sfx.FightPlayerAttack);
+            Gfx.Shake(Balance.FightHitShake, Balance.FightHitShakeTime);
+            _popups.Add(hit, CenterPopup);
+            _popups.Add($"-{(int)dmg}", Palette.Text, Balance.FightPopupEnemyDmg);
+            if (_pet.Has(Species.Mossling))
+            {
+                int heal = Math.Max(1, (int)MathF.Round(_pet.MaxHp * Balance.MosslingHealPct));
+                _pet.Hp += heal;
+                _pet.ClampStats();
+                _popups.Add($"+{heal}", Palette.Heal, Balance.FightPopupPetSub);
+            }
+            if (_pet.Has(Species.Toothless) && !_poisoned)
+            {
+                _poisoned = true;
+                _popups.Add("Poisoned!", Balance.FightPoisonColor, Balance.FightPopupEnemyStatus);
+            }
             if (_enemy.Hp <= 0)
             {
                 _won = true;
-                _end = 1.5f;
+                _end = Balance.FightEndDelay;
+            }
+            else
+            {
+                StartDodge();
+                if (_pet.Has(Species.Blinkbun))   // needle warps to arrive at the Dodge centre in BlinkbunLeadTime seconds
+                    _wheel.Needle = ((_dodge!.Center - _wheel.Dir * _wheel.Speed * Balance.BlinkbunLeadTime) % MathHelper.TwoPi + MathHelper.TwoPi) % MathHelper.TwoPi;
             }
         }
         else
         {
-            _popups.Add("Miss", Palette.Danger, new Vector2(Gfx.W / 2f, 250));
-            EnemyHits();
+            _popups.Add("Miss", Palette.Danger, CenterPopup);
+            if (_dodge == null) _tAtkMiss++;
+            Telemetry.Emit("fight_press", "kind", "miss", "hit", "Miss", "dmgDealt", 0, "combo", _combo, "petHp", _pet.HpShown,
+                "enemyHp", (int)_enemy.Hp, "poisoned", _poisoned);
+            _combo = 0;
+            EnemyHits("miss_press");
         }
     }
 
@@ -150,34 +236,36 @@ public class FightScene : Scene
     {
         // Arena: the base at night, seen through the open red door
         var bd = BaseScene.SharedBackdrop;
-        bd.Draw(sb, 3000, 0.85f, _time, 560);
-        Gfx.Rect(sb, 0, 560, Gfx.W, 160, new Color(30, 22, 24));
-        Gfx.Rect(sb, 0, 560, Gfx.W, 4, new Color(80, 50, 44));
-        Gfx.Rect(sb, 0, 0, Gfx.W, Gfx.H, new Color(60, 0, 10) * 0.18f);
+        bd.Draw(sb, Balance.FightBackdropX, Balance.FightBackdropLight, _time, Balance.FightFloorY);
+        Gfx.Rect(sb, 0, Balance.FightFloorY, Gfx.W, Gfx.H - Balance.FightFloorY, Balance.FightFloor);
+        Gfx.Rect(sb, 0, Balance.FightFloorY, Gfx.W, 4, Balance.FightFloorEdge);
+        Gfx.Rect(sb, 0, 0, Gfx.W, Gfx.H, Balance.FightRedTint * Balance.FightRedTintAlpha);
 
-        var petFeet = new Vector2(250 + _lunge * 30, 560);
-        var enemyFeet = new Vector2(1010 - _lunge * 60, 560);
-        Art.Pet(sb, _pet.Species, Color.Lerp(_pet.Color, Color.Red, _petFlash), petFeet, 1.4f, _time, enemyFeet - new Vector2(0, 80),
-            1f, _pet.Dead);
-        Art.Enemy(sb, _enemy, enemyFeet, _time, petFeet, _enemyFlash);
+        var petFeet = new Vector2(Balance.FightPetX + _lunge * Balance.FightPetLunge, Balance.FightFloorY);
+        var enemyFeet = new Vector2(Balance.FightEnemyX - _lunge * Balance.FightEnemyLunge, Balance.FightFloorY);
+        Art.Pet(sb, _pet.Species, Color.Lerp(_pet.Color, Color.Red, _petFlash), petFeet, Balance.FightPetScale, _time, enemyFeet - new Vector2(0, 80),
+            1f, _pet.Dead, flash: _petFlash);
+        Art.Enemy(sb, _enemy, enemyFeet, _time, petFeet, MathF.Max(_enemyFlash, _poisoned ? Balance.FightPoisonTint : 0));
 
         // Pet HP (small bar over its head) and enemy HP (top right), per Figma
-        Ui.Bar(sb, new Rectangle((int)petFeet.X - 70, 380, 140, 16), _pet.Hp, _pet.MaxHp, Palette.Hp);
-        Gfx.Text(sb, Gfx.Small, $"{_pet.Name}  {_pet.HpShown}/{_pet.MaxHp}  ATK {_pet.Atk}", new Vector2(petFeet.X, 354), Palette.Text, 0.5f);
-        Gfx.Text(sb, Gfx.Font, _enemy.Name, new Vector2(Gfx.W - 40, 24), Palette.Danger, 1f);
-        Ui.Bar(sb, new Rectangle(Gfx.W - 440, 60, 400, 24), _enemy.Hp, _enemy.MaxHp, Palette.Hp,
+        Ui.Bar(sb, new Rectangle((int)petFeet.X - Balance.FightPetBarW / 2, Balance.FightPetBarY, Balance.FightPetBarW, Balance.FightPetBarH), _pet.Hp, _pet.MaxHp, Palette.Hp);
+        Gfx.Text(sb, Gfx.Small, $"{_pet.Name}  {_pet.HpShown}/{_pet.MaxHp}  ATK {_pet.Atk}", new Vector2(petFeet.X, Balance.FightPetLabelY), Palette.Text, 0.5f);
+        Gfx.Text(sb, Gfx.Font, _enemy.Name, new Vector2(Gfx.W - Balance.FightEnemyMargin, Balance.FightEnemyNameY), Palette.Danger, 1f);
+        Ui.Bar(sb, new Rectangle(Gfx.W - Balance.FightEnemyBarW - Balance.FightEnemyMargin, Balance.FightEnemyBarY, Balance.FightEnemyBarW, Balance.FightEnemyBarH), _enemy.Hp, _enemy.MaxHp, Palette.Hp,
             $"Health {(int)_enemy.Hp}/{(int)_enemy.MaxHp}");
 
-        _wheel.Draw(sb, 26);
-        Gfx.Text(sb, Gfx.Small, "Hit Dodge before it shrinks away. If you're too slow, your pet gets hit!",
-            new Vector2(Gfx.W / 2f, 250), Palette.Dim, 0.5f);
+        _wheel.Draw(sb, Balance.FightWheelThickness);
+        Gfx.Text(sb, Gfx.Small, _dodge != null
+                ? "Hit Dodge before it shrinks away. If you're too slow, your pet gets hit!"
+                : "Land an Attack to strike, then get ready to Dodge!",
+            new Vector2(Gfx.W / 2f, Balance.FightTipY), Palette.Dim, 0.5f);
         _popups.Draw(sb);
 
         if (_end >= 0)
         {
-            Ui.Dim(sb, 0.4f);
-            Gfx.Text(sb, Gfx.Big, _won ? "VICTORY" : "DEFEATED", new Vector2(Gfx.W / 2f, 300), _won ? Palette.Coin : Palette.Danger, 0.5f);
+            Ui.Dim(sb, Balance.FightEndDim);
+            Gfx.Text(sb, Gfx.Big, _won ? "VICTORY" : "DEFEATED", new Vector2(Gfx.W / 2f, Balance.FightEndTextY), _won ? Palette.Coin : Palette.Danger, 0.5f);
         }
-        Ui.Hint(sb, "SPACE  on Dodge (yellow) to evade   |   SPACE  on Attack (green) to strike");
+        Ui.Hint(sb, _dodge != null ? "SPACE  on Dodge (yellow) to evade" : "SPACE  on Attack (green) to strike");
     }
 }

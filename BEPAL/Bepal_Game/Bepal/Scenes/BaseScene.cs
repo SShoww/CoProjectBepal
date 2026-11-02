@@ -17,27 +17,59 @@ public class BaseScene : Scene
 
     public const float WorldW = 3840;
     public const float GroundY = 600;
-    const float WallLeft = 120, WallRight = 3560;
-    public const float BedX = 300, UpgradeX = 900, HearthX = 1900, DoctorX = 2650, BookX = 3100, DoorX = 3640;
+    // Hard walls stop the player; speed into a wall tapers to half between the soft line and the wall
+    const float WallLeft = 120, SoftLeft = 630, SoftRight = 3400, WallRight = 3730;
+    // The player's centre stops half a sprite width short of each wall so the sprite never pokes through
+    static float MinX => WallLeft + Art.PlayerHalfWidth;
+    static float MaxX => WallRight - Art.PlayerHalfWidth;
+    // Big windows: centres 630 + 520*i, between the hanging lamps; last one ends ~160px short of the door
+    const int WindowCount = 6;
+    const float BaseArtPhase = 250;   // bg_base.png tiles start this far left of the wall: its windows land at x≈655 and ≈2265 (clear of Upgrade/Doctor); the 3rd (≈3880) is past WallRight, not cut in half at the door
+    const float WindowW = 320, WindowH = 160, WindowTop = GroundY - 210;
+    static float WindowX(int i) => 630 + 520 * i;
+    static bool InWindow(float x)
+    {
+        for (int i = 0; i < WindowCount; i++)
+            if (x + 8 > WindowX(i) - WindowW / 2 && x < WindowX(i) + WindowW / 2) return true;
+        return false;
+    }
+    public const float BedX = 300, BoxX = 600, UpgradeX = 900, HearthX = 1900, DoctorX = 2650, BookX = 3100, DoorX = 3640;
 
     readonly GameState _gs;
     float _playerX = HearthX - 150;
     int _facing = 1;
     float _walkT;
-    float _camX;
+    float _vel;          // px/s, signed; PlayerX stays the physics position
+    readonly SpriteMotion _motion = new();   // pose for the player image (single still or primitives)
+    float _faceVis = 1;  // smoothed facing for drawing only
+    int _lastStep;
+    float _camX, _look;
     float _time;
+    float _knockT;
+    bool _debug;          // F3: position overlay
     public float Night;   // driven by NightScene
+
+    // Prompt: fades in when the nearest spot changes
+    (Kind, Pet?) _promptKey;
+    float _promptT;
+    Smoothed _expShown;
+
+    struct Dust { public Vector2 Pos, Vel; public float Age; }
+    readonly Dust[] _dust = new Dust[Balance.DustMax];
+    int _dustNext;
 
     class PetActor
     {
-        public float X, Target, Wait;
+        public float X, Start, Target, Wait, T, Dur, Hop, Phase;   // Phase: fixed per-pet offset so idle bobs aren't in sync
+        public bool Moving;
         public int Facing = 1;
+        public Smoothed Hp;
     }
 
     readonly Dictionary<Pet, PetActor> _actors = new();
-    readonly Random _rng = new();
+    readonly Random _rng = RunSeed.Make(2);
 
-    public enum Kind { Bed, Upgrade, Doctor, Book, Door, Pet }
+    public enum Kind { Bed, Box, Upgrade, Doctor, Book, Door, Pet }
 
     public record Spot(Kind Kind, float X, string Label, Pet? Pet = null);
 
@@ -46,7 +78,12 @@ public class BaseScene : Scene
     public float PlayerX => _playerX;
     public float PetX(Pet p) => Actor(p).X;
 
-    public BaseScene(GameState gs) => _gs = gs;
+    public BaseScene(GameState gs)
+    {
+        _gs = gs;
+        _expShown.Snap(gs.PlayerExp);
+        for (int i = 0; i < _dust.Length; i++) _dust[i].Age = Balance.DustLife;   // all slots start expired
+    }
 
     /// <summary>Spawn position override (used by the screenshot tool).</summary>
     public float StartX
@@ -60,12 +97,16 @@ public class BaseScene : Scene
 
     public GameState State => _gs;
 
+    /// <summary>Cozy by default; the Day 4 storm theme once the red door has been opened.</summary>
+    public override string? Music => _gs.Day == 4 ? Bgm.Storm : Bgm.Base;
+
     PetActor Actor(Pet p)
     {
         if (!_actors.TryGetValue(p, out var a))
         {
-            a = new PetActor { X = HearthX + _rng.Next(-300, 300) };
-            a.Target = a.X;
+            a = new PetActor { X = HearthX + _rng.Next(-300, 300), Phase = (float)_rng.NextDouble() * 6.28f };
+            a.Target = a.Start = a.X;
+            a.Hp.Snap(p.Hp);
             _actors[p] = a;
         }
         return a;
@@ -74,6 +115,7 @@ public class BaseScene : Scene
     IEnumerable<Spot> Spots()
     {
         yield return new Spot(Kind.Bed, BedX, "Sleep (End day)");
+        yield return new Spot(Kind.Box, BoxX, "Box (items)");
         yield return new Spot(Kind.Upgrade, UpgradeX, "Upgrade");
         yield return new Spot(Kind.Doctor, DoctorX, "Doctor");
         yield return new Spot(Kind.Book, BookX, "Notebook");
@@ -84,35 +126,81 @@ public class BaseScene : Scene
     public override void Update(float dt)
     {
         _time += dt;
+        Rain.Target = _gs.Day == 4 ? (_gs.DoorDone ? 1f : 0.5f) : 0f;
 
-        // Walking
-        int move = (Input.Down(Keys.D) || Input.Down(Keys.Right) ? 1 : 0) - (Input.Down(Keys.A) || Input.Down(Keys.Left) ? 1 : 0);
-        if (move != 0)
+        // Knocking repeats (clip + a short pause) until the red door is opened
+        _knockT -= dt;
+        if (!_gs.DoorEventPending) _knockT = 0;
+        else if (_knockT <= 0)
         {
-            _facing = move;
-            _playerX = MathHelper.Clamp(_playerX + move * 330 * dt, 60, WorldW - 60);
-            _walkT += dt;
+            Audio.Play(Sfx.DoorKnock);
+            _knockT = Balance.KnockInterval;
         }
-        _camX = MathHelper.Lerp(_camX, MathHelper.Clamp(_playerX - Gfx.W / 2f, 0, WorldW - Gfx.W), 1 - MathF.Exp(-dt * 6));
 
-        // Pets wander around the hearth light
+        // Walking: accelerate toward the input direction, brake when released, turn around faster than a plain start
+        int move = (Input.Down(Keys.D) || Input.Down(Keys.Right) ? 1 : 0) - (Input.Down(Keys.A) || Input.Down(Keys.Left) ? 1 : 0);
+        bool run = Input.Down(Keys.LeftShift) || Input.Down(Keys.RightShift);
+        float top = run ? Balance.PlayerRunSpeed : Balance.PlayerMaxSpeed;
+        float accel = move == 0 ? Balance.PlayerDecel
+            : MathF.Sign(_vel) == -move ? Balance.PlayerTurnAccel : Balance.PlayerAccel;
+        _vel = Ease.MoveToward(_vel, move * top, accel * dt);
+        if (_vel < 0)
+            _vel = MathF.Max(_vel, -WallCap(top, (_playerX - MinX) / (SoftLeft - MinX)));
+        else if (_vel > 0)
+            _vel = MathF.Min(_vel, WallCap(top, (MaxX - _playerX) / (MaxX - SoftRight)));
+        if (move != 0) _facing = move;
+        _faceVis = Ease.Damp(_faceVis, _facing, Balance.FaceDamp, dt);
+        _playerX += _vel * dt;
+        if (_playerX < MinX || _playerX > MaxX)
+        {
+            _playerX = MathHelper.Clamp(_playerX, MinX, MaxX);
+            _vel = 0;
+        }
+        float speed = MathF.Abs(_vel) / Balance.PlayerMaxSpeed;   // 0..1 walking, up to ~1.7 running
+        _walkT += dt * speed;
+        _motion.Update(dt, _vel, _facing);
+        if (MathF.Abs(_vel) > Balance.FootstepMinSpeed) Audio.Loop(Sfx.Footstep, 0.6f);
+        UpdateDust(dt, speed);
+
+        // Camera: look ahead of the motion, and only follow once the focus leaves the deadzone
+        _look = Ease.Damp(_look, MathHelper.Clamp(_vel * Balance.CamLookScale, -Balance.CamLookMax, Balance.CamLookMax), Balance.CamLookK, dt);
+        float focus = _playerX + _look;
+        float off = focus - (_camX + Gfx.W / 2f);
+        float want = off > Balance.CamDeadzone ? focus - Balance.CamDeadzone - Gfx.W / 2f
+            : off < -Balance.CamDeadzone ? focus + Balance.CamDeadzone - Gfx.W / 2f : _camX;
+        _camX = MathHelper.Clamp(Ease.Damp(_camX, want, Balance.CamFollowK, dt), 0, WorldW - Gfx.W);
+
+        // Pets wander around the hearth light, easing between spots
         foreach (var p in _gs.Pets)
         {
             var a = Actor(p);
+            a.Hp.Update(p.Hp, Balance.BarSmoothK, dt);
             if (p.Dead) continue;
-            if (MathF.Abs(a.Target - a.X) < 4)
+            if (a.Moving)
+            {
+                a.T += dt;
+                float u = a.Dur <= 0 ? 1 : MathF.Min(a.T / a.Dur, 1);
+                a.X = MathHelper.Lerp(a.Start, a.Target, Ease.InOutSine(u));
+                // One hop per PetHopLen px actually travelled, so hops slow to a stop with the ease instead of fighting it
+                a.Hop = MathF.Abs(MathF.Sin(MathF.PI * MathF.Abs(a.X - a.Start) / Balance.PetHopLen)) * Balance.PetHopPx * MathF.Sin(MathF.PI * u);
+                if (u >= 1) { a.X = a.Target; a.Moving = false; a.Hop = 0; }
+            }
+            else
             {
                 a.Wait -= dt;
                 if (a.Wait <= 0)
                 {
                     a.Target = HearthX + _rng.Next(-420, 420);
                     a.Wait = 1.5f + (float)_rng.NextDouble() * 3;
+                    if (MathF.Abs(a.Target - a.X) >= 4)
+                    {
+                        a.Start = a.X;
+                        a.T = 0;
+                        a.Dur = MathF.Abs(a.Target - a.X) / Balance.PetWalkSpeed * Balance.PetEaseMul;
+                        a.Facing = Math.Sign(a.Target - a.X);
+                        a.Moving = true;
+                    }
                 }
-            }
-            else
-            {
-                a.Facing = Math.Sign(a.Target - a.X);
-                a.X += a.Facing * 55 * dt;
             }
         }
         foreach (var gone in _actors.Keys.Where(k => !_gs.Pets.Contains(k)).ToList()) _actors.Remove(gone);
@@ -125,17 +213,71 @@ public class BaseScene : Scene
             .Select(t => t.s)
             .FirstOrDefault();
 
+        // Prompt fade-in restarts whenever the nearest spot changes (pets move, so compare identity, not X)
+        var key = (_near?.Kind ?? Kind.Pet, _near?.Pet);
+        if (_near == null || key != _promptKey) _promptT = 0;
+        _promptKey = key;
+        _promptT += dt;
+
+        if (_gs.PlayerExp < _expShown.Value) _expShown.Snap(_gs.PlayerExp);   // level-up wrapped the bar
+        _expShown.Update(_gs.PlayerExp, Balance.BarSmoothK, dt);
+
+        if (Input.Pressed(Keys.F3)) _debug = !_debug;
         if (Input.Pressed(Keys.Space) && _near != null) Interact(_near);
         if (Input.Back)
-            M.Push(new ChoiceScene("Paused", new[]
-            {
-                new Option("Resume", () => { }),
-                new Option("Main Menu", () => M.Reset(new MainMenuScene())),
-            }, cancellable: true));
+        {
+            _vel = 0;
+            OpenPause();
+        }
+    }
+
+    void OpenPause() =>
+        M.Push(new ChoiceScene("Paused", new[]
+        {
+            new Option("Resume", () => { }),
+            new Option("Options", () => M.Push(new OptionsScene(OpenPause))),
+            new Option("Main Menu", () => M.Reset(new MainMenuScene())),
+        }, cancellable: true, pause: true));
+
+    static float WallCap(float top, float dist) => top * (0.5f + 0.5f * Ease.Smoothstep(dist));
+
+    void UpdateDust(float dt, float speed)
+    {
+        for (int i = 0; i < _dust.Length; i++)
+        {
+            if (_dust[i].Age >= Balance.DustLife) continue;
+            _dust[i].Age += dt;
+            _dust[i].Pos += _dust[i].Vel * dt;
+            _dust[i].Vel *= 1 - MathF.Min(1, 4 * dt);
+        }
+        // One puff per foot-down (each half of the walk cycle) once moving fast enough
+        int step = (int)MathF.Floor(_walkT * 12f / MathF.PI);
+        if (step == _lastStep) return;
+        _lastStep = step;
+        if (speed <= Balance.DustMinSpeed) return;
+        int dir = MathF.Sign(_vel) < 0 ? 1 : -1;   // kicked up behind the feet
+        _dust[_dustNext] = new Dust
+        {
+            Pos = new Vector2(_playerX + (step % 2 == 0 ? -6 : 6), GroundY + 4),
+            Vel = new Vector2(dir * (18 + 6 * (step % 3)), -(14 + 4 * (step % 4))),
+        };
+        _dustNext = (_dustNext + 1) % _dust.Length;
+    }
+
+    void DrawDust(SpriteBatch sb)
+    {
+        foreach (var d in _dust)
+        {
+            if (d.Age >= Balance.DustLife) continue;
+            float t = d.Age / Balance.DustLife;
+            Gfx.Circle(sb, new Vector2(Sx(d.Pos.X), d.Pos.Y), 3 + 4 * t, new Color(150, 124, 104) * (0.4f * (1 - t)));
+        }
     }
 
     void Interact(Spot s)
     {
+        _vel = 0;
+        Audio.Play(Sfx.Interact);
         switch (s.Kind)
         {
             case Kind.Bed:
@@ -147,6 +289,9 @@ public class BaseScene : Scene
                         new Option("Sleep", () => M.Push(new NightScene(this))),
                         new Option("Not yet", () => { }),
                     }, cancellable: true));
+                break;
+            case Kind.Box:
+                M.Push(new InventoryScene(_gs));
                 break;
             case Kind.Upgrade:
                 M.Push(new UpgradeScene(_gs));
@@ -167,6 +312,11 @@ public class BaseScene : Scene
             case Kind.Pet:
                 if (s.Pet!.Dead)
                     M.Push(DialogueScene.Say("", null, $"{s.Pet.Name} isn't moving. The Doctor might be able to help."));
+                else if (_gs.Energy <= 0)
+                {
+                    Telemetry.Emit("care_select", "pet", s.Pet.Name, "result", "noenergy", "care", "", "hit", "Miss", "energyAfter", _gs.Energy);
+                    M.Push(DialogueScene.Say("", null, "No energy left. Sleep at the bed to rest."));
+                }
                 else M.Push(new CareSelectScene(_gs, s.Pet));
                 break;
         }
@@ -178,8 +328,10 @@ public class BaseScene : Scene
     {
         float night = MathHelper.Clamp(Night, 0, 1);
         SharedBackdrop.Draw(sb, _camX, night, _time, GroundY);
+        Rain.DrawSky(sb);
 
-        DrawStructure(sb, night);
+        if (Backdrop.HasBaseInterior) SharedBackdrop.DrawBaseInterior(sb, Sx(WallLeft - 20), Sx(WallRight + 20), GroundY - 250, GroundY, BaseArtPhase, night);   // painted wall + floor (bg_base.png), same box as the primitive wall
+        else DrawStructure(sb, night);
 
         // Hearth light
         var hearth = new Vector2(Sx(HearthX), GroundY - 40);
@@ -188,55 +340,98 @@ public class BaseScene : Scene
         Gfx.Glow(sb, hearth, 620 * flicker, 360 * flicker, new Color(255, 150, 70) * (0.28f + 0.2f * night));
         Gfx.Glow(sb, hearth, 180, 140, new Color(255, 190, 110) * 0.55f);
         Gfx.EndAdditive(sb);
-        Gfx.Rect(sb, hearth.X - 50, GroundY - 26, 100, 26, new Color(70, 60, 60));
-        for (int i = 0; i < 3; i++)
-            Gfx.Ellipse(sb, hearth + new Vector2(-18 + i * 18, -4 - MathF.Abs(MathF.Sin(_time * 7 + i)) * 10), 12, 26,
-                Color.Lerp(new Color(255, 120, 40), new Color(255, 220, 120), i % 2));
+        var propTint = Color.Lerp(Color.White, Backdrop.NightTint, night * 0.7f);   // same night shade as the painted wall
+        if (!Art.Prop(sb, "prop_hearth", new Vector2(hearth.X, GroundY + 4), HearthH, Color.Lerp(propTint, Color.White, 0.6f), 0.97f + 0.03f * flicker))
+        {
+            Gfx.Rect(sb, hearth.X - 50, GroundY - 26, 100, 26, new Color(70, 60, 60));
+            for (int i = 0; i < 3; i++)
+                Gfx.Ellipse(sb, hearth + new Vector2(-18 + i * 18, -4 - MathF.Abs(MathF.Sin(_time * 7 + i)) * 10), 12, 26,
+                    Color.Lerp(new Color(255, 120, 40), new Color(255, 220, 120), i % 2));
+        }
 
-        DrawObjects(sb);
+        DrawObjects(sb, propTint);
 
         // Pets
-        var playerHead = new Vector2(Sx(_playerX), GroundY - 90);
+        var playerHead = new Vector2(Sx(_playerX), GroundY - Art.PlayerSpriteHeight + 15);
         foreach (var p in _gs.Pets)
         {
             var a = Actor(p);
-            var feet = new Vector2(Sx(a.X), GroundY + 6);
+            var feet = new Vector2(Sx(a.X), GroundY + 6 - a.Hop);
             bool hl = _near?.Pet == p;
-            Art.Pet(sb, p.Species, p.Color, feet, 0.8f, _time + a.X, playerHead, 1f, p.Dead, hl);
+            Art.Pet(sb, p.Species, p.Color, feet, 0.8f, _time + a.Phase, playerHead, 1f, p.Dead, hl);
             if (hl) Gfx.Text(sb, Gfx.Small, p.Name, new Vector2(feet.X, feet.Y - 132), Palette.Warm, 0.5f);
-            Ui.Bar(sb, new Rectangle((int)feet.X - 30, (int)feet.Y - 86, 60, 8), p.Hp, p.MaxHp, Palette.Hp);
+            Ui.Bar(sb, new Rectangle((int)feet.X - 30, (int)GroundY + 6 - 86, 60, 8), a.Hp.Value, p.MaxHp, Palette.Hp);
         }
 
-        Art.Player(sb, new Vector2(Sx(_playerX), GroundY + 6), _facing, _walkT);
+        DrawDust(sb);
+        var feetP = new Vector2(Sx(_playerX), GroundY + 6);
+        var pose = _motion.Pose;
+        if (Art.PlayerSprite != null)
+            Art.PlayerImage(sb, feetP, pose, _motion.Face);
+        else
+            Art.Player(sb, feetP, _facing, _walkT,
+                lean: pose.Rot * 92f, bob: -pose.Offset.Y, faceScale: _motion.Face,
+                breath: (pose.Scale.Y - 1) * 32f);
 
-        // Ground and foreground parallax (1.3)
-        Gfx.Rect(sb, 0, GroundY, Gfx.W, Gfx.H - GroundY, Gfx.Lerp(new Color(58, 40, 34), new Color(24, 18, 22), night));
-        Gfx.Rect(sb, 0, GroundY, Gfx.W, 4, Gfx.Lerp(new Color(110, 74, 56), new Color(44, 32, 36), night));
-        for (int i = 0; i < 40; i++)
+        // Ground (the painted interior has its own floor), then the sprite foreground (parallax 1.3) in front of everything
+        if (!Backdrop.HasBaseInterior)
         {
-            float x = ((i * 173 - _camX * 1.3f) % 5200 + 5200) % 5200 - 200;
-            if (x < -80 || x > Gfx.W + 80) continue;
-            float size = 0.6f + (i * 37 % 11) / 10f;
-            Gfx.Ellipse(sb, new Vector2(x, Gfx.H - 14), 60 * size, 30 * size, new Color(14, 10, 14) * 0.85f);
+            Gfx.Rect(sb, 0, GroundY, Gfx.W, Gfx.H - GroundY, Gfx.Lerp(new Color(58, 40, 34), new Color(24, 18, 22), night));
+            Gfx.Rect(sb, 0, GroundY, Gfx.W, 4, Gfx.Lerp(new Color(110, 74, 56), new Color(44, 32, 36), night));
         }
+        SharedBackdrop.DrawForeground(sb, _camX, night);
 
         // Darkness beyond the walls
         EdgeDark(sb, Sx(WallLeft), -1);
         EdgeDark(sb, Sx(DoorX + 80), 1);
         Gfx.Rect(sb, 0, 0, Gfx.W, Gfx.H, new Color(10, 6, 24) * (night * 0.35f));
+        Rain.DrawFlash(sb);
 
         // Interaction prompt
         if (_near != null && M.Top == this)
         {
-            var pos = new Vector2(Sx(_near.X), GroundY - (_near.Kind == Kind.Pet ? 150 : 200));
-            string text = $"[Space] {_near.Label}";
+            float fade = Ease.OutCubic(_promptT / Balance.PromptFadeTime);
+            var pos = new Vector2(Sx(_near.X), GroundY - (_near.Kind == Kind.Pet ? 150 : 200) + MathF.Sin(_time * 3.2f) * 4);
+            string text = $"(Space) {_near.Label}";
             var size = Gfx.Small.MeasureString(text);
-            Gfx.Rect(sb, pos.X - size.X / 2 - 10, pos.Y - 4, size.X + 20, size.Y + 8, Color.Black * 0.6f);
-            Gfx.Text(sb, Gfx.Small, text, new Vector2(pos.X, pos.Y), Palette.Warm, 0.5f);
-            if (_near.Pet is { } np) CareSelectScene.PetStats(sb, np, new Rectangle(20, 470, 250, 210));
+            Gfx.Rect(sb, pos.X - size.X / 2 - 10, pos.Y - 4, size.X + 20, size.Y + 8, Color.Black * (0.6f * fade));
+            Gfx.Text(sb, Gfx.Small, text, new Vector2(pos.X, pos.Y), Palette.Warm * fade, 0.5f);
+            if (_near.Pet is { } np) CareSelectScene.PetStats(sb, np, new Rectangle(20, Gfx.H - 20 - CareSelectScene.StatsH, CareSelectScene.StatsW, CareSelectScene.StatsH));
         }
 
         DrawHud(sb);
+        if (_debug) DrawDebug(sb);
+    }
+
+    /// <summary>F3 overlay: player/camera numbers plus world-space markers for walls, spots and interaction range.</summary>
+    void DrawDebug(SpriteBatch sb)
+    {
+        void VLine(float worldX, Color c, float w = 2) => Gfx.Rect(sb, Sx(worldX) - w / 2, 0, w, Gfx.H, c);
+        VLine(WallLeft, Color.Red * 0.6f);
+        VLine(WallRight, Color.Red * 0.6f);
+        VLine(MinX, Color.Yellow * 0.6f, 1);   // where the player's centre actually stops
+        VLine(MaxX, Color.Yellow * 0.6f, 1);
+        VLine(SoftLeft, Color.Orange * 0.6f);
+        VLine(SoftRight, Color.Orange * 0.6f);
+        foreach (var s in Spots())
+        {
+            float r = s.Kind == Kind.Pet ? 80 : 90;   // pets: 60 reach + 20 bonus (see _near)
+            Gfx.Rect(sb, Sx(s.X - r), GroundY + 20, r * 2, 6, (s == _near ? Color.Lime : Color.Cyan) * 0.5f);
+            VLine(s.X, Color.Cyan * 0.5f, 1);
+        }
+        VLine(_playerX, Color.Magenta * 0.8f);
+
+        string[] lines =
+        {
+            $"PlayerX {_playerX:0.0}  vel {_vel:0.0}  face {_facing}",
+            $"CamX {_camX:0.0}  look {_look:0.0}  screenX {Sx(_playerX):0.0}",
+            $"Near {(_near == null ? "-" : _near.Kind + " @ " + _near.X.ToString("0"))}",
+            $"World {WorldW:0}  wall {WallLeft:0}..{WallRight:0}  soft {SoftLeft:0}/{SoftRight:0}",
+        };
+        var box = new Rectangle(10, 10, 560, 20 + lines.Length * 22);
+        Gfx.Rect(sb, box, Color.Black * 0.7f);
+        for (int i = 0; i < lines.Length; i++)
+            Gfx.Text(sb, Gfx.Small, lines[i], new Vector2(box.X + 10, box.Y + 10 + i * 22), Color.White, 0f);
     }
 
     void EdgeDark(SpriteBatch sb, float edgeX, int dir)
@@ -257,18 +452,36 @@ public class BaseScene : Scene
         // Back wall of the sanctuary
         float l = Sx(WallLeft), r = Sx(WallRight);
         var wall = Gfx.Lerp(new Color(86, 58, 52), new Color(40, 28, 32), night);
-        Gfx.Rect(sb, l, GroundY - 230, r - l, 230, wall);
+        float wallTop = GroundY - 230;
+        var panel = Color.Lerp(wall, Color.Black, 0.25f);
+        var frame = Color.Lerp(wall, Color.Black, 0.55f);
+        // Wall in segments so the big windows leave the backdrop visible
+        float cursor = l;
+        for (int i = 0; i < WindowCount; i++)
+        {
+            float wx = Sx(WindowX(i)) - WindowW / 2;
+            Gfx.Rect(sb, cursor, wallTop, wx - cursor, 230, wall);
+            Gfx.Rect(sb, wx, wallTop, WindowW, WindowTop - wallTop, wall);                            // above the glass
+            Gfx.Rect(sb, wx, WindowTop + WindowH, WindowW, GroundY - WindowTop - WindowH, wall);      // below the glass
+            cursor = wx + WindowW;
+        }
+        Gfx.Rect(sb, cursor, wallTop, r - cursor, 230, wall);
         Gfx.Rect(sb, l - 20, GroundY - 250, r - l + 40, 22, Color.Lerp(wall, Color.Black, 0.35f));   // roof beam
         for (float x = WallLeft; x < WallRight; x += 160)
-            Gfx.Rect(sb, Sx(x), GroundY - 230, 8, 230, Color.Lerp(wall, Color.Black, 0.25f));        // wall panels
-        // Round windows onto space
-        for (float x = WallLeft + 400; x < WallRight - 200; x += 700)
+            if (!InWindow(x)) Gfx.Rect(sb, Sx(x), wallTop, 8, 230, panel);                           // wall panels
+        // Big windows onto the outside (kept clear of the door)
+        for (int i = 0; i < WindowCount; i++)
         {
-            var c = new Vector2(Sx(x), GroundY - 150);
-            Gfx.Circle(sb, c, 52, Color.Lerp(wall, Color.Black, 0.4f));
-            Gfx.Circle(sb, c, 44, Gfx.Lerp(new Color(60, 50, 110), new Color(10, 10, 30), night));
-            Gfx.Rect(sb, c.X - 30, c.Y - 18, 3, 3, Color.White * 0.8f);
-            Gfx.Rect(sb, c.X + 12, c.Y + 8, 2, 2, Color.White * 0.6f);
+            float wx = Sx(WindowX(i)) - WindowW / 2;
+            if (wx > Gfx.W || wx + WindowW < 0) continue;
+            Gfx.Rect(sb, wx - 10, WindowTop - 10, WindowW + 20, 10, frame);                          // frame: top, bottom, left, right
+            Gfx.Rect(sb, wx - 10, WindowTop + WindowH, WindowW + 20, 10, frame);
+            Gfx.Rect(sb, wx - 10, WindowTop, 10, WindowH, frame);
+            Gfx.Rect(sb, wx + WindowW, WindowTop, 10, WindowH, frame);
+            Gfx.Rect(sb, wx, WindowTop, WindowW, WindowH, Color.White * (0.06f * (1 - night)));       // faint glass tint
+            Gfx.Rect(sb, wx + WindowW / 2 - 4, WindowTop, 8, WindowH, frame);                         // mullion
+            Gfx.Rect(sb, wx, WindowTop + WindowH / 2 - 4, WindowW, 8, frame);                         // transom
+            Gfx.Rect(sb, wx - 14, WindowTop + WindowH + 10, WindowW + 28, 8, panel);                  // sill
         }
         // Hanging lamps
         for (float x = WallLeft + 250; x < WallRight; x += 520)
@@ -280,62 +493,126 @@ public class BaseScene : Scene
         }
     }
 
-    void DrawObjects(SpriteBatch sb)
+    /// <summary>Drawn heights (px) of the prop_* sprites (Content/Sprites, 512 px on the long side).</summary>
+    const float BedH = 110, HearthH = 130, UpgradeH = 170, BookH = 120, DoorH = 205;   // door panel ≈ 1.3x the 140 px player
+    const float DoctorStationH = 142, DoctorStationDx = 123;   // sign + curtain + bed cut from the same sheet as npc_doctor, kept at its scale/offset
+
+    void DrawObjects(SpriteBatch sb, Color tint)
     {
         float g = GroundY;
         // Bed
         float bx = Sx(BedX);
-        Gfx.Rect(sb, bx - 90, g - 50, 180, 50, new Color(120, 80, 60));
-        Gfx.Rect(sb, bx - 90, g - 70, 180, 26, new Color(200, 170, 150));
-        Gfx.Rect(sb, bx - 90, g - 90, 50, 40, new Color(236, 220, 200));
+        if (!Art.Prop(sb, "prop_bed", new Vector2(bx, g + 4), BedH, tint))
+        {
+            Gfx.Rect(sb, bx - 90, g - 50, 180, 50, new Color(120, 80, 60));
+            Gfx.Rect(sb, bx - 90, g - 70, 180, 26, new Color(200, 170, 150));
+            Gfx.Rect(sb, bx - 90, g - 90, 50, 40, new Color(236, 220, 200));
+        }
+        // Box (items from the merchant); the dot shows there is something inside
+        float kx = Sx(BoxX);
+        Gfx.Rect(sb, kx - 45, g - 60, 90, 60, new Color(130, 92, 60));
+        Gfx.Rect(sb, kx - 45, g - 60, 90, 12, new Color(160, 118, 80));
+        Gfx.Rect(sb, kx - 8, g - 48, 16, 10, new Color(220, 190, 110));
+        if (_gs.Inventory.Values.Any(n => n > 0)) Gfx.Circle(sb, new Vector2(kx + 45, g - 62), 8, Palette.Coin);
         // Upgrade console
         float ux = Sx(UpgradeX);
-        Gfx.Rect(sb, ux - 50, g - 150, 100, 150, new Color(60, 70, 84));
-        Gfx.Rect(sb, ux - 38, g - 136, 76, 50, new Color(40, 200, 170) * (0.6f + 0.2f * MathF.Sin(_time * 2)));
-        Gfx.Text(sb, Gfx.Small, "UPGRADE", new Vector2(ux, g - 70), new Color(160, 240, 220), 0.5f);
-        if (_gs.Points > 0) Gfx.Circle(sb, new Vector2(ux + 50, g - 150), 10, Palette.Coin);
+        if (Art.Prop(sb, "prop_upgrade", new Vector2(ux, g + 4), UpgradeH, tint))
+        {
+            if (_gs.Points > 0) Gfx.Circle(sb, new Vector2(ux + 66, g - UpgradeH + 4), 10, Palette.Coin);   // top-right corner of the notice board
+        }
+        else
+        {
+            Gfx.Rect(sb, ux - 50, g - 150, 100, 150, new Color(60, 70, 84));
+            Gfx.Rect(sb, ux - 38, g - 136, 76, 50, new Color(40, 200, 170) * (0.6f + 0.2f * MathF.Sin(_time * 2)));
+            Gfx.Text(sb, Gfx.Small, "UPGRADE", new Vector2(ux, g - 70), new Color(160, 240, 220), 0.5f);
+            if (_gs.Points > 0) Gfx.Circle(sb, new Vector2(ux + 50, g - 150), 10, Palette.Coin);
+        }
         // Doctor
+        if (!Art.Prop(sb, "prop_doctor", new Vector2(Sx(DoctorX) + DoctorStationDx, g + 6), DoctorStationH, tint))
+            Gfx.Rect(sb, Sx(DoctorX) + 40, g - 60, 80, 60, new Color(200, 200, 210));
         Art.Doctor(sb, new Vector2(Sx(DoctorX), g + 6), _time);
-        Gfx.Rect(sb, Sx(DoctorX) + 40, g - 60, 80, 60, new Color(200, 200, 210));
         if (_gs.Pets.Any(p => p.Dead)) Gfx.Text(sb, Gfx.Font, "+", new Vector2(Sx(DoctorX), g - 170), Palette.Danger, 0.5f);
         // Notebook desk
         float nx = Sx(BookX);
-        Gfx.Rect(sb, nx - 60, g - 70, 120, 12, new Color(110, 76, 56));
-        Gfx.Rect(sb, nx - 52, g - 58, 10, 58, new Color(90, 62, 46));
-        Gfx.Rect(sb, nx + 42, g - 58, 10, 58, new Color(90, 62, 46));
-        Gfx.Rect(sb, nx - 30, g - 84, 60, 14, new Color(180, 60, 60));
-        Gfx.Rect(sb, nx - 26, g - 82, 52, 3, new Color(240, 230, 210));
+        if (!Art.Prop(sb, "prop_notebook", new Vector2(nx, g + 4), BookH, tint))
+        {
+            Gfx.Rect(sb, nx - 60, g - 70, 120, 12, new Color(110, 76, 56));
+            Gfx.Rect(sb, nx - 52, g - 58, 10, 58, new Color(90, 62, 46));
+            Gfx.Rect(sb, nx + 42, g - 58, 10, 58, new Color(90, 62, 46));
+            Gfx.Rect(sb, nx - 30, g - 84, 60, 14, new Color(180, 60, 60));
+            Gfx.Rect(sb, nx - 26, g - 82, 52, 3, new Color(240, 230, 210));
+        }
         // The red door
         float dx = Sx(DoorX);
-        Gfx.Rect(sb, dx - 90, g - 300, 180, 300, new Color(40, 30, 34));
-        Gfx.Rect(sb, dx - 72, g - 282, 144, 282, new Color(170, 30, 38));
-        Gfx.Rect(sb, dx - 4, g - 282, 8, 282, new Color(110, 18, 24));
-        Gfx.Circle(sb, new Vector2(dx + 50, g - 140), 7, Palette.Coin);
+        float doorH = DoorH;
+        if (!Art.Prop(sb, "prop_door", new Vector2(dx, g + 4), DoorH, tint))
+        {
+            doorH = 300;
+            Gfx.Rect(sb, dx - 90, g - 300, 180, 300, new Color(40, 30, 34));
+            Gfx.Rect(sb, dx - 72, g - 282, 144, 282, new Color(170, 30, 38));
+            Gfx.Rect(sb, dx - 4, g - 282, 8, 282, new Color(110, 18, 24));
+            Gfx.Circle(sb, new Vector2(dx + 50, g - 140), 7, Palette.Coin);
+        }
         if (_gs.DoorEventPending)
         {
             float pulse = 0.5f + 0.5f * MathF.Sin(_time * 8);
             Gfx.BeginAdditive(sb);
-            Gfx.Glow(sb, new Vector2(dx, g - 150), 220, 260, Palette.Danger * (0.3f + 0.3f * pulse));
+            Gfx.Glow(sb, new Vector2(dx, g - doorH / 2), 220, doorH * 0.87f, Palette.Danger * (0.3f + 0.3f * pulse));
             Gfx.EndAdditive(sb);
             float shake = MathF.Sin(_time * 40) * 3 * pulse;
-            Gfx.Text(sb, Gfx.Font, "Knock Knock !!", new Vector2(dx + shake, g - 360), Palette.Danger, 0.5f);
+            if (Ui.Knock is { } knock)
+                sb.Draw(knock, new Vector2(dx + shake, g - doorH - 50), null, Color.White, 0, new Vector2(knock.Width, knock.Height) / 2, 1f, SpriteEffects.None, 0);
+            else Gfx.Text(sb, Gfx.Font, "Knock Knock !!", new Vector2(dx + shake, g - doorH - 60), Palette.Danger, 0.5f);
         }
     }
 
     void DrawHud(SpriteBatch sb)
     {
-        var r = new Rectangle(16, 14, 560, 64);
+        if (Ui.PlayerInfo != null) DrawHudArt(sb, Ui.PlayerInfo);
+        else DrawHudPanel(sb);
+        if (_near == null && M.Top == this) Ui.Hint(sb, "A / D  Walk     SHIFT  Run     SPACE  Interact     ESC  Pause");
+    }
+
+    /// <summary>Player status bar art (ui_player_info.png); slot boxes are in the art's own pixels, scaled by <see cref="Ui.PlayerInfoScale"/>.</summary>
+    void DrawHudArt(SpriteBatch sb, Texture2D art)
+    {
+        const float s = Ui.PlayerInfoScale;
+        var o = new Vector2(32, 26);   // Figma mockup (48, 39) at the same 2/3
+        Rectangle R(int x, int y, int w, int h) => new((int)(o.X + x * s), (int)(o.Y + y * s), (int)(w * s), (int)(h * s));
+        void Centered(SpriteFont font, string text, Rectangle slot, Color c)
+        {
+            if (font.MeasureString(text).X > slot.Width - 4) font = Gfx.Small;   // small slots: drop to the small size
+            Gfx.Text(sb, font, Gfx.Fit(font, text, slot.Width - 4), new Vector2(slot.Center.X, slot.Center.Y - font.LineSpacing / 2f), c, 0.5f, false);
+        }
+
+        sb.Draw(art, new Rectangle((int)o.X, (int)o.Y, (int)(art.Width * s), (int)(art.Height * s)), Color.White);
+        Centered(Gfx.Font, $"Day {_gs.Day}", R(45, 42, 159, 81), Ui.Ink);
+        Centered(Gfx.Font, $"{_gs.Coin}", R(318, 42, 126, 81), Ui.Ink);
+        Centered(Gfx.Small, "Energy", R(45, 138, 159, 45), Ui.Ink);
+        for (int i = 0; i < _gs.MaxEnergy; i++)
+        {
+            var pip = i < _gs.Energy ? Ui.EnergyFull : Ui.EnergyEmpty;
+            if (pip != null) sb.Draw(pip, R(212 + i * 63, 131, 64, 64), Color.White);
+        }
+        Centered(Gfx.Font, $"Player LV. {_gs.PlayerLevel}", R(612, 42, 399, 81), Ui.Ink);
+        var bar = R(621, 141, 444, 36);
+        float t = _gs.PlayerMaxExp <= 0 ? 0 : MathHelper.Clamp(_expShown.Value / _gs.PlayerMaxExp, 0, 1);
+        Gfx.Rect(sb, bar.X, bar.Y, bar.Width * t, bar.Height, Palette.Progress);
+        Centered(Gfx.Font, $"Points {_gs.Points}", R(1155, 75, 327, 81), _gs.Points > 0 ? Ui.Ink : Ui.InkDim);
+    }
+
+    void DrawHudPanel(SpriteBatch sb)
+    {
+        var r = new Rectangle(16, 14, 488, 74);
         Ui.Panel(sb, r, 0.85f);
         Gfx.Text(sb, Gfx.Font, $"Day {_gs.Day}", new Vector2(r.X + 16, r.Y + 8), Palette.Warm);
-        Gfx.Circle(sb, new Vector2(r.X + 118, r.Y + 22), 9, Palette.Coin);
-        Gfx.Text(sb, Gfx.Font, $"{_gs.Coin}", new Vector2(r.X + 134, r.Y + 8), Palette.Coin);
-        Gfx.Text(sb, Gfx.Small, "Energy", new Vector2(r.X + 16, r.Y + 38), Palette.Dim);
+        Gfx.Circle(sb, new Vector2(r.X + 100, r.Y + 26), 7, Palette.Coin);
+        Gfx.Text(sb, Gfx.Font, $"{_gs.Coin}", new Vector2(r.X + 116, r.Y + 8), Palette.Coin);
+        Gfx.Text(sb, Gfx.Small, "Energy", new Vector2(r.X + 22, r.Y + 41), Palette.Dim);
         for (int i = 0; i < _gs.MaxEnergy; i++)
-            Gfx.Rect(sb, r.X + 96 + i * 20, r.Y + 41, 14, 14, i < _gs.Energy ? new Color(120, 240, 140) : new Color(50, 60, 50));
-        Gfx.Text(sb, Gfx.Font, $"Player LV. {_gs.PlayerLevel}", new Vector2(r.X + 240, r.Y + 8), Palette.Text);
-        Ui.Bar(sb, new Rectangle(r.X + 240, r.Y + 40, 180, 14), _gs.PlayerExp, _gs.PlayerMaxExp, Palette.Progress);
-        Gfx.Text(sb, Gfx.Small, $"Points {_gs.Points}", new Vector2(r.X + 432, r.Y + 36), Palette.Dim);
-
-        if (_near == null && M.Top == this) Ui.Hint(sb, "A / D  Walk     SPACE  Interact     ESC  Pause");
+            Gfx.Rect(sb, r.X + 88 + i * 20, r.Y + 46, 14, 14, i < _gs.Energy ? new Color(120, 240, 140) : new Color(50, 60, 50));
+        Gfx.Text(sb, Gfx.Font, $"Player LV. {_gs.PlayerLevel}", new Vector2(r.X + 228, r.Y + 8), Palette.Text);
+        Ui.Bar(sb, new Rectangle(r.X + 228, r.Y + 40, 150, 14), _expShown.Value, _gs.PlayerMaxExp, Palette.Progress);
+        Gfx.Text(sb, Gfx.Font, $"Points {_gs.Points}", new Vector2(r.X + 392, r.Y + 24), _gs.Points > 0 ? Palette.Coin : Palette.Dim);
     }
 }

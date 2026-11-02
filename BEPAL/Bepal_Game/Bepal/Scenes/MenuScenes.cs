@@ -2,20 +2,25 @@ using System;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 namespace Bepal;
 
 /// <summary>Figma Scene 1.</summary>
 public class MainMenuScene : Scene
 {
-    readonly Button _play = new(new Rectangle(Gfx.W / 2 - 120, 380, 240, 56), "Play");
-    readonly Button _quit = new(new Rectangle(Gfx.W / 2 - 120, 450, 240, 56), "Quit");
+    readonly Button _play = Ui.Skin(new Button(new Rectangle(Gfx.W / 2 - 120, 380, 240, 56), "Play"), Ui.MenuButton);
+    readonly Button _options = Ui.Skin(new Button(new Rectangle(Gfx.W / 2 - 120, 450, 240, 56), "Options"), Ui.MenuButton);
+    readonly Button _quit = Ui.Skin(new Button(new Rectangle(Gfx.W / 2 - 120, 520, 240, 56), "Quit"), Ui.MenuButton);
     float _time;
+
+    public override string? Music => Bgm.Menu;
 
     public override void Update(float dt)
     {
         _time += dt;
         if (_play.Update() || Input.Confirm) M.Reset(new ChooseStarterScene());
+        else if (_options.Update()) M.Push(new OptionsScene());
         else if (_quit.Update()) Game1.Instance.Exit();
     }
 
@@ -24,14 +29,15 @@ public class MainMenuScene : Scene
         BaseScene.SharedBackdrop.Draw(sb, _time * 25, 0.55f, _time);
         Gfx.Rect(sb, 0, 600, Gfx.W, 120, new Color(30, 22, 26));
         Gfx.Glow(sb, new Vector2(Gfx.W / 2f, 230), 420, 150, Color.Black * 0.5f);
-        Gfx.Text(sb, Gfx.Big, "BePal", new Vector2(Gfx.W / 2f, 170), Palette.Warm, 0.5f);
-        Gfx.Text(sb, Gfx.Font, "a sanctuary at the edge of the universe", new Vector2(Gfx.W / 2f, 240), Palette.Text * 0.8f, 0.5f);
+        Gfx.Text(sb, Gfx.Title, "BePal", new Vector2(Gfx.W / 2f, 140), Palette.Warm, 0.5f);
+        Gfx.Text(sb, Gfx.Font, "a sanctuary at the edge of the universe", new Vector2(Gfx.W / 2f, 262), Palette.Text * 0.8f, 0.5f);
         Art.Pet(sb, Species.Blinkbun, Pet.Create(Species.Blinkbun).Color, new Vector2(200, 640), 1f, _time, new Vector2(640, 300));
         Art.Pet(sb, Species.Mossling, Pet.Create(Species.Mossling).Color, new Vector2(1080, 640), 1f, _time + 1, new Vector2(640, 300));
         _play.Draw(sb);
+        _options.Draw(sb);
         _quit.Draw(sb);
         if (MathF.Sin(_time * 4) > -0.3f)
-            Gfx.Text(sb, Gfx.Font, "[ Space ] to Enter", new Vector2(Gfx.W / 2f, 612), Palette.Text, 0.5f);
+            Gfx.Text(sb, Gfx.Font, "Press Space to Enter", new Vector2(Gfx.W / 2f, 612), Palette.Text, 0.5f);
         Gfx.Text(sb, Gfx.Small, "A / D  Walk      SPACE  Interact / QTE      Mouse  UI", new Vector2(Gfx.W / 2f, 670), Palette.Dim, 0.5f);
     }
 }
@@ -41,6 +47,8 @@ public class ChooseStarterScene : Scene
 {
     float _time;
     bool _picked;
+
+    public override string? Music => Bgm.Menu;
 
     public override void Enter()
     {
@@ -52,6 +60,7 @@ public class ChooseStarterScene : Scene
     {
         _picked = true;
         var gs = new GameState(pet.Species);
+        Telemetry.RunStart(gs, pet.Species);
         var baseScene = new BaseScene(gs);
         M.Reset(baseScene, DialogueScene.Say("", null,
             "At the edge of the universe, on a planet no one visits, there is a sanctuary. You are its only keeper.",
@@ -75,7 +84,11 @@ public class GameOverScene : Scene
     readonly string _reason;
     float _time;
 
-    public GameOverScene(string reason) => _reason = reason;
+    public GameOverScene(string reason)
+    {
+        _reason = reason;
+        Telemetry.End("game_over", reason);
+    }
 
     public override void Update(float dt)
     {
@@ -92,13 +105,19 @@ public class GameOverScene : Scene
     }
 }
 
-/// <summary>End of the vertical slice (Day 5, after Big Z).</summary>
+/// <summary>End of the demo (Day 5, after Big Z): the boss cannot be beaten yet, the story continues in the full game.</summary>
 public class ToBeContinuedScene : Scene
 {
     readonly int _days;
     float _time;
 
-    public ToBeContinuedScene(int days) => _days = days;
+    public override string? Music => Bgm.End;
+
+    public ToBeContinuedScene(int days)
+    {
+        _days = days;
+        Telemetry.End("to_be_continued");
+    }
 
     public override void Update(float dt)
     {
@@ -110,10 +129,12 @@ public class ToBeContinuedScene : Scene
     {
         Gfx.Rect(sb, 0, 0, Gfx.W, Gfx.H, Color.Black);
         float a = MathHelper.Clamp(_time / 1.5f, 0, 1);
-        Gfx.Text(sb, Gfx.Font, "The sanctuary fell silent.", new Vector2(Gfx.W / 2f, 230), Palette.Text * a, 0.5f);
-        Gfx.Text(sb, Gfx.Big, "To be continued...", new Vector2(Gfx.W / 2f, 290), Palette.Warm * a, 0.5f);
-        Gfx.Text(sb, Gfx.Small, $"You kept the sanctuary alive for {_days} days.", new Vector2(Gfx.W / 2f, 380), Palette.Dim * a, 0.5f);
-        if (_time > 2f) Gfx.Text(sb, Gfx.Small, "Space  Main Menu", new Vector2(Gfx.W / 2f, 470), Palette.Dim, 0.5f);
+        Gfx.Text(sb, Gfx.Font, "The sanctuary fell silent.", new Vector2(Gfx.W / 2f, 190), Palette.Text * a, 0.5f);
+        Gfx.Text(sb, Gfx.Big, "End of the BePal demo", new Vector2(Gfx.W / 2f, 250), Palette.Warm * a, 0.5f);
+        Gfx.Text(sb, Gfx.Font, "Big Z can't be beaten yet - the story continues in the full game.", new Vector2(Gfx.W / 2f, 330), Palette.Text * a, 0.5f);
+        Gfx.Text(sb, Gfx.Small, $"You kept the sanctuary alive for {_days} days.", new Vector2(Gfx.W / 2f, 395), Palette.Dim * a, 0.5f);
+        Gfx.Text(sb, Gfx.Font, "Thanks for playing!", new Vector2(Gfx.W / 2f, 450), Palette.Warm * a, 0.5f);
+        if (_time > 2f) Gfx.Text(sb, Gfx.Small, "Space  Main Menu", new Vector2(Gfx.W / 2f, 520), Palette.Dim, 0.5f);
     }
 }
 
@@ -126,8 +147,13 @@ public class NightScene : Scene
     System.Collections.Generic.List<string> _report = new();
 
     public override bool Overlay => true;
+    public override bool OpenAnim => false;   // drives its own fade
 
-    public NightScene(BaseScene b) => _base = b;
+    public NightScene(BaseScene b)
+    {
+        _base = b;
+        Audio.Play(Sfx.EndDay);
+    }
 
     public override void Update(float dt)
     {
@@ -136,6 +162,7 @@ public class NightScene : Scene
         else if (!_advanced)
         {
             _advanced = true;
+            Telemetry.DayEnd(_base.State);
             _report = _base.State.AdvanceDay();
         }
         else if (_t > 3.0f && _t < 4.5f) _base.Night = 1 - (_t - 3f) / 1.5f;
@@ -157,5 +184,72 @@ public class NightScene : Scene
         if (_t > 0.8f && _t < 3.6f)
             Gfx.Text(sb, Gfx.Big, _advanced ? $"Day {_base.State.Day}" : $"Day {_base.State.Day} is over...",
                 new Vector2(Gfx.W / 2f, 280), Palette.Text * MathHelper.Clamp(a * 1.5f, 0, 1), 0.5f);
+    }
+}
+
+/// <summary>Options (from the main menu and the pause menu): music and sound-effect volume, saved when closed.</summary>
+public class OptionsScene : Scene
+{
+    readonly Slider[] _sliders;
+    readonly Button _back = Ui.Skin(new Button(new Rectangle(Gfx.W / 2 - 100, 150 + 400 - Ui.Pad - 50, 200, 50), "Back"), Ui.OptionsButton);
+    readonly Action? _onClose;
+    int _sel;
+
+    public override bool Overlay => true;
+
+    public OptionsScene(Action? onClose = null)
+    {
+        _onClose = onClose;
+        _sliders = new[]
+        {
+            new Slider(new Rectangle(520, 270, 360, 12), Settings.Music),
+            new Slider(new Rectangle(520, 350, 360, 12), Settings.Sfx),
+        };
+    }
+
+    void Close()
+    {
+        Settings.Music = _sliders[0].Value;
+        Settings.Sfx = _sliders[1].Value;
+        Settings.Save();
+        M.Remove(this);
+        _onClose?.Invoke();
+    }
+
+    public override void Update(float dt)
+    {
+        if (Input.Pressed(Keys.Up) || Input.Pressed(Keys.W)) _sel = 0;
+        if (Input.Pressed(Keys.Down) || Input.Pressed(Keys.S)) _sel = 1;
+        float nudge = (Input.Pressed(Keys.Right) || Input.Pressed(Keys.D) ? 1 : 0) - (Input.Pressed(Keys.Left) || Input.Pressed(Keys.A) ? 1 : 0);
+        if (nudge != 0) _sliders[_sel].Nudge(nudge * Balance.OptionsStep);
+
+        for (int i = 0; i < _sliders.Length; i++)
+        {
+            _sliders[i].Update();
+            if (_sliders[i].Changed || _sliders[i].Released) _sel = i;
+        }
+        // Apply live so the music reacts while dragging; the SFX slider plays a click on release so you can hear the level
+        Settings.Music = _sliders[0].Value;
+        Settings.Sfx = _sliders[1].Value;
+        if (_sliders[1].Released) Audio.Play(Sfx.UiCoin);
+        if (_back.Update() || Input.Back || Input.Confirm) Close();
+    }
+
+    public override void Draw(SpriteBatch sb)
+    {
+        Ui.Dim(sb, 0.7f);
+        var panel = new Rectangle(Gfx.W / 2 - 360, 150, 720, 400);
+        bool art = Ui.Skin(sb, Ui.Options, panel);
+        Gfx.Text(sb, Gfx.Big, "Options", new Vector2(Gfx.W / 2f, panel.Y + Ui.Pad), art ? Ui.Ink : Palette.Warm, 0.5f, !art);
+        string[] names = { "Music", "Sound effects" };
+        for (int i = 0; i < _sliders.Length; i++)
+        {
+            var s = _sliders[i];
+            Gfx.Text(sb, Gfx.Font, names[i], new Vector2(panel.X + 50, s.Rect.Center.Y - Gfx.Font.LineSpacing / 2f), art ? (i == _sel ? Ui.Ink : Ui.InkDim) : i == _sel ? Palette.Text : Palette.Dim, 0, !art);
+            s.Draw(sb, i == _sel);
+            Gfx.Text(sb, Gfx.Font, $"{(int)MathF.Round(s.Value * 100)}%", new Vector2(panel.Right - 50, s.Rect.Center.Y - Gfx.Font.LineSpacing / 2f), art ? Ui.Ink : Palette.Coin, 1f, !art);
+        }
+        _back.Draw(sb);
+        Ui.Hint(sb, "Drag or click a slider   |   W/S  Select   A/D  Adjust   |   ESC  Back");
     }
 }

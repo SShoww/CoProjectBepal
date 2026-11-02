@@ -1,5 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Extended;
+using MonoGame.Extended.ViewportAdapters;
 
 namespace Bepal
 {
@@ -12,6 +14,7 @@ namespace Bepal
         private readonly SceneManager _scenes = new();
         private ShotRunner? _shots;
         private AutoPlay? _bot;
+        private bool _dev;   // F2 scene jumper: Debug builds, or --dev / --scene on a Release build
 
         public Game1()
         {
@@ -20,6 +23,8 @@ namespace Bepal
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
             Window.Title = "BePal";
+            Window.AllowUserResizing = true;
+            InactiveSleepTime = System.TimeSpan.Zero;   // keep full frame rate behind other windows (default 20 ms sleep stutters)
         }
 
         protected override void Initialize()
@@ -30,17 +35,90 @@ namespace Bepal
             base.Initialize();
         }
 
+        /// <summary>Borderless window the size of the desktop (not true full screen, so Alt+Tab doesn't minimize).
+        /// The game stays at W x H: <see cref="Gfx.Viewport"/> scales it up with black bars.
+        /// 1 px taller than the screen so Windows doesn't treat it as exclusive full screen
+        /// (that switch on Alt+Tab is what causes the hitch and the colour shift).</summary>
+        void SetFullScreen(bool on)
+        {
+            var mode = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode;
+            Window.IsBorderless = on;
+            _graphics.PreferredBackBufferWidth = on ? mode.Width : Gfx.W;
+            _graphics.PreferredBackBufferHeight = on ? mode.Height + 1 : Gfx.H;
+            _graphics.ApplyChanges();
+            Window.Position = on ? Point.Zero : new Point((mode.Width - Gfx.W) / 2, (mode.Height - Gfx.H) / 2);
+            Settings.Fullscreen = on;
+        }
+
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             Gfx.Init(GraphicsDevice, Content);
-            _scenes.ResetNow(new MainMenuScene());
 
             var args = System.Environment.GetCommandLineArgs();
-            int i = System.Array.IndexOf(args, "--shots");
-            if (i >= 0 && i + 1 < args.Length) _shots = new ShotRunner(args[i + 1]);
-            if (System.Array.IndexOf(args, "--autoplay") >= 0)
-                _bot = new AutoPlay(_scenes, refuseMerchant: System.Array.IndexOf(args, "--refuse") >= 0);
+            string? Arg(string name)
+            {
+                int k = System.Array.IndexOf(args, name);
+                return k >= 0 && k + 1 < args.Length ? args[k + 1] : null;
+            }
+            bool Has(string name) => System.Array.IndexOf(args, name) >= 0;
+
+            string? botArg = Arg("--bot");
+            bool auto = Has("--autoplay") || botArg != null;
+            Audio.Muted = auto || Has("--shots");
+            Settings.Persist = !Audio.Muted;   // bots/shots must not read or overwrite the player's options
+            Settings.Load();
+            Audio.Load(Content);
+            MusicPlayer.Load(Content);
+            if (int.TryParse(Arg("--seed"), out int seed)) RunSeed.Set(seed);
+            _scenes.ResetNow(new MainMenuScene());
+
+            string? sceneArg = Arg("--scene");
+#if DEBUG
+            _dev = true;
+#endif
+            _dev |= Has("--dev") || sceneArg != null;
+            if (sceneArg != null)
+            {
+                var entry = SceneCatalog.Find(sceneArg);
+                if (entry != null) SceneCatalog.Apply(_scenes, entry);
+                else System.Console.WriteLine($"--scene '{sceneArg}': no unique match. Available:\n  "
+                    + string.Join("\n  ", System.Linq.Enumerable.Select(SceneCatalog.All, e => e.Name)));
+            }
+
+            string? shotsDir = Arg("--shots");
+            if (shotsDir != null) _shots = new ShotRunner(shotsDir);
+            if (auto)
+                _bot = new AutoPlay(_scenes, refuseMerchant: Has("--refuse"), profile: botArg ?? "perfect", seed: RunSeed.Seed);
+            string? telDir = Arg("--telemetry");
+            string player = Arg("--player") ?? "";
+            // Tester build: a telemetry.txt next to the exe turns telemetry on for a plain double-click
+            // (first line that is not blank or "#..." = player name; files go to <exe dir>/data).
+            string telFile = System.IO.Path.Combine(System.AppContext.BaseDirectory, "telemetry.txt");
+            if (telDir == null && _shots == null && sceneArg == null && System.IO.File.Exists(telFile))
+            {
+                telDir = System.IO.Path.Combine(System.AppContext.BaseDirectory, "data");
+                if (player == "")
+                    player = System.Linq.Enumerable.FirstOrDefault(System.IO.File.ReadLines(telFile), l => l.Trim() != "" && !l.Trim().StartsWith('#'))?.Trim() ?? "";
+            }
+            if (telDir != null && _shots == null && sceneArg == null)
+            {
+                Telemetry.Configure(telDir, _bot?.Profile ?? "human", auto ? "autoplay" : "play", Has("--refuse"), player);
+                Telemetry.SceneProbe = () => _scenes.Top?.GetType().Name ?? "";
+            }
+
+            if (_shots == null && _bot == null)
+            {
+                Gfx.Viewport = new BoxingViewportAdapter(Window, GraphicsDevice, Gfx.W, Gfx.H);
+                if (Settings.Fullscreen) SetFullScreen(true);
+            }
+        }
+
+        protected override void OnExiting(object sender, ExitingEventArgs args)
+        {
+            Telemetry.End(_bot is { Failed: true } ? "timeout" : "quit");
+            Telemetry.Flush();
+            base.OnExiting(sender, args);
         }
 
         protected override void Update(GameTime gameTime)
@@ -57,11 +135,14 @@ namespace Bepal
                 {
                     _bot.Step();
                     Gfx.UpdateShake(1 / 60f);
+                    Telemetry.Tick(1 / 60f);
                     _scenes.Update(1 / 60f);
                 }
                 if (_bot.Finished)
                 {
-                    var log = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "bepal_autoplay.log");
+                    if (_bot.Failed) Telemetry.End("timeout");
+                    string suffix = _bot.CustomRun ? $"_{_bot.Profile}_{RunSeed.Seed}" : "";
+                    var log = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"bepal_autoplay{suffix}.log");
                     System.IO.File.WriteAllLines(log, _bot.Log);
                     System.Console.WriteLine(log);
                     Exit();
@@ -70,14 +151,26 @@ namespace Bepal
             }
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
             Input.Update();
+            if (Gfx.Viewport != null && Input.ToggleFullScreen)
+            {
+                SetFullScreen(!Window.IsBorderless);
+                Settings.Save();
+                Input.Consume();   // Alt+Enter must not also confirm in the scene
+            }
+            if (_dev && Input.Pressed(Microsoft.Xna.Framework.Input.Keys.F2) && _scenes.Top is not SceneJumpScene)
+                _scenes.Push(new SceneJumpScene());
             Gfx.UpdateShake(dt);
+            Telemetry.Tick(dt);
             _scenes.Update(dt);
+            Audio.EndFrame(dt);
+            MusicPlayer.Update(dt, _scenes.WantedMusic);
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Black);
+            Gfx.Viewport?.Reset();   // boxed viewport (ApplyChanges resets it to the whole back buffer)
             Gfx.Begin(_spriteBatch);
             _scenes.Draw(_spriteBatch);
             _spriteBatch.End();

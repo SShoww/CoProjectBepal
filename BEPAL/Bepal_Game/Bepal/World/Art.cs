@@ -1,5 +1,6 @@
 using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace Bepal;
@@ -13,9 +14,100 @@ public static class Art
         Gfx.Circle(sb, c + look * r * 0.45f, r * 0.55f, new Color(14, 10, 16) * alpha);
     }
 
+    // ---- Optional real sprites: Content/Sprites/<name>.png registered in Content.mgcb; a missing file means "draw the primitive" ----
+    // Names: pet_<species lowercase>, enemy_toothless, enemy_bigz, npc_merchant, npc_doctor, prop_* (base furniture, see Prop). See BEPAL/Assets/_candidates/README.md.
+    record Sprite(Texture2D Tex, Rectangle Src, Texture2D? Silhouette = null);
+    static readonly System.Collections.Generic.Dictionary<string, Sprite> Sprites = new();
+
+    /// <summary>Highlight ring drawn around a pet sprite when the player is near it or hovers its pick card.</summary>
+    static readonly Color OutlineColor = new(0x60, 0xDF, 0xFF);   // #60DFFF
+
+    /// <summary>Drawn height (px) of each sprite at scale 1 (match the primitive it replaces); feet = bottom edge of the opaque pixels.</summary>
+    const float PetSpriteHeight = 90, DoctorSpriteHeight = 125, MerchantSpriteHeight = 220, ToothlessEnemyHeight = 150, BigZSpriteHeight = 230;
+
+    public static void LoadOptional(ContentManager content)
+    {
+        var names = new System.Collections.Generic.List<string> { "enemy_toothless", "enemy_bigz", "npc_merchant", "npc_doctor",
+            "prop_bed", "prop_hearth", "prop_notebook", "prop_door", "prop_upgrade", "prop_doctor" };
+        foreach (Species s in Enum.GetValues<Species>()) names.Add("pet_" + s.ToString().ToLowerInvariant());
+        foreach (var n in names)
+        {
+            try
+            {
+                var tex = content.Load<Texture2D>("Sprites/" + n);
+                Sprites[n] = new Sprite(tex, OpaqueBounds(tex), n.StartsWith("pet_") ? Silhouette(tex) : null);
+            }
+            catch (ContentLoadException) { }   // no art yet: keep the primitive
+        }
+    }
+
+    /// <summary>Tight box around the non-transparent pixels, so any padding in the PNG doesn't move the feet.</summary>
+    static Rectangle OpaqueBounds(Texture2D tex)
+    {
+        var px = new Color[tex.Width * tex.Height];
+        tex.GetData(px);
+        int x0 = tex.Width, y0 = tex.Height, x1 = -1, y1 = -1;
+        for (int y = 0; y < tex.Height; y++)
+        for (int x = 0; x < tex.Width; x++)
+            if (px[y * tex.Width + x].A > 8)
+            {
+                x0 = Math.Min(x0, x); x1 = Math.Max(x1, x);
+                y0 = Math.Min(y0, y); y1 = Math.Max(y1, y);
+            }
+        return x1 < 0 ? new Rectangle(0, 0, tex.Width, tex.Height) : new Rectangle(x0, y0, x1 - x0 + 1, y1 - y0 + 1);
+    }
+
+    /// <summary>White copy of <paramref name="tex"/> keeping only its alpha (premultiplied), with box-filtered mipmaps so it downsizes as smoothly as the sprite.
+    /// Tinting it gives a solid-colour silhouette for <see cref="SpriteMotion.Draw"/>'s outline.</summary>
+    static Texture2D Silhouette(Texture2D tex)
+    {
+        int w = tex.Width, h = tex.Height;
+        var px = new Color[w * h];
+        tex.GetData(px);
+        for (int i = 0; i < px.Length; i++) { byte a = px[i].A; px[i] = new Color(a, a, a, a); }
+        var sil = new Texture2D(tex.GraphicsDevice, w, h, true, SurfaceFormat.Color);
+        for (int level = 0; level < sil.LevelCount; level++)
+        {
+            sil.SetData(level, null, px, 0, w * h);
+            int nw = Math.Max(1, w / 2), nh = Math.Max(1, h / 2);
+            var next = new Color[nw * nh];
+            for (int y = 0; y < nh; y++)
+            for (int x = 0; x < nw; x++)
+            {
+                int x0 = Math.Min(x * 2, w - 1), x1 = Math.Min(x * 2 + 1, w - 1), y0 = Math.Min(y * 2, h - 1), y1 = Math.Min(y * 2 + 1, h - 1);
+                int a = (px[y0 * w + x0].A + px[y0 * w + x1].A + px[y1 * w + x0].A + px[y1 * w + x1].A) / 4;
+                next[y * nw + x] = new Color(a, a, a, a);
+            }
+            px = next; w = nw; h = nh;
+        }
+        return sil;
+    }
+
+    /// <summary>Draws the named sprite standing on <paramref name="feet"/> (idle breathing + bob via <see cref="SpriteMotion"/>'s <see cref="Pose"/>). Returns false if there is no such sprite.
+    /// Sprites face right; <paramref name="lookAt"/> mirrors them toward it.</summary>
+    static bool TryDrawSprite(SpriteBatch sb, string name, Vector2 feet, float height, float time, Vector2 lookAt, Color tint, float bobPx, float outlineAlpha = 0)
+    {
+        if (!Sprites.TryGetValue(name, out var spr)) return false;
+        float dx = lookAt.X - feet.X;
+        float breath = MathF.Sin(time * 2f) * Balance.BreathScale;
+        var pose = new Pose { Offset = new Vector2(0, -MathF.Abs(MathF.Sin(time * 3f)) * bobPx), Scale = new Vector2(1 - breath * 0.6f, 1 + breath) };
+        SpriteMotion.Draw(sb, spr.Tex, spr.Src, feet, height, pose, dx < -8 ? -1 : 1, tint, SamplerState.LinearClamp,
+            outlineAlpha > 0 ? spr.Silhouette : null, OutlineColor * outlineAlpha);
+        return true;
+    }
+
+    /// <summary>Draws a still base prop (prop_*) standing on <paramref name="feet"/>, <paramref name="height"/> px tall (x <paramref name="stretchY"/>), in the current batch. Returns false if there is no such sprite.</summary>
+    public static bool Prop(SpriteBatch sb, string name, Vector2 feet, float height, Color tint, float stretchY = 1)
+    {
+        if (!Sprites.TryGetValue(name, out var spr)) return false;
+        float k = height / spr.Src.Height;
+        sb.Draw(spr.Tex, feet, spr.Src, tint, 0, new Vector2(spr.Src.Width / 2f, spr.Src.Height), new Vector2(k, k * stretchY), SpriteEffects.None, 0);
+        return true;
+    }
+
     /// <summary>Draws a pet standing on <paramref name="feet"/>. <paramref name="lookAt"/> is a world/screen point the eyes follow.</summary>
     public static void Pet(SpriteBatch sb, Species s, Color col, Vector2 feet, float scale, float time, Vector2 lookAt,
-        float alpha = 1f, bool dead = false, bool highlight = false)
+        float alpha = 1f, bool dead = false, bool highlight = false, float flash = 0f)
     {
         float bob = dead ? 0 : MathF.Sin(time * 3f) * 3f * scale;
         var body = feet + new Vector2(0, -40 * scale + bob);
@@ -25,7 +117,11 @@ public static class Art
         look = look.LengthSquared() > 1 ? Vector2.Normalize(look) : Vector2.Zero;
 
         Gfx.Ellipse(sb, feet + new Vector2(0, -2), 40 * scale, 8 * scale, Color.Black * 0.3f * alpha);
-        if (highlight) Gfx.Glow(sb, body, 90 * scale, 90 * scale, Palette.Warm * 0.55f);
+
+        var spriteTint = Color.Lerp(dead ? Color.Gray : Color.White, new Color(255, 110, 110), flash) * alpha;
+        float outline = highlight ? (0.8f + 0.2f * MathF.Sin(time * 5f)) * alpha : 0;   // sprites get a soft-pulsing outline
+        if (TryDrawSprite(sb, "pet_" + s.ToString().ToLowerInvariant(), feet, PetSpriteHeight * scale, time, lookAt, spriteTint, dead ? 0 : 3 * scale, outline)) return;
+        if (highlight) Gfx.Glow(sb, body, 90 * scale, 90 * scale, Palette.Warm * 0.55f);   // primitive fallback: glow instead
 
         switch (s)
         {
@@ -78,6 +174,9 @@ public static class Art
     {
         if (e.Name == "Toothless")
         {
+            var tint = Color.Lerp(Color.White, new Color(255, 110, 110), flash);
+            if (TryDrawSprite(sb, "enemy_toothless", feet, ToothlessEnemyHeight, time, lookAt, tint, 4)) return;
+            if (TryDrawSprite(sb, "pet_toothless", feet, ToothlessEnemyHeight, time, lookAt, tint, 4)) return;   // same creature: reuse the pet art
             Pet(sb, Species.Toothless, Color.Lerp(e.Color, Color.White, flash), feet, 1.6f, time, lookAt);
             return;
         }
@@ -87,6 +186,7 @@ public static class Art
         var body = feet + new Vector2(0, -90 * s + MathF.Sin(time * 1.3f) * 4);
         Gfx.Ellipse(sb, feet, 110 * s, 16 * s, Color.Black * 0.4f);
         Gfx.Glow(sb, body, 200 * s, 200 * s, new Color(255, 40, 60) * 0.25f);
+        if (TryDrawSprite(sb, "enemy_bigz", feet, BigZSpriteHeight * s, time, lookAt, Color.Lerp(Color.White, new Color(255, 110, 110), flash), 4)) return;
         Gfx.Ellipse(sb, body, 90 * s, 96 * s, c);
         for (int i = 0; i < 5; i++)
         {
@@ -100,23 +200,52 @@ public static class Art
         Gfx.Ellipse(sb, body + new Vector2(0, 50) * s, 44 * s, 10 * s, Color.Black);
     }
 
-    /// <summary>The Lone Sanctuarist — a quiet humanoid in a hooded cloak.</summary>
-    public static void Player(SpriteBatch sb, Vector2 feet, int facing, float walkT)
+    /// <summary>The player's still image (null = draw the primitive character instead). Origin = bottom centre of <see cref="PlayerSpriteSrc"/>.</summary>
+    public static Texture2D? PlayerSprite;
+    /// <summary>Opaque area inside player.png (found at load, so padding in the file doesn't matter); drawn at <see cref="PlayerSpriteHeight"/> px tall.</summary>
+    public static Rectangle PlayerSpriteSrc { get; private set; } = new(0, 0, 1, 1);
+    public const float PlayerSpriteHeight = 140;
+    /// <summary>Half of the drawn sprite width (px), so a wall can stop the sprite's edge instead of its centre.</summary>
+    public static float PlayerHalfWidth => PlayerSpriteSrc.Width * PlayerSpriteHeight / PlayerSpriteSrc.Height / 2;
+
+    public static void LoadPlayer(ContentManager content)
     {
+        PlayerSprite = content.Load<Texture2D>("Sprites/player");
+        PlayerSpriteSrc = OpaqueBounds(PlayerSprite);
+    }
+
+    public static void PlayerImage(SpriteBatch sb, Vector2 feet, Pose pose, float face)
+    {
+        Gfx.Ellipse(sb, feet + new Vector2(0, -2), 26, 6, Color.Black * 0.35f);
+        SpriteMotion.Draw(sb, PlayerSprite!, PlayerSpriteSrc, feet, PlayerSpriteHeight, pose, face, null, SamplerState.LinearClamp);
+    }
+
+    /// <summary>The Lone Sanctuarist — a quiet humanoid in a hooded cloak.</summary>
+    /// <param name="lean">Horizontal sway (px) of the head relative to the feet; lower parts shift proportionally.</param>
+    /// <param name="bob">Upper body lift (px) while walking; the legs stay planted.</param>
+    /// <param name="faceScale">Smoothed facing in -1..1 (defaults to <paramref name="facing"/>) so the face slides through a turn.</param>
+    /// <param name="breath">Idle breathing, +-px on the cloak height.</param>
+    public static void Player(SpriteBatch sb, Vector2 feet, int facing, float walkT,
+        float lean = 0, float bob = 0, float? faceScale = null, float breath = 0)
+    {
+        float fx = faceScale ?? facing;
         float step = MathF.Sin(walkT * 12f);
+        Vector2 U(float h) => feet + new Vector2(lean * h / 92f, -h - bob);   // point on the upper body at height h
         Gfx.Ellipse(sb, feet + new Vector2(0, -2), 26, 6, Color.Black * 0.35f);
         Gfx.Rect(sb, feet.X - 10 + step * 4, feet.Y - 26, 7, 26, new Color(40, 30, 36));
         Gfx.Rect(sb, feet.X + 3 - step * 4, feet.Y - 26, 7, 26, new Color(40, 30, 36));
-        Gfx.Ellipse(sb, feet + new Vector2(0, -52), 20, 32, new Color(92, 110, 130));          // cloak
-        Gfx.Circle(sb, feet + new Vector2(0, -92), 16, new Color(92, 110, 130));                // hood
-        Gfx.Circle(sb, feet + new Vector2(5 * facing, -90), 10, new Color(20, 18, 26));          // face shadow
-        Gfx.Circle(sb, feet + new Vector2(9 * facing, -92), 2.5f, Palette.Warm);                 // glowing eye
-        Gfx.Rect(sb, feet.X - 14, feet.Y - 60, 28, 5, new Color(214, 150, 88));                  // scarf
+        Gfx.Ellipse(sb, U(52), 20, 32 + breath, new Color(92, 110, 130));                       // cloak
+        Gfx.Circle(sb, U(92 + breath * 0.5f), 16, new Color(92, 110, 130));                     // hood
+        Gfx.Circle(sb, U(90 + breath * 0.5f) + new Vector2(5 * fx, 0), 10, new Color(20, 18, 26));   // face shadow
+        Gfx.Circle(sb, U(92 + breath * 0.5f) + new Vector2(9 * fx, 0), 2.5f, Palette.Warm);           // glowing eye
+        var scarf = U(60);
+        Gfx.Rect(sb, scarf.X - 14, scarf.Y, 28, 5, new Color(214, 150, 88));                    // scarf
     }
 
     public static void Doctor(SpriteBatch sb, Vector2 feet, float time)
     {
         Gfx.Ellipse(sb, feet + new Vector2(0, -2), 26, 6, Color.Black * 0.35f);
+        if (TryDrawSprite(sb, "npc_doctor", feet, DoctorSpriteHeight, time, feet + new Vector2(1, 0), Color.White, 0)) return;
         Gfx.Ellipse(sb, feet + new Vector2(0, -50), 24, 50, new Color(230, 230, 236));
         Gfx.Circle(sb, feet + new Vector2(0, -108), 18, new Color(196, 170, 150));
         Gfx.Rect(sb, feet.X - 14, feet.Y - 116, 28, 6, new Color(230, 230, 236));
@@ -129,6 +258,7 @@ public static class Art
     public static void Merchant(SpriteBatch sb, Vector2 feet, float time)
     {
         Gfx.Ellipse(sb, feet + new Vector2(0, -2), 40, 8, Color.Black * 0.35f);
+        if (TryDrawSprite(sb, "npc_merchant", feet, MerchantSpriteHeight, time, feet + new Vector2(1, 0), Color.White, 0)) return;
         Gfx.Ellipse(sb, feet + new Vector2(0, -80), 40, 80, new Color(34, 28, 40));
         Gfx.Circle(sb, feet + new Vector2(0, -160), 30, new Color(20, 16, 24));                    // shadowed face
         Gfx.Ellipse(sb, feet + new Vector2(0, -170), 64, 10, new Color(24, 20, 28));             // wide hat brim

@@ -12,6 +12,17 @@ public abstract class Scene
     /// <summary>Overlays are drawn on top of the scene below them (which keeps drawing but stops updating).</summary>
     public virtual bool Overlay => false;
 
+    /// <summary>Set to give this scene its own background music (a <see cref="Bgm"/> name).</summary>
+    public string? MusicOverride;
+    /// <summary>BGM wanted while this scene is on the stack: <see cref="Music"/> plays the topmost scene's non-null track; null = keep whatever is underneath.</summary>
+    public virtual string? Music => MusicOverride;
+
+    /// <summary>Seconds since this scene was pushed (only counts while it is on top); drives the open animation.</summary>
+    public float Age;
+
+    /// <summary>Overlays play a short scale/fade-in when drawn; override to opt out.</summary>
+    public virtual bool OpenAnim => Overlay;
+
     public virtual void Enter() { }
     public abstract void Update(float dt);
     public abstract void Draw(SpriteBatch sb);
@@ -27,6 +38,17 @@ public class SceneManager
     int _fadeDir;         // 1 = fading out, -1 = fading in
 
     public Scene? Top => _stack.Count > 0 ? _stack[^1] : null;
+
+    /// <summary>Background music wanted right now: the first non-null <see cref="Scene.Music"/> from the top of the stack.</summary>
+    public string? WantedMusic
+    {
+        get
+        {
+            for (int i = _stack.Count - 1; i >= 0; i--)
+                if (_stack[i].Music is { } m) return m;
+            return null;
+        }
+    }
 
     public void Push(Scene s)
     {
@@ -65,9 +87,12 @@ public class SceneManager
 
     public void Update(float dt)
     {
+        dt = MathF.Min(dt, Balance.MaxDt);
+        Ui.Dt = dt;
+        Rain.Tick(dt);
         if (_fadeDir != 0)
         {
-            _fade += _fadeDir * dt * 2.5f;
+            _fade += _fadeDir * dt * Balance.FadeSpeed;
             if (_fadeDir == 1 && _fade >= 1)
             {
                 _fade = 1;
@@ -85,6 +110,7 @@ public class SceneManager
             }
             if (_fadeDir == 1) return;
         }
+        if (Top != null) Top.Age += dt;
         Top?.Update(dt);
     }
 
@@ -92,7 +118,29 @@ public class SceneManager
     {
         int first = _stack.Count - 1;
         while (first > 0 && _stack[first].Overlay) first--;
-        for (int i = Math.Max(first, 0); i < _stack.Count; i++) _stack[i].Draw(sb);
-        if (_fade > 0) Gfx.Rect(sb, -20, -20, Gfx.W + 40, Gfx.H + 40, Color.Black * _fade);
+        for (int i = Math.Max(first, 0); i < _stack.Count; i++) DrawScene(sb, _stack[i]);
+        if (_fade > 0) Gfx.Rect(sb, -20, -20, Gfx.W + 40, Gfx.H + 40, Color.Black * Ease.InOutSine(_fade));
+    }
+
+    /// <summary>Draw-only open animation: scale 0.94 -> 1 (OutBack) about the screen centre, dim fading in. Update/input are never delayed.</summary>
+    static void DrawScene(SpriteBatch sb, Scene s)
+    {
+        if (!s.OpenAnim || s.Age >= Balance.OverlayOpenTime)
+        {
+            s.Draw(sb);
+            return;
+        }
+        float t = s.Age / Balance.OverlayOpenTime;
+        float k = MathHelper.Lerp(Balance.OverlayOpenScale, 1f, Ease.OutBack(t));
+        var c = new Vector3(Gfx.W / 2f, Gfx.H / 2f, 0);
+        Gfx.ViewExtra = Matrix.CreateTranslation(-c) * Matrix.CreateScale(k, k, 1) * Matrix.CreateTranslation(c);
+        Ui.OpenAlpha = Ease.OutCubic(t);
+        sb.End();
+        Gfx.Begin(sb);
+        s.Draw(sb);
+        Gfx.ViewExtra = Matrix.Identity;
+        Ui.OpenAlpha = 1f;
+        sb.End();
+        Gfx.Begin(sb);
     }
 }

@@ -1,0 +1,69 @@
+
+=== H1. fight_start snapshots (enemy, pet hp/maxHp/atk) ===
+human          Toothless n=20 petHp 102/102 (100% of max) atk 21.2 seaTea 0
+human          Big Z     n=38 petHp 87/98 (88% of max) atk 21.9 seaTea 17
+perfect        Toothless n=40 petHp 120/120 (100% of max) atk 30.0 seaTea 0
+perfect        Big Z     n=40 petHp 90/120 (75% of max) atk 34.0 seaTea 0
+sloppy         Toothless n=40 petHp 107/107 (100% of max) atk 23.4 seaTea 0
+sloppy         Big Z     n=29 petHp 61/103 (60% of max) atk 25.1 seaTea 0
+upgrade-first  Toothless n=40 petHp 120/120 (100% of max) atk 30.0 seaTea 0
+upgrade-first  Big Z     n=40 petHp 107/127 (84% of max) atk 37.7 seaTea 40
+caring         Toothless n=40 petHp 120/120 (100% of max) atk 30.0 seaTea 0
+caring         Big Z     n=40 petHp 140/140 (100% of max) atk 40.0 seaTea 0
+
+=== H2. Toothless fight_end: dmgTaken, petsLost, won ===
+human          n=20 dmgTaken 38.2 won 18 petsLost 2
+perfect        n=40 dmgTaken 0.0 won 40 petsLost 0
+sloppy         n=40 dmgTaken 78.4 won 30 petsLost 10
+upgrade-first  n=40 dmgTaken 0.0 won 40 petsLost 0
+caring         n=40 dmgTaken 0.0 won 40 petsLost 0
+
+=== H3. Boss damage by profile ===
+human          n=38 bigzDmg 231
+perfect        n=40 bigzDmg 388
+sloppy         n=30 bigzDmg 75
+upgrade-first  n=40 bigzDmg 1,330
+caring         n=40 bigzDmg 663
+
+=== H4. Heal value: hpDelta of Heal QTEs ===
+human          n=86 hpDelta avg 5.3; =0: 72; <=10: 72; >=40: 5
+sloppy         n=12 hpDelta avg 19.2; =0: 3; <=10: 4; >=40: 0
+
+=== H5. Human: energy by appetite (bot_params.appetite) days 1-4 ===
+appetite>=0.5  runs 30 days 117: used 2.72 left 0.63 max 3.11; days left>0: 63%
+appetite<0.5   runs 10 days 37: used 1.27 left 2.00 max 3.00; days left>0: 100%
+
+=== H6. Human outcomes: energy total used vs player level (all human runs reaching d5) ===
+playerLevel 3: runs 8, energyUsedTotal avg 5.0
+playerLevel 4: runs 18, energyUsedTotal avg 9.3
+playerLevel 5: runs 12, energyUsedTotal avg 12.8
+
+=== H7. Exp thresholds: cumulative exp to reach level L = sum 10*(k) for k=1..L-1 ===
+level 2: cumulative exp 10 (= 1.0 energy at 10 exp/E)
+level 3: cumulative exp 30 (= 3.0 energy at 10 exp/E)
+level 4: cumulative exp 60 (= 6.0 energy at 10 exp/E)
+level 5: cumulative exp 100 (= 10.0 energy at 10 exp/E)
+level 6: cumulative exp 150 (= 15.0 energy at 10 exp/E)
+level 7: cumulative exp 210 (= 21.0 energy at 10 exp/E)
+
+=== H8. Merchant sell moment: which pet sold, pets before ===
+perfect  pet_removed: Toothless, merchant_sale=40
+caring   pet_removed: Toothless, merchant_sale=40
+human    pet_removed: Toothless, merchant_sale=8
+
+=== H9. Human refuse runs: coin at d5 (idle) and purchases bought vs not ===
+refuse n=30: final coin avg 365; runs with final coin >=250 (could revive): 24; shop buys/run 1.73; upgrade coin/run 202
+
+=== H10. Human: tonic runs vs exp ===
+tonic=0: runs 11, playerLevel 4.09, exp-ish energyUsed 8.6
+tonic=1: runs 19, playerLevel 4.05, exp-ish energyUsed 9.9
+
+=== H11. Energy upgrade timing (human): bought day, energy used on days after vs maxEnergy ===
+seed 5: Energy bought day 3 (coin 150); d1:2/3 d2:2/3 d3:5/4 d4:3/4; appetite 0.76
+seed 9: Energy bought day 4 (coin 150); d1:2/3 d2:2/3 d3:4/3 d4:3/4; appetite 0.67
+seed 16: Energy bought day 4 (coin 150); d1:2/3 d2:2/3 d3:2/3 d4:3/4; appetite 0.71
+seed 18: Energy bought day 3 (coin 150); d1:2/3 d2:2/3 d3:5/4 d4:3/4; appetite 0.66
+seed 19: Energy bought day 3 (coin 150); d1:3/3 d2:3/3 d3:6/4 d4:3/4; appetite 0.84
+seed 28: Energy bought day 3 (coin 150); d1:3/3 d2:3/3 d3:4/4 d4:3/4; appetite 0.84
+seed 29: Energy bought day 4 (coin 150); d1:2/3 d2:2/3 d3:2/3 d4:3/4; appetite 0.62
+seed 31: Energy bought day 3 (coin 150); d1:3/3 d2:3/3 d3:4/4 d4:4/4; appetite 0.97

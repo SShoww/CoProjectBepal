@@ -11,6 +11,7 @@ public static class DayEvents
     public static void OpenDoor(SceneManager m, GameState gs)
     {
         gs.DoorDone = true;
+        Audio.Play(Sfx.DoorOpen);
         switch (gs.Day)
         {
             case 2: Toothless(m, gs); break;
@@ -39,22 +40,29 @@ public static class DayEvents
     {
         m.Push(new ChoiceScene("Toothless is at the door. What will you do?", new[]
         {
-            new Option("Chase", () => m.Push(DialogueScene.Say("", null,
-                "You wave your arms and shout. Toothless hisses and slinks back into the dark. (No energy spent.)"))),
+            new Option("Chase", () => { Telemetry.DoorEvent("toothless", "chase"); m.Push(DialogueScene.Say("", null,
+                "You wave your arms and shout. Toothless hisses and slinks back into the dark. (No energy spent.)")); }),
             new Option("Tame", () => m.Push(new PetPickScene("Choose your pet", gs.Alive, pet =>
+            {
+                Telemetry.DoorEvent("toothless", "tame");
                 m.Push(new FightScene(gs, Enemy.Toothless(), pet, won =>
                 {
                     if (!won)
                     {
-                        m.Reset(new GameOverScene("All your pets have fallen to Toothless."));
+                        m.Push(DialogueScene.Say("", null,
+                            "All your pets have fallen to Toothless. It slinks back into the dark.",
+                            "Carry them home and ask the Doctor to revive them."));
                         return;
                     }
                     var t = Pet.Create(Species.Toothless);
                     gs.Pets.Add(t);
-                    gs.Coin += Balance.ToothlessReward;
+                    Telemetry.Emit("pet_added", "pet", t.Name, "via", "toothless_tame");
+                    gs.AddCoin(Balance.ToothlessReward, "toothless_reward");
+                    Audio.Play(Sfx.NewPet);
                     m.Push(DialogueScene.Say("", null, "You got new pet !!!",
                         $"Toothless curls up by the hearth. (+{Balance.ToothlessReward} coin from the sanctuary fund)"));
-                })), onCancel: () => ToothlessChoice(m, gs)))
+                }));
+            }, onCancel: () => ToothlessChoice(m, gs)))
             , gs.Alive.Any()),
         }));
     }
@@ -64,23 +72,31 @@ public static class DayEvents
     {
         var target = gs.Pets.FirstOrDefault(p => p.Species == Species.Toothless && !p.Dead) ?? gs.Alive.FirstOrDefault() ?? gs.Pets[0];
         var portrait = Portrait((sb, t) => Art.Merchant(sb, new Vector2(Gfx.W / 2f, 490), t));
-        m.Push(new DialogueScene(new[]
+        m.Push(WithBgm(Bgm.Merchant, new DialogueScene(new[]
         {
             new Line("", "A tall figure in a wide hat waits outside, a cart of glass bottles and cages behind him."),
             new Line("Merchant", $"I'm quite interested in your {target.Name}... can you give it to me?"),
             new Line("Merchant", $"I'll pay {Balance.MerchantOffer:N0} coin. More than this little shelter earns in a lifetime."),
-        }, () => m.Push(new ChoiceScene($"Sell {target.Name} for {Balance.MerchantOffer:N0} coin?", new[]
+        }, () => m.Push(WithBgm(Bgm.Merchant, new ChoiceScene($"Sell {target.Name} for {Balance.MerchantOffer:N0} coin?", new[]
         {
             new Option("Sell", () =>
             {
+                Telemetry.DoorEvent("merchant", "sell");
                 gs.Pets.Remove(target);
-                gs.Coin += Balance.MerchantOffer;
-                m.Push(DialogueScene.Say("Merchant", null, "A pleasure doing business. It'll be... well looked after.",
-                    $"The cart rolls away. You can still hear {target.Name} crying long after it's gone."));
+                Telemetry.Emit("pet_removed", "pet", target.Name, "via", "merchant_sale");
+                gs.AddCoin(Balance.MerchantOffer, "merchant_sale");
+                Audio.Play(Sfx.UiCoin);
+                m.Push(WithBgm(Bgm.Merchant, DialogueScene.Say("Merchant", () => m.Push(new ShopScene(gs, onClose: () =>
+                        m.Push(DialogueScene.Say("", null, $"The cart rolls away. You can still hear {target.Name} crying long after it's gone.")))),
+                    "A pleasure doing business. It'll be... well looked after.", "Now, with all that coin... care to spend some of it? My cart is still open.")));
             }, gs.Pets.Count > 1),
-            new Option("Refuse", () => m.Push(DialogueScene.Say("Merchant", () => m.Push(new ShopScene(gs)),
-                "Hmph. Sentimental. Suit yourself.", "Then perhaps you'd like to buy something instead?"))),
-        })), portrait));
+            new Option("Refuse", () =>
+            {
+                Telemetry.DoorEvent("merchant", "refuse");
+                m.Push(WithBgm(Bgm.Merchant, DialogueScene.Say("Merchant", () => m.Push(new ShopScene(gs)),
+                    "Hmph. Sentimental. Suit yourself.", "Then perhaps you'd like to buy something instead?")));
+            }),
+        }))), portrait)));
     }
 
     // ---------- Day 4 ----------
@@ -92,7 +108,10 @@ public static class DayEvents
             p.ClampStats();
         }
         gs.DisasterSeen = true;
+        Telemetry.DoorEvent("storm", "none");
+        Audio.Play(Sfx.Storm);
         Gfx.Shake(18, 0.8f);
+        Rain.Flash();
         m.Push(DialogueScene.Say("", null,
             "You crack the door open. No one is there. Only the wind.",
             "THUNDER STORM! Mud and lightning blast through the sanctuary!",
@@ -105,7 +124,7 @@ public static class DayEvents
     {
         var portrait = Portrait((sb, t) => Art.Enemy(sb, Enemy.BigZ(), new Vector2(Gfx.W / 2f, 520), t, Input.Mouse.ToVector2(), 0));
         void End() => m.Reset(new ToBeContinuedScene(gs.Day));
-        m.Push(new DialogueScene(new[]
+        m.Push(WithBgm(Bgm.Boss, new DialogueScene(new[]
         {
             new Line("", "KNOCK. KNOCK. The whole door bends inward."),
             new Line("Big Z", "So THIS is where the little strays hide."),
@@ -114,12 +133,23 @@ public static class DayEvents
         {
             if (!gs.Alive.Any())
             {
+                Telemetry.DoorEvent("bigz", "none");
                 m.Push(DialogueScene.Say("", End, "There is no one left to stand against Big Z."));
                 return;
             }
-            m.Push(new PetPickScene("Choose your pet", gs.Alive, pet =>
+            m.Push(WithBgm(Bgm.Boss, new PetPickScene("Choose your pet", gs.Alive, pet =>
+            {
+                Telemetry.DoorEvent("bigz", "fight");
                 m.Push(new FightScene(gs, Enemy.BigZ(), pet, _ =>
-                    m.Push(DialogueScene.Say("Big Z", End, "Pathetic. Keep your shelter warm for me, keeper."))))));
-        }, portrait));
+                    m.Push(WithBgm(Bgm.Boss, DialogueScene.Say("Big Z", End, "Pathetic. Keep your shelter warm for me, keeper.")))));
+            })));
+        }, portrait)));
+    }
+
+    /// <summary>Gives <paramref name="s"/> its own background music for the length of the scene.</summary>
+    static T WithBgm<T>(string track, T s) where T : Scene
+    {
+        s.MusicOverride = track;
+        return s;
     }
 }

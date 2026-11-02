@@ -21,13 +21,15 @@ public class Pet
     public int Level = 1;
     public float Progress;
 
-    /// <summary>Reserved for pet skills (GDD 06: passives are out of prototype scope, pending design talk).</summary>
+    /// <summary>Passive skill description shown in the Notebook; null = species has no passive yet.</summary>
     public string? Passive;
+    public bool PassiveUnlocked => Passive != null && Level >= Balance.PassiveLevel;
+    public bool Has(Species s) => Species == s && PassiveUnlocked;
 
     // GDD 06 §3.5: Clean <= 25 lowers Max HP, Clean <= 50 lowers ATK.
-    public int MaxHp => (int)((BaseMaxHp + (Level - 1) * Balance.HpPerLevel) * (Clean <= 25 ? 0.8f : 1f));
-    public int Atk => (int)MathF.Round((BaseAtk + (Level - 1) * Balance.AtkPerLevel) * (Clean <= 50 ? 0.75f : 1f));
-    public int MaxProgress => 100 + (Level - 1) * 50;
+    public int MaxHp => (int)((BaseMaxHp + (Level - 1) * Balance.HpPerLevel) * (Clean <= Balance.CleanLowHpThreshold ? Balance.CleanLowHpMul : 1f));
+    public int Atk => (int)MathF.Round((BaseAtk + (Level - 1) * Balance.AtkPerLevel) * (Clean <= Balance.CleanLowAtkThreshold ? Balance.CleanLowAtkMul : 1f));
+    public int MaxProgress => Balance.ProgressBase + (Level - 1) * Balance.ProgressPerLevel;
     public bool Dead => Hp <= 0;
     public int HpShown => (int)MathF.Ceiling(Math.Max(0, Hp));
 
@@ -61,24 +63,28 @@ public class Pet
             Species = s, Name = "Mossling", Element = "Plant", Color = new Color(206, 78, 70),
             BaseMaxHp = 100, BaseAtk = 20, Hp = 100, Stomach = 80, Clean = 70,
             Description = "A soft, moss-covered creature with a single bud on its head. Calm, but startles easily. Its eyes never quite blink.",
+            Passive = "Every attack heals this pet for 1% of its Max HP.",
         },
         Species.Nibbleclaw => new Pet
         {
             Species = s, Name = "Nibbleclaw", Element = "Beast", Color = new Color(222, 150, 70),
             BaseMaxHp = 90, BaseAtk = 25, Hp = 90, Stomach = 70, Clean = 80,
             Description = "Half cat, half anteater. Long claws hide under its fur. Quick, curious and a little too interested in your fingers.",
+            Passive = "Consecutive Attack hits without a miss build a combo: each hit deals more damage than the last. A miss resets it.",
         },
         Species.Blinkbun => new Pet
         {
             Species = s, Name = "Blinkbun", Element = "Shadow", Color = new Color(92, 176, 112),
             BaseMaxHp = 110, BaseAtk = 15, Hp = 110, Stomach = 60, Clean = 60,
             Description = "A long-eared rabbit with a third eye on its forehead. Patient and tough. The third eye watches you sleep.",
+            Passive = "After every attack the needle warps to just ahead of the Dodge zone, giving you time to aim.",
         },
         _ => new Pet
         {
             Species = s, Name = "Toothless", Element = "Acid", Color = new Color(52, 46, 64),
-            BaseMaxHp = 120, BaseAtk = 15, Hp = 60, Stomach = 60, Clean = 60,
+            BaseMaxHp = 120, BaseAtk = 15, Hp = Balance.ToothlessStartHp, Stomach = 60, Clean = 60,
             Description = "A slick black reptile with no teeth and a throat sac full of purple acid. Tamed... mostly.",
+            Passive = "Every attack poisons the enemy: it takes more damage and hits weaker. Does not stack.",
         },
     };
 }
@@ -99,13 +105,13 @@ public class Enemy
 
     public static Enemy Toothless() => new()
     {
-        Name = "Toothless", AttackName = "Acid", MaxHp = 120, Hp = 120, Atk = 15, Color = new Color(52, 46, 64),
-        DodgeShrink = 0.11f, NeedleSpeed = 2.8f,
+        Name = "Toothless", AttackName = "Acid", MaxHp = Balance.ToothlessHp, Hp = Balance.ToothlessHp, Atk = Balance.ToothlessAtk, Color = new Color(52, 46, 64),
+        DodgeShrink = Balance.ToothlessDodgeShrink, NeedleSpeed = Balance.ToothlessNeedleSpeed,
     };
 
     public static Enemy BigZ() => new()
     {
-        Name = "Big Z", AttackName = "Crush", MaxHp = 9999, Hp = 9999, Atk = 20, Color = new Color(120, 24, 36),
-        Size = 1.7f, DodgeShrink = 0.26f, NeedleSpeed = 3.4f, IsBoss = true,
+        Name = "Big Z", AttackName = "Crush", MaxHp = Balance.BigZHp, Hp = Balance.BigZHp, Atk = Balance.BigZAtk, Color = new Color(120, 24, 36),
+        Size = 1.7f, DodgeShrink = Balance.BigZDodgeShrink, NeedleSpeed = Balance.BigZNeedleSpeed, IsBoss = true,
     };
 }

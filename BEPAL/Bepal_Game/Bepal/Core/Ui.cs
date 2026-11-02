@@ -1,5 +1,8 @@
+using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Extended.Graphics;
 
 namespace Bepal;
 
@@ -30,6 +33,13 @@ public class Button
     public string Label;
     public bool Enabled = true;
     public Color Accent = Palette.PanelEdge;
+    /// <summary>Sprite skin (normal / held while the mouse is down on it), drawn from <see cref="SkinSrc"/>; null = nine-patch.</summary>
+    public Texture2D? Skin, SkinHeld;
+    public Rectangle SkinSrc;
+    /// <summary>&gt; 0 = draw the whole <see cref="Skin"/> as a nine-slice with corners this many art px (ignores <see cref="SkinSrc"/>), for art whose size differs from the button.</summary>
+    public int SkinCorner;
+    public Color Ink = Palette.Text, InkDim = Palette.Dim;
+    public bool Shadow = true;
 
     public Button(Rectangle rect, string label)
     {
@@ -37,27 +47,204 @@ public class Button
         Label = label;
     }
 
+    float _hover;   // 0..1, eased toward the hover state in Draw
+
     public bool Hover => Enabled && Rect.Contains(Input.Mouse);
 
     /// <summary>Returns true when clicked this frame.</summary>
-    public bool Update() => Hover && Input.Click;
+    public bool Update()
+    {
+        if (!Hover || !Input.Click) return false;
+        Audio.Play(Sfx.UiClick);
+        return true;
+    }
 
     public void Draw(SpriteBatch sb)
     {
-        var bg = !Enabled ? new Color(40, 36, 40) : Hover ? Color.Lerp(Palette.Panel, Accent, 0.35f) : Palette.Panel;
-        Gfx.Rect(sb, Rect, bg * 0.95f);
-        Gfx.Outline(sb, Rect, Enabled ? Accent : new Color(80, 70, 70), Hover ? 3 : 2);
-        var size = Gfx.Font.MeasureString(Label);
-        Gfx.Text(sb, Gfx.Font, Label, new Vector2(Rect.Center.X, Rect.Center.Y - size.Y / 2), Enabled ? Palette.Text : Palette.Dim, 0.5f);
+        _hover = Ease.Damp(_hover, Hover ? 1 : 0, Balance.ButtonHoverK, Ui.Dt);
+        var r = Rect;
+        r.Y -= (int)MathF.Round(Balance.ButtonLiftPx * _hover);
+        if (Skin != null)
+        {
+            var tex = Hover && Input.MouseHeld && SkinHeld != null ? SkinHeld : Skin;
+            var tint = Enabled ? Color.White : new Color(120, 112, 108);
+            if (SkinCorner > 0) Ui.NineSlice(sb, tex, r, SkinCorner, tint);
+            else sb.Draw(tex, r, SkinSrc, tint);
+        }
+        else
+        {
+            var bg = !Enabled ? new Color(40, 36, 40) : Color.Lerp(Palette.Panel, Accent, 0.35f * _hover);
+            Ui.Frame(sb, r, bg * 0.95f, Enabled ? Color.Lerp(Accent, Palette.Warm, 0.4f * _hover) : new Color(80, 70, 70));
+        }
+        float room = r.Width - Ui.Pad;
+        var font = Label.Length == 1 ? Gfx.Big                                   // glyph buttons ("+") need the big size to read
+            : Gfx.Font.MeasureString(Label).X > room ? Gfx.Small : Gfx.Font;   // long label: drop to the small size first
+        var label = Gfx.Fit(font, Label, room);
+        // A lone glyph ("+") is centred on its ink, not on the line box (which sits it low in the button)
+        float top = font.LineSpacing / 2f;
+        if (Label.Length == 1 && font.GetGlyphs().TryGetValue(Label[0], out var g))
+            top = g.Cropping.Y + g.BoundsInTexture.Height / 2f;
+        Gfx.Text(sb, font, label, new Vector2(r.Center.X, r.Center.Y - top), Enabled ? Ink : InkDim, 0.5f, Shadow);
+    }
+}
+
+/// <summary>Horizontal 0..1 slider: click or drag on the track; <see cref="Changed"/>/<see cref="Released"/> report this frame's events.</summary>
+public class Slider
+{
+    public Rectangle Rect;
+    public float Value;
+    public bool Changed, Released;
+    bool _drag;
+
+    public Slider(Rectangle rect, float value)
+    {
+        Rect = rect;
+        Value = value;
+    }
+
+    Rectangle Hit => new(Rect.X - 12, Rect.Y - 14, Rect.Width + 24, Rect.Height + 28);
+
+    public void Update()
+    {
+        Changed = Released = false;
+        if (Input.Click && Hit.Contains(Input.Mouse)) _drag = true;
+        if (!_drag) return;
+        if (Input.MouseHeld)
+        {
+            float v = MathHelper.Clamp((Input.Mouse.X - Rect.X) / (float)Rect.Width, 0, 1);
+            if (v != Value) { Value = v; Changed = true; }
+        }
+        else
+        {
+            _drag = false;
+            Released = true;
+        }
+    }
+
+    public void Nudge(float delta)
+    {
+        float v = MathHelper.Clamp(MathF.Round((Value + delta) * 100f) / 100f, 0, 1);
+        if (v == Value) return;
+        Value = v;
+        Changed = Released = true;
+    }
+
+    public void Draw(SpriteBatch sb, bool selected)
+    {
+        Gfx.Rect(sb, Rect.X, Rect.Center.Y - 4, Rect.Width, 8, new Color(60, 50, 56));
+        Gfx.Rect(sb, Rect.X, Rect.Center.Y - 4, (int)(Rect.Width * Value), 8, Palette.Warm);
+        var knob = new Vector2(Rect.X + Rect.Width * Value, Rect.Center.Y);
+        Gfx.Circle(sb, knob, selected || _drag ? 13 : 10, selected || _drag ? Palette.Text : Palette.Warm);
     }
 }
 
 public static class Ui
 {
+    /// <summary>Frame step of the current update, set once per frame by SceneManager (Button tween reads it).</summary>
+    public static float Dt = 1 / 60f;
+    /// <summary>0..1 fade-in of the overlay currently being drawn (1 = fully open); scales <see cref="Dim"/>.</summary>
+    public static float OpenAlpha = 1f;
+
+    /// <summary>Layout rhythm shared by the screens: safe margin from the screen edge, inner padding of a panel, gap under a title.</summary>
+    public const int Margin = 32, Pad = 24, TitleGap = 16;
+
+    /// <summary>Pet status frame (Content/Sprites/ui_status_panel.png, 396x332: header + 4 bar slots); null = draw <see cref="Panel"/> instead.</summary>
+    public static Texture2D? StatusPanel;
+    /// <summary>Shop/inventory item card (Content/Sprites/ui_item_slot.png, 270x230 = <see cref="Items.CardW"/>x<see cref="Items.CardH"/>) and its Buy/Use button, normal + held (full-card canvas, the button sits at <see cref="ItemButtonSrc"/>); null = nine-patch.</summary>
+    public static Texture2D? ItemSlot, ItemButton, ItemButtonHold;
+    public static readonly Rectangle ItemButtonSrc = new(25, 183, 220, 40);
+    /// <summary>Text on the light-brown item card art.</summary>
+    public static readonly Color CardInk = new(255, 248, 236), CardInkDim = new(246, 230, 210);
+
+    /// <summary>Player status bar (ui_player_info.png, 1545x225, drawn at <see cref="PlayerInfoScale"/>) and its Energy pips (64x64, full / empty).</summary>
+    public static Texture2D? PlayerInfo, EnergyFull, EnergyEmpty;
+    public const float PlayerInfoScale = 1.2f / 3f;   // 2/3 of the Figma mockup size (1030x150)
+    /// <summary>Peach panels, each the exact size of the box it replaces: dialogue box with its name tab (1120x202), choice / pause prompt (800x260) and their
+    /// 220x60 buttons, options (720x400) + 200x50 button, main-menu button (240x56), notebook (960x560) + 240x120 section button, pet pick card (250x340), "Knock!" sign.</summary>
+    public static Texture2D? Dialog, Choice, ChoiceButton, Pause, PauseButton, Options, OptionsButton, MenuButton, Notebook, NotebookButton, PetCard, Knock;
+    /// <summary>Text on the peach panels.</summary>
+    public static readonly Color Ink = new(92, 52, 28), InkDim = new(160, 116, 84);
+
+    public static void LoadOptional(ContentManager content)
+    {
+        StatusPanel = Load(content, "ui_status_panel");
+        ItemSlot = Load(content, "ui_item_slot");
+        ItemButton = Load(content, "ui_item_button");
+        ItemButtonHold = Load(content, "ui_item_button_hold");
+        PlayerInfo = Load(content, "ui_player_info");
+        EnergyFull = Load(content, "ui_energy_full");
+        EnergyEmpty = Load(content, "ui_energy_empty");
+        Dialog = Load(content, "ui_dialog");
+        Choice = Load(content, "ui_choice");
+        ChoiceButton = Load(content, "ui_choice_button");
+        Pause = Load(content, "ui_pause");
+        PauseButton = Load(content, "ui_pause_button");
+        Options = Load(content, "ui_options");
+        OptionsButton = Load(content, "ui_options_button");
+        MenuButton = Load(content, "ui_menu_button");
+        Notebook = Load(content, "ui_notebook");
+        NotebookButton = Load(content, "ui_notebook_button");
+        PetCard = Load(content, "ui_pet_card");
+        Knock = Load(content, "ui_knock");
+    }
+
+    /// <summary>Draws <paramref name="tex"/> over <paramref name="r"/>, or the nine-patch <see cref="Panel"/> when the art is missing. Returns true if the art was drawn.</summary>
+    public static bool Skin(SpriteBatch sb, Texture2D? tex, Rectangle r, float alpha = 0.95f)
+    {
+        if (tex == null) { Panel(sb, r, alpha); return false; }
+        sb.Draw(tex, r, Color.White);
+        return true;
+    }
+
+    /// <summary>Like <see cref="Skin(SpriteBatch, Texture2D?, Rectangle, float)"/>, but nine-slices the art (<paramref name="corner"/> art px kept unscaled) so it fits a box of another size.</summary>
+    public static bool SkinSliced(SpriteBatch sb, Texture2D? tex, Rectangle r, int corner, float alpha = 0.95f)
+    {
+        if (tex == null) { Panel(sb, r, alpha); return false; }
+        NineSlice(sb, tex, r, corner, Color.White);
+        return true;
+    }
+
+    /// <summary>Draws the whole of <paramref name="tex"/> into <paramref name="r"/>: <paramref name="corner"/>-px corners keep their size, edges and centre stretch.</summary>
+    public static void NineSlice(SpriteBatch sb, Texture2D tex, Rectangle r, int corner, Color color)
+    {
+        int c = Math.Min(corner, Math.Min(r.Width, r.Height) / 2);
+        int[] dx = { r.X, r.X + c, r.Right - c, r.Right }, dy = { r.Y, r.Y + c, r.Bottom - c, r.Bottom };
+        int[] sx = { 0, corner, tex.Width - corner, tex.Width }, sy = { 0, corner, tex.Height - corner, tex.Height };
+        for (int j = 0; j < 3; j++)
+            for (int i = 0; i < 3; i++)
+                sb.Draw(tex, new Rectangle(dx[i], dy[j], dx[i + 1] - dx[i], dy[j + 1] - dy[j]),
+                    new Rectangle(sx[i], sy[j], sx[i + 1] - sx[i], sy[j + 1] - sy[j]), color);
+    }
+
+    /// <summary>Gives <paramref name="b"/> the whole of <paramref name="tex"/> as its skin with <see cref="Ink"/> text (nine-sliced when <paramref name="corner"/> &gt; 0); no art = unchanged nine-patch button.</summary>
+    public static Button Skin(Button b, Texture2D? tex, int corner = 0)
+    {
+        if (tex == null) return b;
+        b.Skin = tex;
+        b.SkinSrc = tex.Bounds;
+        b.SkinCorner = corner;
+        b.Ink = Ink;
+        b.InkDim = InkDim;
+        b.Shadow = false;
+        return b;
+    }
+
+    static Texture2D? Load(ContentManager content, string name)
+    {
+        try { return content.Load<Texture2D>("Sprites/" + name); }
+        catch (ContentLoadException) { return null; }   // no art: keep the nine-patch panel
+    }
+
     public static void Panel(SpriteBatch sb, Rectangle r, float alpha = 0.95f)
     {
-        Gfx.Rect(sb, r, Palette.Panel * alpha);
-        Gfx.Outline(sb, r, Palette.PanelEdge, 2);
+        Frame(sb, r, Palette.Panel * alpha, Palette.PanelEdge);
+    }
+
+    /// <summary>Rounded box: <paramref name="fill"/> under a 2px <paramref name="edge"/> border (MonoGame.Extended nine-patch).</summary>
+    public static void Frame(SpriteBatch sb, Rectangle r, Color fill, Color edge)
+    {
+        sb.Draw(Gfx.PanelFill, r, fill);
+        sb.Draw(Gfx.PanelRing, r, edge);
     }
 
     public static void Bar(SpriteBatch sb, Rectangle r, float value, float max, Color fill, string? label = null)
@@ -66,10 +253,11 @@ public static class Ui
         float t = max <= 0 ? 0 : MathHelper.Clamp(value / max, 0, 1);
         Gfx.Rect(sb, r.X + 2, r.Y + 2, (r.Width - 4) * t, r.Height - 4, fill);
         if (label != null)
-            Gfx.Text(sb, Gfx.Small, label, new Vector2(r.X + 6, r.Y + (r.Height - Gfx.Small.LineSpacing) / 2f), Palette.Text);
+            Gfx.Text(sb, Gfx.Small, Gfx.Fit(Gfx.Small, label, r.Width - 12), new Vector2(r.X + 6, r.Y + (r.Height - Gfx.Small.LineSpacing) / 2f), Palette.Text);
     }
 
-    public static void Dim(SpriteBatch sb, float a = 0.6f) => Gfx.Rect(sb, 0, 0, Gfx.W, Gfx.H, Color.Black * a);
+    // Oversized so it still covers the screen while an overlay is scaled down during its open animation
+    public static void Dim(SpriteBatch sb, float a = 0.6f) => Gfx.Rect(sb, -100, -100, Gfx.W + 200, Gfx.H + 200, Color.Black * (a * OpenAlpha));
 
     public static void Hint(SpriteBatch sb, string text) =>
         Gfx.Text(sb, Gfx.Small, text, new Vector2(Gfx.W / 2f, Gfx.H - 30), Palette.Dim, 0.5f);

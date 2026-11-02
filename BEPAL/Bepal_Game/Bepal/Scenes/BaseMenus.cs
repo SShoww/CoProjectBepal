@@ -11,6 +11,7 @@ namespace Bepal;
 public class UpgradeScene : Scene
 {
     readonly GameState _gs;
+    public GameState State => _gs;
     readonly Button[] _plus = new Button[3];
     readonly Popups _popups = new();
 
@@ -19,16 +20,25 @@ public class UpgradeScene : Scene
     public UpgradeScene(GameState gs)
     {
         _gs = gs;
-        for (int i = 0; i < 3; i++) _plus[i] = new Button(new Rectangle(880, 250 + i * 110, 64, 64), "+");
+        for (int i = 0; i < 3; i++) _plus[i] = Ui.Skin(new Button(PlusRect(i), "+"), Ui.OptionsButton, ArtCorner);
     }
+
+    const int ArtCorner = 8, CardCorner = 16;   // nine-slice corners of the peach panel/button art and of the brown item card art
+    static readonly Color NeedInk = new(255, 196, 180);   // "Need ..." on the brown card (Palette.Danger is too dark there)
+
+    static readonly Rectangle Panel = new(280, 110, 720, 520);
+    /// <summary>Brown card behind upgrade row <paramref name="i"/>.</summary>
+    static Rectangle RowRect(int i) => new(Panel.X + Ui.Pad, 236 + i * 124, Panel.Width - 2 * Ui.Pad, 108);
+    /// <summary>Hit box of the "+" button of row <paramref name="i"/> (also used by the autoplay bot).</summary>
+    public static Rectangle PlusRect(int i) { var r = RowRect(i); return new(r.Right - 96, r.Center.Y - 30, 76, 60); }
 
     (string name, string desc, int coin, int points, int level, int max)[] Rows =>
     new[]
     {
-        ("QTE", "Train dots get bigger", Balance.QteCoin, Balance.QtePoints, _gs.QteUpgrade, Balance.QteMax),
-        ("Energy", "+1 Energy every day", Balance.EnergyCoin, Balance.EnergyPoints, _gs.EnergyUpgrade,
+        ("QTE", "Train dots get bigger", Balance.QteCoin, Balance.PointCost(0, _gs.QteUpgrade), _gs.QteUpgrade, Balance.QteMax),
+        ("Energy", "+1 Energy every day", Balance.EnergyCoin, Balance.PointCost(1, _gs.EnergyUpgrade), _gs.EnergyUpgrade,
             Balance.MaxEnergyCap - Balance.BaseEnergy),
-        ("Progress Bar", "Train progress +10 -> +15", Balance.ProgressCoin, Balance.ProgressPoints, _gs.ProgressUpgrade,
+        ("Progress Bar", "Train progress +50% each", Balance.ProgressCoin, Balance.PointCost(2, _gs.ProgressUpgrade), _gs.ProgressUpgrade,
             Balance.ProgressMax),
     };
 
@@ -41,14 +51,17 @@ public class UpgradeScene : Scene
             var r = rows[i];
             _plus[i].Enabled = r.level < r.max && _gs.Coin >= r.coin && _gs.Points >= r.points;
             if (!_plus[i].Update()) continue;
-            _gs.Coin -= r.coin;
+            _gs.SpendCoin(r.coin, "upgrade");
             _gs.Points -= r.points;
+            Audio.Play(Sfx.UiCoin);
             switch (i)
             {
                 case 0: _gs.QteUpgrade++; break;
-                case 1: _gs.EnergyUpgrade++; _gs.Energy++; break;
+                case 1: _gs.EnergyUpgrade++; _gs.AddEnergy(1, "upgrade"); break;
                 case 2: _gs.ProgressUpgrade++; break;
             }
+            Telemetry.Emit("upgrade_buy", "name", i switch { 0 => "QTE", 1 => "Energy", _ => "Progress" }, "newLevel", r.level + 1,
+                "coinCost", r.coin, "pointCost", r.points, "coinAfter", _gs.Coin, "pointsAfter", _gs.Points);
             _popups.Add($"{r.name} upgraded!", Palette.Coin, new Vector2(Gfx.W / 2f, 140));
         }
         if (Input.Back) M.Remove(this);
@@ -57,21 +70,38 @@ public class UpgradeScene : Scene
     public override void Draw(SpriteBatch sb)
     {
         Ui.Dim(sb, 0.7f);
-        var panel = new Rectangle(280, 110, 720, 520);
-        Ui.Panel(sb, panel);
-        Gfx.Text(sb, Gfx.Big, "Upgrade", new Vector2(panel.X + 30, panel.Y + 10), Palette.Warm);
-        Gfx.Text(sb, Gfx.Font, $"Points : {_gs.Points}     Coin : {_gs.Coin}", new Vector2(panel.Right - 30, panel.Y + 30), Palette.Coin, 1f);
+        var panel = Panel;
+        bool art = Ui.SkinSliced(sb, Ui.Options, panel, ArtCorner);
+        Gfx.Text(sb, Gfx.Big, "Upgrade", new Vector2(panel.X + Ui.Pad + 6, panel.Y + Ui.Pad), art ? Ui.Ink : Palette.Warm, 0, !art);
+        Gfx.Text(sb, Gfx.Font, $"Points : {_gs.Points}     Coin : {_gs.Coin}", new Vector2(panel.Right - Ui.Pad - 6, panel.Y + Ui.Pad + 8),
+            art ? Ui.Ink : Palette.Coin, 1f, !art);
+        Gfx.Text(sb, Gfx.Small, Gfx.Wrap(Gfx.Small, "Points come from Player level-ups: keep caring for your pets (Train, Feed, Clean, Heal).", panel.Width - 2 * Ui.Pad - 12),
+            new Vector2(panel.X + Ui.Pad + 6, panel.Y + 84), art ? Ui.InkDim : Palette.Dim, 0, !art);
         var rows = Rows;
         for (int i = 0; i < 3; i++)
         {
             var r = rows[i];
-            int y = 250 + i * 110;
-            Gfx.Text(sb, Gfx.Font, r.name, new Vector2(320, y + 2), Palette.Text);
-            Gfx.Text(sb, Gfx.Small, r.desc, new Vector2(320, y + 34), Palette.Dim);
+            var card = RowRect(i);
+            bool cardArt = Ui.SkinSliced(sb, Ui.ItemSlot, card, CardCorner);
+            Color ink = cardArt ? Ui.CardInk : Palette.Text, dim = cardArt ? Ui.CardInkDim : Palette.Dim;
+            int x = card.X + 24, col = card.X + 300;
+            Gfx.Text(sb, Gfx.Font, r.name, new Vector2(x, card.Y + 16), ink);
+            Gfx.Text(sb, Gfx.Small, r.desc, new Vector2(x, card.Y + 56), dim);
+            // Level pips: one Energy icon per upgrade level (full = bought), squares when the art is missing
             for (int k = 0; k < r.max; k++)
-                Gfx.Rect(sb, 600 + k * 26, y + 8, 20, 20, k < r.level ? Palette.Coin : new Color(60, 50, 56));
-            string req = r.level >= r.max ? "MAX" : $"REQ. {r.coin} coin . {r.points} points";
-            Gfx.Text(sb, Gfx.Small, req, new Vector2(600, y + 38), r.level >= r.max ? Palette.Coin : Palette.Dim);
+            {
+                var pip = k < r.level ? Ui.EnergyFull : Ui.EnergyEmpty;
+                if (pip != null) sb.Draw(pip, new Rectangle(col - 5 + k * 42, card.Y + 6, 44, 44), Color.White);
+                else Gfx.Rect(sb, col + k * 26, card.Y + 16, 20, 20, k < r.level ? Palette.Coin : new Color(60, 50, 56));
+            }
+            bool maxed = r.level >= r.max;
+            string req = maxed ? "MAX" : $"REQ. {r.coin} coin . {r.points} {(r.points == 1 ? "point" : "points")}";
+            Gfx.Text(sb, Gfx.Small, req, new Vector2(col, card.Y + 58), maxed ? (cardArt ? ink : Palette.Coin) : dim);
+            if (!maxed && (_gs.Points < r.points || _gs.Coin < r.coin))
+            {
+                string why = _gs.Points < r.points ? $"Need {r.points - _gs.Points} more {(r.points - _gs.Points == 1 ? "point" : "points")}" : $"Need {r.coin - _gs.Coin} more coin";
+                Gfx.Text(sb, Gfx.Small, why, new Vector2(col, card.Y + 80), cardArt ? NeedInk : Palette.Danger);
+            }
             _plus[i].Draw(sb);
         }
         _popups.Draw(sb);
@@ -83,6 +113,7 @@ public class UpgradeScene : Scene
 public class DoctorScene : Scene
 {
     readonly GameState _gs;
+    public GameState State => _gs;
     float _time;
 
     public override bool Overlay => true;
@@ -91,7 +122,7 @@ public class DoctorScene : Scene
 
     List<Pet> Fallen => _gs.Pets.Where(p => p.Dead).ToList();
 
-    Rectangle Card(int i, int n) => new(Gfx.W / 2 - (n * 230 + (n - 1) * 20) / 2 + i * 250, 220, 230, 300);
+    public static Rectangle Card(int i, int n) => new(Gfx.W / 2 - (n * 230 + (n - 1) * 20) / 2 + i * 250, 220, 230, 300);
 
     public override void Update(float dt)
     {
@@ -107,8 +138,10 @@ public class DoctorScene : Scene
                 {
                     new Option("Yes", () =>
                     {
-                        _gs.Coin -= Balance.ReviveCost;
+                        _gs.SpendCoin(Balance.ReviveCost, "revive");
+                        Audio.Play(Sfx.UiCoin);
                         pet.Hp = 1;
+                        Telemetry.Revive(pet, Balance.ReviveCost);
                         M.Remove(this);
                         M.Push(DialogueScene.Say("Doctor", null, $"{pet.Name} is breathing again. Barely. Keep it fed and clean."));
                     }, afford),
@@ -151,12 +184,16 @@ public class NotebookScene : Scene
     int _tab = -1;   // -1 = main page, 0 = pets, 1 = disaster
     int _page;
     float _time;
-    readonly Button _pets = new(new Rectangle(380, 300, 240, 120), "pet discovery");
-    readonly Button _disaster = new(new Rectangle(660, 300, 240, 120), "Disaster");
+    readonly Button _pets = Ui.Skin(new Button(new Rectangle(380, 300, 240, 120), "pet discovery"), Ui.NotebookButton);
+    readonly Button _disaster = Ui.Skin(new Button(new Rectangle(660, 300, 240, 120), "Disaster"), Ui.NotebookButton);
 
     public override bool Overlay => true;
 
-    public NotebookScene(GameState gs) => _gs = gs;
+    public NotebookScene(GameState gs, int tab = -1)
+    {
+        _gs = gs;
+        _tab = tab;
+    }
 
     public override void Update(float dt)
     {
@@ -179,14 +216,29 @@ public class NotebookScene : Scene
     {
         Ui.Dim(sb, 0.7f);
         var book = new Rectangle(160, 90, 960, 560);
-        Gfx.Rect(sb, book, new Color(236, 222, 196));
-        Gfx.Outline(sb, book, new Color(120, 70, 50), 6);
-        Gfx.Rect(sb, book.Center.X - 3, book.Y, 6, book.Height, new Color(190, 170, 140));
+        var paper = new Color(236, 222, 196);
+        if (Ui.Notebook is { } art)
+        {
+            sb.Draw(art, book, Color.White);   // title "Survival Notebook" is hand-written on the art
+            if (_tab != -1)
+            {
+                // Inner pages: paint over the title on both pages, keeping the border and the spine
+                Gfx.Rect(sb, book.X + 8, book.Y + 8, book.Width / 2 - 14, 140, paper);
+                Gfx.Rect(sb, book.Center.X + 6, book.Y + 8, book.Width / 2 - 14, 140, paper);
+            }
+        }
+        else
+        {
+            Gfx.Rect(sb, book, paper);
+            Gfx.Outline(sb, book, new Color(120, 70, 50), 6);
+            int spineTop = _tab == -1 ? book.Y + 190 : book.Y;   // cover page: keep the spine clear of the title
+            Gfx.Rect(sb, book.Center.X - 3, spineTop, 6, book.Bottom - spineTop, new Color(190, 170, 140));
+        }
         var ink = new Color(60, 40, 36);
 
         if (_tab == -1)
         {
-            Gfx.Text(sb, Gfx.Big, "Survival Notebook", new Vector2(Gfx.W / 2f, 160), ink, 0.5f, false);
+            if (Ui.Notebook == null) Gfx.Text(sb, Gfx.Big, "Survival Notebook", new Vector2(Gfx.W / 2f, 160), ink, 0.5f, false);
             _pets.Draw(sb);
             _disaster.Draw(sb);
             if (!_gs.DisasterSeen)
@@ -207,6 +259,17 @@ public class NotebookScene : Scene
             Gfx.Text(sb, Gfx.Font, $"Stomach : {(int)p.Stomach}", new Vector2(x, y + 80), ink, 0, false);
             Gfx.Text(sb, Gfx.Font, $"Clean : {(int)p.Clean}", new Vector2(x, y + 120), ink, 0, false);
             Gfx.Text(sb, Gfx.Small, Gfx.Wrap(Gfx.Small, p.Description, 380), new Vector2(x, y + 180), ink, 0, false);
+            if (p.Passive != null)
+            {
+                var pass = new Vector2(x, y + 180 + Gfx.Small.MeasureString(Gfx.Wrap(Gfx.Small, p.Description, 380)).Y + 16);
+                if (p.PassiveUnlocked)
+                {
+                    Gfx.Text(sb, Gfx.Font, "Passive", pass, ink, 0, false);
+                    Gfx.Text(sb, Gfx.Small, Gfx.Wrap(Gfx.Small, p.Passive, 380), pass + new Vector2(0, 34), ink, 0, false);
+                }
+                else
+                    Gfx.Text(sb, Gfx.Small, $"Passive - unlocks at Level {Balance.PassiveLevel}", pass, ink * 0.55f, 0, false);
+            }
             Gfx.Text(sb, Gfx.Small, $"{_page + 1} / {_gs.Pets.Count}", new Vector2(Gfx.W / 2f, 610), ink, 0.5f, false);
         }
         else
@@ -227,82 +290,288 @@ public class NotebookScene : Scene
     }
 }
 
-/// <summary>Day 3 merchant shop (only after refusing to sell). Items take effect on purchase.</summary>
+/// <summary>Item card shared by the shop and the inventory.</summary>
+static class ItemCards
+{
+    /// <summary>Draws the card into <paramref name="card"/>; offsets scale with the card, the text wraps at a fixed width so it never re-wraps mid-animation.</summary>
+    public static void Draw(SpriteBatch sb, ItemInfo it, Rectangle card, int owned)
+    {
+        float s = card.Width / (float)Items.CardW;
+        bool art = Ui.ItemSlot != null;
+        if (art) sb.Draw(Ui.ItemSlot, card, Color.White);
+        else Ui.Panel(sb, card);
+        Gfx.Circle(sb, new Vector2(card.Center.X, card.Y + 42 * s), 26 * s, it.Color);
+        Gfx.Circle(sb, new Vector2(card.Center.X - 8 * s, card.Y + 33 * s), 7 * s, Color.White * 0.4f);
+        Gfx.Text(sb, Gfx.Font, it.Name, new Vector2(card.Center.X, card.Y + 78 * s), art ? Ui.CardInk : Palette.Text, 0.5f);
+        Gfx.Text(sb, Gfx.Small, Gfx.Wrap(Gfx.Small, it.Desc, Items.CardW - 40), new Vector2(card.Center.X, card.Y + 108 * s), art ? Ui.CardInkDim : Palette.Dim, 0.5f);
+        if (owned > 0) Gfx.Text(sb, Gfx.Small, $"x{owned}", new Vector2(card.Right - 14, card.Y + 10), art ? Ui.CardInk : Palette.Coin, 1f);
+    }
+
+    /// <summary>Buy/Use button of a card (skinned with the card art when it loaded).</summary>
+    public static Button Button(string label)
+    {
+        var b = new Button(Items.HeroButtonRect, label);
+        if (Ui.ItemButton == null) return b;
+        b.Skin = Ui.ItemButton;
+        b.SkinHeld = Ui.ItemButtonHold;
+        b.SkinSrc = Ui.ItemButtonSrc;
+        b.Ink = Ui.CardInk;
+        b.InkDim = Ui.CardInkDim;
+        return b;
+    }
+}
+
+/// <summary>
+/// Horizontal item carousel shared by the shop and the inventory.
+/// Horizontal Scrub: drag maps 1:1 onto the track (one card stride per <see cref="Balance.TrackStride"/> px); wheel, A/D, arrows and a tap on a card step one card.
+/// Staging: the card nearest the centre is the hero (full size, bright, the only clickable one); the rest shrink to 0.9 and dim to 0.4.
+/// </summary>
+sealed class ItemTrack
+{
+    static readonly Rectangle Band = new(0, 150, Gfx.W, 290);
+    const int BarW = 360, BarY = 470;
+
+    readonly Button _prev = new(new Rectangle(Gfx.W / 2 - BarW / 2 - 84, BarY - 18, 68, 40), "<");
+    readonly Button _next = new(new Rectangle(Gfx.W / 2 + BarW / 2 + 16, BarY - 18, 68, 40), ">");
+    Smoothed _pos;
+    int _focus;
+    bool _press, _drag;
+    int _pressX;
+    float _pressPos;
+
+    public int Focus => _focus;
+
+    /// <summary>Centre card <paramref name="i"/> (snap = no animation, used by the autoplay bot and the shots).</summary>
+    public void SetFocus(int i, bool snap = false)
+    {
+        _focus = Math.Clamp(i, 0, Items.Count - 1);
+        if (snap) _pos.Snap(_focus);
+    }
+
+    /// <summary>Is card <paramref name="i"/> the one in the middle (and so clickable)?</summary>
+    public bool IsHero(int i) => MathF.Abs(i - _pos.Value) < 0.5f;
+
+    public Rectangle Card(int i)
+    {
+        float d = i - _pos.Value;
+        float hero = 1 - MathF.Min(MathF.Abs(d), 1);
+        return Items.ScaledCard(Gfx.W / 2f + d * Balance.TrackStride, MathHelper.Lerp(Balance.StageHeroScale, 1f, Ease.OutCubic(hero)));
+    }
+
+    int Nearest => Math.Clamp((int)MathF.Round(_pos.Value), 0, Items.Count - 1);
+
+    void Step(int dir)
+    {
+        int f = Math.Clamp(_focus + dir, 0, Items.Count - 1);
+        if (f == _focus) return;
+        _focus = f;
+        Audio.Play(Sfx.UiClick);
+    }
+
+    public void Update(float dt)
+    {
+        _prev.Enabled = _focus > 0;
+        _next.Enabled = _focus < Items.Count - 1;
+        if (_prev.Update()) { _focus--; }
+        if (_next.Update()) { _focus++; }
+        if (Input.Wheel != 0) Step(Input.Wheel > 0 ? -1 : 1);
+        if (Input.Pressed(Keys.A) || Input.Pressed(Keys.Left)) Step(-1);
+        if (Input.Pressed(Keys.D) || Input.Pressed(Keys.Right)) Step(1);
+
+        if (Input.Click && Band.Contains(Input.Mouse))
+        {
+            _press = true;
+            _drag = false;
+            _pressX = Input.Mouse.X;
+            _pressPos = _pos.Value;
+        }
+        if (_press)
+        {
+            float dx = Input.Mouse.X - _pressX;
+            if (!_drag && MathF.Abs(dx) > Balance.TrackDragSlop) _drag = true;
+            if (_drag) _pos.Snap(Math.Clamp(_pressPos - dx / Balance.TrackStride, 0, Items.Count - 1));
+            if (!Input.MouseHeld)
+            {
+                _press = false;
+                if (_drag) _focus = Nearest;
+                else
+                    for (int i = 0; i < Items.Count; i++)
+                        if (i != Nearest && Card(i).Contains(Input.Mouse)) _focus = i;
+                _drag = false;
+            }
+        }
+        if (!_drag) _pos.Update(_focus, Balance.TrackSnapK, dt);
+    }
+
+    /// <summary>Dim a card that isn't the hero (draw after the card and its button).</summary>
+    public void DrawDim(SpriteBatch sb, int i)
+    {
+        float hero = 1 - MathF.Min(MathF.Abs(i - _pos.Value), 1);
+        float a = (1 - Balance.StageDimAlpha) * (1 - Ease.OutCubic(hero));
+        if (a > 0.01f) Ui.Frame(sb, Card(i), Color.Black * a, Color.Transparent);
+    }
+
+    /// <summary>Progress cue: arrows, a thumb on a bar and "n / N".</summary>
+    public void DrawCue(SpriteBatch sb)
+    {
+        int x = Gfx.W / 2 - BarW / 2;
+        Gfx.Rect(sb, new Rectangle(x, BarY, BarW, 4), Palette.PanelEdge * 0.6f);
+        int thumbW = BarW / Items.Count;
+        float t = Items.Count > 1 ? Math.Clamp(_pos.Value / (Items.Count - 1), 0f, 1f) : 0f;
+        Gfx.Rect(sb, new Rectangle(x + (int)((BarW - thumbW) * t), BarY - 2, thumbW, 8), Palette.Warm);
+        _prev.Draw(sb);
+        _next.Draw(sb);
+        Gfx.Text(sb, Gfx.Small, $"{Nearest + 1} / {Items.Count}", new Vector2(Gfx.W / 2f, BarY + 18), Palette.Text, 0.5f);
+        Gfx.Text(sb, Gfx.Small, "Wheel / drag / A D  Browse", new Vector2(Gfx.W / 2f, BarY + 42), Palette.Dim, 0.5f);
+    }
+}
+
+/// <summary>Day 3 merchant shop (after Sell or Refuse). Items go into the box in the base; use them later from there.</summary>
 public class ShopScene : Scene
 {
     readonly GameState _gs;
-    readonly Button[] _buy = new Button[3];
-    readonly Button _leave = new(new Rectangle(Gfx.W / 2 - 100, 600, 200, 50), "Leave");
+    readonly Button[] _buy = new Button[Items.Count];
+    readonly Button _leave = new(new Rectangle(Gfx.W / 2 - 100, 650, 200, 46), "Leave");
+    readonly Action? _onClose;
+    public GameState State => _gs;
     readonly Popups _popups = new();
+    readonly ItemTrack _track = new();
     float _time;
 
     public override bool Overlay => true;
+    public override string? Music => Bgm.Merchant;
 
-    record Item(string Name, int Price, string Desc, Color Color);
-
-    static readonly Item[] Items =
-    {
-        new("Crab Apple", 25, "One pet: +18 HP, +20 Stomach", new Color(220, 70, 60)),
-        new("Caffeine Tonic", 40, "+2 Energy today", new Color(230, 160, 60)),
-        new("Sea Tea", 18, "Dodge zone +20% in your next fight", new Color(90, 190, 220)),
-    };
-
-    public ShopScene(GameState gs)
+    public ShopScene(GameState gs, Action? onClose = null)
     {
         _gs = gs;
-        for (int i = 0; i < 3; i++) _buy[i] = new Button(new Rectangle(250 + i * 280, 470, 220, 50), $"Buy  {Items[i].Price}");
+        _onClose = onClose;
+        for (int i = 0; i < Items.Count; i++) _buy[i] = ItemCards.Button($"Buy  {Items.All[i].Price}");
+    }
+
+    /// <summary>Put item <paramref name="i"/> in the middle of the track (the autoplay bot and the shots use this before clicking <see cref="BuyRect"/>).</summary>
+    public void Focus(int i, bool snap = true) => _track.SetFocus(i, snap);
+
+    /// <summary>Hit box of the Buy button of the centred item (also used by the autoplay bot).</summary>
+    public static Rectangle BuyRect => Items.HeroButtonRect;
+
+    void Close()
+    {
+        M.Remove(this);
+        _onClose?.Invoke();
     }
 
     public override void Update(float dt)
     {
         _time += dt;
         _popups.Update(dt);
-        _buy[0].Enabled = _gs.Coin >= Items[0].Price && _gs.Alive.Any();
-        _buy[1].Enabled = _gs.Coin >= Items[1].Price;
-        _buy[2].Enabled = _gs.Coin >= Items[2].Price && !_gs.SeaTea;
-
-        if (_buy[0].Update())
-            M.Push(new PetPickScene("Who gets the Crab Apple?", _gs.Pets, p =>
-            {
-                _gs.Coin -= Items[0].Price;
-                p.Hp += 18;
-                p.Stomach += 20;
-                p.ClampStats();
-                _popups.Add($"{p.Name} munches happily", Palette.Heal, new Vector2(Gfx.W / 2f, 150));
-            }, onCancel: () => { }));
-        if (_buy[1].Update())
+        _track.Update(dt);
+        for (int i = 0; i < Items.Count; i++)
         {
-            _gs.Coin -= Items[1].Price;
-            _gs.Energy += 2;
-            _popups.Add("+2 Energy!", Palette.Heal, new Vector2(Gfx.W / 2f, 150));
+            var it = Items.All[i];
+            _buy[i].Rect = Items.ButtonRect(_track.Card(i));
+            _buy[i].Enabled = _track.IsHero(i) && _gs.Coin >= it.Price && _gs.Owned(it.Item) < Balance.ShopMaxOwned;
+            if (!_buy[i].Update()) continue;
+            _gs.SpendCoin(it.Price, ShopSink(it.Item));
+            _gs.AddItem(it.Item);
+            Telemetry.Emit("shop_buy", "item", it.Name, "price", it.Price, "target", "");
+            Audio.Play(Sfx.UiCoin);
+            _popups.Add($"{it.Name} added to your box", Palette.Heal, new Vector2(Gfx.W / 2f, 140));
         }
-        if (_buy[2].Update())
-        {
-            _gs.Coin -= Items[2].Price;
-            _gs.SeaTea = true;
-            _popups.Add("Sea Tea ready for the next fight", Palette.Clean, new Vector2(Gfx.W / 2f, 150));
-        }
-        if (_leave.Update() || Input.Back) M.Remove(this);
+        if (_leave.Update() || Input.Back) Close();
     }
+
+    static string ShopSink(Item i) => i switch
+    {
+        Item.CrabApple => "shop_apple",
+        Item.CaffeineTonic => "shop_tonic",
+        Item.SeaTea => "shop_tea",
+        Item.CloudyGlasses => "shop_glasses",
+        Item.BalletShoes => "shop_ballet",
+        Item.TornNotebook => "shop_notebook",
+        _ => "shop_ribbon",
+    };
 
     public override void Draw(SpriteBatch sb)
     {
         Ui.Dim(sb, 0.75f);
         Art.Merchant(sb, new Vector2(1150, 700), _time);
-        Gfx.Text(sb, Gfx.Big, "Merchant", new Vector2(Gfx.W / 2f, 60), Palette.Warm, 0.5f);
-        Gfx.Text(sb, Gfx.Font, $"Coin : {_gs.Coin}", new Vector2(Gfx.W / 2f, 130), Palette.Coin, 0.5f);
-        for (int i = 0; i < 3; i++)
+        Gfx.Text(sb, Gfx.Big, "Merchant", new Vector2(Gfx.W / 2f, 24), Palette.Warm, 0.5f);
+        Gfx.Text(sb, Gfx.Font, $"Coin : {_gs.Coin}", new Vector2(Gfx.W / 2f, 96), Palette.Coin, 0.5f);
+        Gfx.Text(sb, Gfx.Small, $"Bought items go to the box in your base (max {Balance.ShopMaxOwned} of each).", new Vector2(Gfx.W / 2f, 124), Palette.Dim, 0.5f);
+        for (int i = 0; i < Items.Count; i++)
         {
-            var it = Items[i];
-            var card = new Rectangle(240 + i * 280, 200, 240, 330);
-            Ui.Panel(sb, card);
-            Gfx.Circle(sb, new Vector2(card.Center.X, card.Y + 90), 44, it.Color);
-            Gfx.Circle(sb, new Vector2(card.Center.X - 14, card.Y + 74), 12, Color.White * 0.4f);
-            Gfx.Text(sb, Gfx.Font, it.Name, new Vector2(card.Center.X, card.Y + 150), Palette.Text, 0.5f);
-            Gfx.Text(sb, Gfx.Small, Gfx.Wrap(Gfx.Small, it.Desc, 200), new Vector2(card.Center.X, card.Y + 190), Palette.Dim, 0.5f);
+            ItemCards.Draw(sb, Items.All[i], _track.Card(i), _gs.Owned(Items.All[i].Item));
             _buy[i].Draw(sb);
+            _track.DrawDim(sb, i);
         }
+        _track.DrawCue(sb);
         _leave.Draw(sb);
         _popups.Draw(sb);
+    }
+}
+
+/// <summary>The box in the base: use the items bought from the merchant.</summary>
+public class InventoryScene : Scene
+{
+    readonly GameState _gs;
+    readonly Button[] _use = new Button[Items.Count];
+    readonly Popups _popups = new();
+    readonly ItemTrack _track = new();
+    public GameState State => _gs;
+
+    public override bool Overlay => true;
+
+    public InventoryScene(GameState gs)
+    {
+        _gs = gs;
+        for (int i = 0; i < Items.Count; i++) _use[i] = ItemCards.Button("Use");
+    }
+
+    /// <summary>Put item <paramref name="i"/> in the middle of the track (the autoplay bot uses this before clicking <see cref="UseRect"/>).</summary>
+    public void Focus(int i, bool snap = true) => _track.SetFocus(i, snap);
+
+    /// <summary>Hit box of the Use button of the centred item (also used by the autoplay bot).</summary>
+    public static Rectangle UseRect => Items.HeroButtonRect;
+
+    public override void Update(float dt)
+    {
+        _popups.Update(dt);
+        _track.Update(dt);
+        for (int i = 0; i < Items.Count; i++)
+        {
+            var it = Items.All[i];
+            string? block = Items.UseBlock(_gs, it.Item);
+            _use[i].Rect = Items.ButtonRect(_track.Card(i));
+            _use[i].Enabled = _track.IsHero(i) && _gs.Owned(it.Item) > 0 && block == null;
+            _use[i].Label = _gs.Owned(it.Item) == 0 ? "None" : block ?? "Use";
+            if (!_use[i].Update()) continue;
+            if (it.Item == Item.CrabApple)
+                M.Push(new PetPickScene("Who gets the Crab Apple?", _gs.Pets, p => Use(it.Item, p), onCancel: () => { }));
+            else Use(it.Item, null);
+        }
+        if (Input.Back) M.Remove(this);
+    }
+
+    void Use(Item item, Pet? target)
+    {
+        string msg = Items.Apply(_gs, item, target);
+        Audio.Play(Sfx.UiClick);
+        _popups.Add(msg, Palette.Heal, new Vector2(Gfx.W / 2f, 120));
+    }
+
+    public override void Draw(SpriteBatch sb)
+    {
+        Ui.Dim(sb, 0.75f);
+        Gfx.Text(sb, Gfx.Big, "Box", new Vector2(Gfx.W / 2f, 24), Palette.Warm, 0.5f);
+        Gfx.Text(sb, Gfx.Font, $"Energy {_gs.Energy}/{_gs.MaxEnergy}", new Vector2(Gfx.W / 2f, 96), Palette.Warm, 0.5f);
+        for (int i = 0; i < Items.Count; i++)
+        {
+            ItemCards.Draw(sb, Items.All[i], _track.Card(i), _gs.Owned(Items.All[i].Item));
+            _use[i].Draw(sb);
+            _track.DrawDim(sb, i);
+        }
+        _track.DrawCue(sb);
+        _popups.Draw(sb);
+        Ui.Hint(sb, "Click Use   |   ESC  Back");
     }
 }
