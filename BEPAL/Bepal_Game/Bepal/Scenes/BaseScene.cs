@@ -495,6 +495,7 @@ public class BaseScene : Scene
 
     /// <summary>Drawn heights (px) of the prop_* sprites (Content/Sprites, 512 px on the long side).</summary>
     const float BedH = 110, HearthH = 130, UpgradeH = 170, BookH = 120, DoorH = 205;   // door panel ≈ 1.3x the 140 px player
+    const float DoctorStationH = 142, DoctorStationDx = 123;   // sign + curtain + bed cut from the same sheet as npc_doctor, kept at its scale/offset
 
     void DrawObjects(SpriteBatch sb, Color tint)
     {
@@ -527,8 +528,9 @@ public class BaseScene : Scene
             if (_gs.Points > 0) Gfx.Circle(sb, new Vector2(ux + 50, g - 150), 10, Palette.Coin);
         }
         // Doctor
+        if (!Art.Prop(sb, "prop_doctor", new Vector2(Sx(DoctorX) + DoctorStationDx, g + 6), DoctorStationH, tint))
+            Gfx.Rect(sb, Sx(DoctorX) + 40, g - 60, 80, 60, new Color(200, 200, 210));
         Art.Doctor(sb, new Vector2(Sx(DoctorX), g + 6), _time);
-        Gfx.Rect(sb, Sx(DoctorX) + 40, g - 60, 80, 60, new Color(200, 200, 210));
         if (_gs.Pets.Any(p => p.Dead)) Gfx.Text(sb, Gfx.Font, "+", new Vector2(Sx(DoctorX), g - 170), Palette.Danger, 0.5f);
         // Notebook desk
         float nx = Sx(BookX);

@@ -28,7 +28,7 @@ public static class Art
     public static void LoadOptional(ContentManager content)
     {
         var names = new System.Collections.Generic.List<string> { "enemy_toothless", "enemy_bigz", "npc_merchant", "npc_doctor",
-            "prop_bed", "prop_hearth", "prop_notebook", "prop_door", "prop_upgrade" };
+            "prop_bed", "prop_hearth", "prop_notebook", "prop_door", "prop_upgrade", "prop_doctor" };
         foreach (Species s in Enum.GetValues<Species>()) names.Add("pet_" + s.ToString().ToLowerInvariant());
         foreach (var n in names)
         {

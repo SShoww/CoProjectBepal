@@ -92,10 +92,10 @@ project: BePal
 
 | รหัส Asset | ชื่อไฟล์ | คำอธิบาย & ท่าทาง | ขนาด | Priority | สถานะ |
 | --- | --- | --- | --- | --- | --- |
-| **NPC-01** | `npc/spr_doctor.png` | **หมอ:** ยืนประจำจุดหมอในฐาน (S3) และในหน้า Doctor (S13) | 320×400 | P1 | 🔲 Not Started |
+| **NPC-01** | `npc/spr_doctor.png` | **หมอ:** ยืนประจำจุดหมอในฐาน (S3) และในหน้า Doctor (S13) | 320×400 | P1 | ✅ In game (2026-11-02, `npc_doctor.png` จาก `player/Docter.png`) |
 | **NPC-02** | `npc/spr_merchant_idle.png` | **The Traveling Collector (Idle):** ชายร่างสูงชุดคลุมทมิฬ หมวกปีกกว้าง รอยยิ้มฟันทอง (Day 3) | 320×400 | P0 | 🔲 Not Started |
 | **NPC-03** | `npc/spr_merchant_talk.png` | **The Traveling Collector (Talk):** ยื่นมือสวมถุงมือหนังตอนเสนอซื้อสัตว์ 5,000 coin | 320×400 | P1 | 🔲 Not Started |
-| **NPC-04** | `npc/spr_bigz_idle.png` | **Big Z (บอส Day 5, HP 9999):** ศัตรูที่ใหญ่และน่ากลัวกว่า Toothless ชัดเจน — ⚠️ ยังไม่มี concept ใน GDD/Figma ต้องให้ภูมิกำหนด | 480×520 | P0 | 🔲 Not Started |
+| **NPC-04** | `npc/spr_bigz_idle.png` | **Big Z (บอส Day 5, HP 9999):** ศัตรูที่ใหญ่และน่ากลัวกว่า Toothless ชัดเจน — ⚠️ ยังไม่มี concept ใน GDD/Figma ต้องให้ภูมิกำหนด | 480×520 | P0 | ✅ In game (2026-11-02, `enemy_bigz.png` จาก `Enemy/Big-Z.png` — ไวรัสสีแดงยิ้ม) |
 | **NPC-05** | `npc/spr_bigz_attack.png` | **Big Z — Attack:** ท่าโจมตีใน Fight | 480×520 | P0 | 🔲 Not Started |
 | **NPC-06** | `npc/spr_merchant_angry.png` | Merchant (Angry) — ชักดาบซ่อนในไม้เท้า | 320×400 | Later | 🔲 Not Started |
 | **NPC-07** | `npc/spr_merchant_flask.png`, `_gatling.png`, `_cane.png`, `_defeat.png` | Merchant Boss Fight 3 เฟส + ท่าแพ้ (Prototype ปฏิเสธพ่อค้า = เปิดร้าน ไม่มี Boss Fight) | 320×400 | Later | 🔲 Not Started |
@@ -133,7 +133,7 @@ project: BePal
 | **ENV-10** | `env/spr_door_red_knock.png` | ประตูแดงตอนมี Event (สั่น/มีแสงแดงรั่ว) — ใช้คู่กับไอคอน Knock | 220×360 | P1 | 🔲 Not Started |
 | **ENV-11** | `env/spr_upgrade_station.png` | **สถานี Upgrade** | 200×240 | P1 | ✅ In game (2026-11-02, `prop_upgrade.png`) |
 | **ENV-12** | `env/spr_notebook_desk.png` | **โต๊ะสมุด** (เปิดสมุด S9) | 180×180 | P1 | ✅ In game (2026-11-02, `prop_notebook.png`) |
-| **ENV-13** | `env/spr_doctor_station.png` | **มุมหมอ** (เตียงพยาบาล/ตู้ยา — หมอยืนข้างๆ) | 220×240 | P1 | 🔲 Not Started |
+| **ENV-13** | `env/spr_doctor_station.png` | **มุมหมอ** (เตียงพยาบาล/ตู้ยา — หมอยืนข้างๆ) | 220×240 | P1 | ✅ In game (2026-11-02, `prop_doctor.png` = ป้ายกาชาด+ม่าน+เตียง จากแผ่นเดียวกับหมอ) |
 | **ENV-14** | `env/spr_merchant_cart.png` | **เกวียนพ่อค้า** จอดหน้าประตู (Day 3) | 400×300 | P1 | 🔲 Not Started |
 | **ENV-15** | `env/spr_acid_puddle.png` | คราบกรดสีม่วงหน้าประตู (หลัง Toothless บุก) | 160×48 | Later | 🔲 Not Started |
 
