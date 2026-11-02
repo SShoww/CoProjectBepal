@@ -3,6 +3,9 @@
 ล่าสุด 10 งาน งานละ 3 บรรทัด เขียนผ่าน `tools/context/log-edit.py` เท่านั้น — รายการเก่าอยู่ที่ [archive/edit-log/](archive/edit-log/)
 
 <!-- entries -->
+- **2026-11-02 21:21 · Q-20261102-pet-outline-icon** — ไอคอน exe/หน้าต่างจาก YourStory_Bepal_icon.png; outline สี #60DFFF กระพริบรอบ sprite สัตว์เมื่อ player เข้าใกล้และเมื่อ hover การ์ดเลือกสัตว์
+  - Files: BEPAL/Bepal_Game/Bepal/Icon.ico, BEPAL/Bepal_Game/Bepal/Icon.bmp, BEPAL/Bepal_Game/Bepal/World/Art.cs, BEPAL/Bepal_Game/Bepal/World/SpriteMotion.cs, CLAUDE.md
+  - Validation: build slnx 0/0; --shots 02_choose (บังคับ highlight ชั่วคราว) เห็น outline ฟ้า; exe icon ตรวจด้วย ExtractAssociatedIcon; --autoplay reached To be continued (หลังเปลี่ยนสี)
 - **2026-11-02 21:04 · Q-20261102-ui-skin** — ใส่ UI สีพีชชุดใหม่: แถบสถานะผู้เล่น 2/3 ของ mockup (+Energy เต็ม/ว่าง), dialog, choice, pause, options, ปุ่มเมนูหลัก, สมุด, การ์ดเลือกสัตว์, ป้าย Knock; merge PR #46 และปิด quest ตามคำสั่งผู้ใช้
   - Files: Core/Ui.cs, Scenes/{BaseScene, DialogScenes, MenuScenes, BaseMenus}.cs, Content/Sprites/ui_*.png (15), Content.mgcb, 05-asset-list.md, CLAUDE.md
   - Validation: build slnx 0/0; --autoplay + --refuse reached To be continued; shots ดูแล้ว; ยังไม่ได้ดูเมนู Pause/เล่นจริง
@@ -30,6 +33,3 @@
 - **2026-10-24 19:49 · Q-20261024-pet-player-sprites** — ใส่ sprite สัตว์ 3 ตัว + player ใหม่ (แก้หันผิดทาง) + กรอบ ui_status_panel แทน panel status สัตว์
   - Files: Content/Sprites/*.png, Content/Content.mgcb, World/Art.cs, World/SpriteMotion.cs, Core/Ui.cs, Core/Gfx.cs, Scenes/CareScenes.cs, Scenes/BaseScene.cs, docs
   - Validation: slnx build 0 warn/0 err; --autoplay reached To be continued; --shots 29 PNG; ยังไม่ได้เล่นจริงด้วยมือ
-- **2026-10-14 15:09 · Q-20261014-toothless-defeat** — แพ้ Toothless (สัตว์ตายหมด) -> dialogue แล้วกลับฐานไปชุบกับหมอ แทน GameOverScene
-  - Files: BEPAL/Bepal_Game/Bepal/Scenes/DayEvents.cs, Context/quests/Q-20261014-toothless-defeat.md
-  - Validation: build 0 warn/0 err; autoplay + --refuse reached To be continued; ยังไม่ได้ทดสอบเส้นทางแพ้จริง
