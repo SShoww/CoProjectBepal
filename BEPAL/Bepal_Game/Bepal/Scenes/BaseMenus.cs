@@ -20,11 +20,17 @@ public class UpgradeScene : Scene
     public UpgradeScene(GameState gs)
     {
         _gs = gs;
-        for (int i = 0; i < 3; i++) _plus[i] = new Button(PlusRect(i), "+");
+        for (int i = 0; i < 3; i++) _plus[i] = Ui.Skin(new Button(PlusRect(i), "+"), Ui.OptionsButton, ArtCorner);
     }
 
+    const int ArtCorner = 8, CardCorner = 16;   // nine-slice corners of the peach panel/button art and of the brown item card art
+    static readonly Color NeedInk = new(255, 196, 180);   // "Need ..." on the brown card (Palette.Danger is too dark there)
+
+    static readonly Rectangle Panel = new(280, 110, 500, 520);
+    /// <summary>Brown card behind upgrade row <paramref name="i"/>.</summary>
+    static Rectangle RowRect(int i) => new(Panel.X + Ui.Pad, 236 + i * 124, Panel.Width - 2 * Ui.Pad, 108);
     /// <summary>Hit box of the "+" button of row <paramref name="i"/> (also used by the autoplay bot).</summary>
-    public static Rectangle PlusRect(int i) => new(880, 250 + i * 110, 64, 64);
+    public static Rectangle PlusRect(int i) { var r = RowRect(i); return new(r.Right - 96, r.Center.Y - 30, 76, 60); }
 
     (string name, string desc, int coin, int points, int level, int max)[] Rows =>
     new[]
@@ -64,28 +70,37 @@ public class UpgradeScene : Scene
     public override void Draw(SpriteBatch sb)
     {
         Ui.Dim(sb, 0.7f);
-        var panel = new Rectangle(280, 110, 720, 520);
-        Ui.Panel(sb, panel);
-        Gfx.Text(sb, Gfx.Big, "Upgrade", new Vector2(panel.X + Ui.Pad + 6, panel.Y + Ui.Pad), Palette.Warm);
-        Gfx.Text(sb, Gfx.Font, $"Points : {_gs.Points}     Coin : {_gs.Coin}", new Vector2(panel.Right - Ui.Pad - 6, panel.Y + Ui.Pad + 8), Palette.Coin, 1f);
+        var panel = Panel;
+        bool art = Ui.SkinSliced(sb, Ui.Options, panel, ArtCorner);
+        Gfx.Text(sb, Gfx.Big, "Upgrade", new Vector2(panel.X + Ui.Pad + 6, panel.Y + Ui.Pad), art ? Ui.Ink : Palette.Warm, 0, !art);
+        Gfx.Text(sb, Gfx.Font, $"Points : {_gs.Points}     Coin : {_gs.Coin}", new Vector2(panel.Right - Ui.Pad - 6, panel.Y + Ui.Pad + 8),
+            art ? Ui.Ink : Palette.Coin, 1f, !art);
         Gfx.Text(sb, Gfx.Small, Gfx.Wrap(Gfx.Small, "Points come from Player level-ups: keep caring for your pets (Train, Feed, Clean, Heal).", panel.Width - 2 * Ui.Pad - 12),
-            new Vector2(panel.X + Ui.Pad + 6, panel.Y + 84), Palette.Dim);
+            new Vector2(panel.X + Ui.Pad + 6, panel.Y + 84), art ? Ui.InkDim : Palette.Dim, 0, !art);
         var rows = Rows;
         for (int i = 0; i < 3; i++)
         {
             var r = rows[i];
-            int y = 250 + i * 110;
-            Gfx.Text(sb, Gfx.Font, r.name, new Vector2(320, y + 2), Palette.Text);
-            Gfx.Text(sb, Gfx.Small, r.desc, new Vector2(320, y + 34), Palette.Dim);
+            var card = RowRect(i);
+            bool cardArt = Ui.SkinSliced(sb, Ui.ItemSlot, card, CardCorner);
+            Color ink = cardArt ? Ui.CardInk : Palette.Text, dim = cardArt ? Ui.CardInkDim : Palette.Dim;
+            int x = card.X + 24, col = card.X + 300;
+            Gfx.Text(sb, Gfx.Font, r.name, new Vector2(x, card.Y + 16), ink);
+            Gfx.Text(sb, Gfx.Small, r.desc, new Vector2(x, card.Y + 56), dim);
+            // Level pips: one Energy icon per upgrade level (full = bought), squares when the art is missing
             for (int k = 0; k < r.max; k++)
-                Gfx.Rect(sb, 600 + k * 26, y + 8, 20, 20, k < r.level ? Palette.Coin : new Color(60, 50, 56));
+            {
+                var pip = k < r.level ? Ui.EnergyFull : Ui.EnergyEmpty;
+                if (pip != null) sb.Draw(pip, new Rectangle(col - 5 + k * 42, card.Y + 6, 44, 44), Color.White);
+                else Gfx.Rect(sb, col + k * 26, card.Y + 16, 20, 20, k < r.level ? Palette.Coin : new Color(60, 50, 56));
+            }
             bool maxed = r.level >= r.max;
             string req = maxed ? "MAX" : $"REQ. {r.coin} coin . {r.points} {(r.points == 1 ? "point" : "points")}";
-            Gfx.Text(sb, Gfx.Small, req, new Vector2(600, y + 38), maxed ? Palette.Coin : Palette.Dim);
+            Gfx.Text(sb, Gfx.Small, req, new Vector2(col, card.Y + 58), maxed ? (cardArt ? ink : Palette.Coin) : dim);
             if (!maxed && (_gs.Points < r.points || _gs.Coin < r.coin))
             {
                 string why = _gs.Points < r.points ? $"Need {r.points - _gs.Points} more {(r.points - _gs.Points == 1 ? "point" : "points")}" : $"Need {r.coin - _gs.Coin} more coin";
-                Gfx.Text(sb, Gfx.Small, why, new Vector2(600, y + 60), Palette.Danger);
+                Gfx.Text(sb, Gfx.Small, why, new Vector2(col, card.Y + 80), cardArt ? NeedInk : Palette.Danger);
             }
             _plus[i].Draw(sb);
         }
