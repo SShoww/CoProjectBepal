@@ -9,9 +9,9 @@ namespace Bepal;
 /// <summary>Figma Scene 1.</summary>
 public class MainMenuScene : Scene
 {
-    readonly Button _play = new(new Rectangle(Gfx.W / 2 - 120, 380, 240, 56), "Play");
-    readonly Button _options = new(new Rectangle(Gfx.W / 2 - 120, 450, 240, 56), "Options");
-    readonly Button _quit = new(new Rectangle(Gfx.W / 2 - 120, 520, 240, 56), "Quit");
+    readonly Button _play = Ui.Skin(new Button(new Rectangle(Gfx.W / 2 - 120, 380, 240, 56), "Play"), Ui.MenuButton);
+    readonly Button _options = Ui.Skin(new Button(new Rectangle(Gfx.W / 2 - 120, 450, 240, 56), "Options"), Ui.MenuButton);
+    readonly Button _quit = Ui.Skin(new Button(new Rectangle(Gfx.W / 2 - 120, 520, 240, 56), "Quit"), Ui.MenuButton);
     float _time;
 
     public override string? Music => Bgm.Menu;
@@ -191,7 +191,7 @@ public class NightScene : Scene
 public class OptionsScene : Scene
 {
     readonly Slider[] _sliders;
-    readonly Button _back = new(new Rectangle(Gfx.W / 2 - 100, 150 + 400 - Ui.Pad - 50, 200, 50), "Back");
+    readonly Button _back = Ui.Skin(new Button(new Rectangle(Gfx.W / 2 - 100, 150 + 400 - Ui.Pad - 50, 200, 50), "Back"), Ui.OptionsButton);
     readonly Action? _onClose;
     int _sel;
 
@@ -239,15 +239,15 @@ public class OptionsScene : Scene
     {
         Ui.Dim(sb, 0.7f);
         var panel = new Rectangle(Gfx.W / 2 - 360, 150, 720, 400);
-        Ui.Panel(sb, panel);
-        Gfx.Text(sb, Gfx.Big, "Options", new Vector2(Gfx.W / 2f, panel.Y + Ui.Pad), Palette.Warm, 0.5f);
+        bool art = Ui.Skin(sb, Ui.Options, panel);
+        Gfx.Text(sb, Gfx.Big, "Options", new Vector2(Gfx.W / 2f, panel.Y + Ui.Pad), art ? Ui.Ink : Palette.Warm, 0.5f, !art);
         string[] names = { "Music", "Sound effects" };
         for (int i = 0; i < _sliders.Length; i++)
         {
             var s = _sliders[i];
-            Gfx.Text(sb, Gfx.Font, names[i], new Vector2(panel.X + 50, s.Rect.Center.Y - Gfx.Font.LineSpacing / 2f), i == _sel ? Palette.Text : Palette.Dim);
+            Gfx.Text(sb, Gfx.Font, names[i], new Vector2(panel.X + 50, s.Rect.Center.Y - Gfx.Font.LineSpacing / 2f), art ? (i == _sel ? Ui.Ink : Ui.InkDim) : i == _sel ? Palette.Text : Palette.Dim, 0, !art);
             s.Draw(sb, i == _sel);
-            Gfx.Text(sb, Gfx.Font, $"{(int)MathF.Round(s.Value * 100)}%", new Vector2(panel.Right - 50, s.Rect.Center.Y - Gfx.Font.LineSpacing / 2f), Palette.Coin, 1f);
+            Gfx.Text(sb, Gfx.Font, $"{(int)MathF.Round(s.Value * 100)}%", new Vector2(panel.Right - 50, s.Rect.Center.Y - Gfx.Font.LineSpacing / 2f), art ? Ui.Ink : Palette.Coin, 1f, !art);
         }
         _back.Draw(sb);
         Ui.Hint(sb, "Drag or click a slider   |   W/S  Select   A/D  Adjust   |   ESC  Back");

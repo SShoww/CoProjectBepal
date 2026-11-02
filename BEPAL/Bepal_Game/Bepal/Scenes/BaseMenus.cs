@@ -169,8 +169,8 @@ public class NotebookScene : Scene
     int _tab = -1;   // -1 = main page, 0 = pets, 1 = disaster
     int _page;
     float _time;
-    readonly Button _pets = new(new Rectangle(380, 300, 240, 120), "pet discovery");
-    readonly Button _disaster = new(new Rectangle(660, 300, 240, 120), "Disaster");
+    readonly Button _pets = Ui.Skin(new Button(new Rectangle(380, 300, 240, 120), "pet discovery"), Ui.NotebookButton);
+    readonly Button _disaster = Ui.Skin(new Button(new Rectangle(660, 300, 240, 120), "Disaster"), Ui.NotebookButton);
 
     public override bool Overlay => true;
 
@@ -201,15 +201,29 @@ public class NotebookScene : Scene
     {
         Ui.Dim(sb, 0.7f);
         var book = new Rectangle(160, 90, 960, 560);
-        Gfx.Rect(sb, book, new Color(236, 222, 196));
-        Gfx.Outline(sb, book, new Color(120, 70, 50), 6);
-        int spineTop = _tab == -1 ? book.Y + 190 : book.Y;   // cover page: keep the spine clear of the title
-        Gfx.Rect(sb, book.Center.X - 3, spineTop, 6, book.Bottom - spineTop, new Color(190, 170, 140));
+        var paper = new Color(236, 222, 196);
+        if (Ui.Notebook is { } art)
+        {
+            sb.Draw(art, book, Color.White);   // title "Survival Notebook" is hand-written on the art
+            if (_tab != -1)
+            {
+                // Inner pages: paint over the title on both pages, keeping the border and the spine
+                Gfx.Rect(sb, book.X + 8, book.Y + 8, book.Width / 2 - 14, 140, paper);
+                Gfx.Rect(sb, book.Center.X + 6, book.Y + 8, book.Width / 2 - 14, 140, paper);
+            }
+        }
+        else
+        {
+            Gfx.Rect(sb, book, paper);
+            Gfx.Outline(sb, book, new Color(120, 70, 50), 6);
+            int spineTop = _tab == -1 ? book.Y + 190 : book.Y;   // cover page: keep the spine clear of the title
+            Gfx.Rect(sb, book.Center.X - 3, spineTop, 6, book.Bottom - spineTop, new Color(190, 170, 140));
+        }
         var ink = new Color(60, 40, 36);
 
         if (_tab == -1)
         {
-            Gfx.Text(sb, Gfx.Big, "Survival Notebook", new Vector2(Gfx.W / 2f, 160), ink, 0.5f, false);
+            if (Ui.Notebook == null) Gfx.Text(sb, Gfx.Big, "Survival Notebook", new Vector2(Gfx.W / 2f, 160), ink, 0.5f, false);
             _pets.Draw(sb);
             _disaster.Draw(sb);
             if (!_gs.DisasterSeen)

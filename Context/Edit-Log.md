@@ -3,6 +3,9 @@
 ล่าสุด 10 งาน งานละ 3 บรรทัด เขียนผ่าน `tools/context/log-edit.py` เท่านั้น — รายการเก่าอยู่ที่ [archive/edit-log/](archive/edit-log/)
 
 <!-- entries -->
+- **2026-11-02 20:38 · Q-20261102-ui-skin** — ใส่ UI ชุดสีพีชใหม่: แถบสถานะผู้เล่นตาม mockup (+Energy เต็ม/ว่าง), dialog, choice, pause, options, ปุ่มเมนูหลัก, สมุด, การ์ดเลือกสัตว์, ป้าย Knock; ไม่มีไฟล์ = วาด nine-patch เดิม
+  - Files: BEPAL/Bepal_Game/Bepal/Core/Ui.cs, BEPAL/Bepal_Game/Bepal/Scenes/{BaseScene, DialogScenes, MenuScenes, BaseMenus}.cs, Content/Sprites/ui_*.png (15), Content.mgcb, 05-asset-list.md, CLAUDE.md
+  - Validation: build 0/0; shots ดูแล้ว 8 หน้า; autoplay + --refuse reached To be continued; ยังไม่ได้ดูเมนู Pause/เล่นจริง
 - **2026-11-02 12:01 · Q-20261102-base-props-sprites** — ใส่ sprite เตียง/เตาไฟ/โต๊ะอัปเกรด/แท่นสมุด/ประตูแดง ในฐานแทน primitive (Art.Prop, fallback เดิม); ย่อประตูเหลือ 205 px ให้สมส่วนกับ player; merge PR #44 และปิด quest ตามคำสั่งผู้ใช้
   - Files: BEPAL/Bepal_Game/Bepal/Content/Sprites/prop_*.png, Content.mgcb, World/Art.cs, World/Backdrop.cs, Scenes/BaseScene.cs, 05-asset-list.md, _candidates/README.md, CLAUDE.md
   - Validation: build 0/0; --shots ฉากฐาน + 04_base_door ดูแล้ว; --autoplay reached To be continued; ยังไม่ได้เล่นจริง
@@ -30,6 +33,3 @@
 - **2026-10-14 15:09 · Q-20261014-toothless-defeat** — แพ้ Toothless (สัตว์ตายหมด) -> dialogue แล้วกลับฐานไปชุบกับหมอ แทน GameOverScene
   - Files: BEPAL/Bepal_Game/Bepal/Scenes/DayEvents.cs, Context/quests/Q-20261014-toothless-defeat.md
   - Validation: build 0 warn/0 err; autoplay + --refuse reached To be continued; ยังไม่ได้ทดสอบเส้นทางแพ้จริง
-- **2026-10-14 13:54 · Q-20261014-ui-font-patrick-hand** — ปิด quest ui-font-patrick-hand (ย้ายไป archive ตามคำสั่งผู้ใช้)
-  - Files: Context/quests, Context/archive/quests
-  - Validation: merge แล้ว PR #32; ยังไม่ได้เล่นจริง
