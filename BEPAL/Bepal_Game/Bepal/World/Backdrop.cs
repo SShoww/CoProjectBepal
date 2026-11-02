@@ -31,7 +31,7 @@ public class Backdrop
     /// <summary>How many px the sprite bottom sits below groundY (hides it behind the ground fill).</summary>
     const float GroundOverlap = 0f;
 
-    static readonly Color NightTint = new(60, 70, 130);
+    public static readonly Color NightTint = new(60, 70, 130);
 
     static Texture2D? _sky, _clouds, _hills, _mid, _near, _fg, _base;
 

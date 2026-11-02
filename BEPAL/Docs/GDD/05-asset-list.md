@@ -27,7 +27,7 @@ project: BePal
 
 | สถานะ | รายการ |
 | --- | --- |
-| เสร็จ (อยู่ใน `Content/`) | parallax 5 ชั้น (`bg_parallax_{sky,clouds,hills,mid,near}.png`, 320x180 วาด 4x), `fg_jungle.png`, `player.png` (ภาพวาดนิ่งเดียว + `SpriteMotion` ขยับด้วยโค้ด), สัตว์ 4 ตัว `pet_mossling\|nibbleclaw\|blinkbun\|toothless.png` (ภาพนิ่ง; `pet_toothless` ใช้เป็นศัตรู Toothless ในฉากสู้ด้วย), ผนัง/พื้นฐาน `bg_base.png` (ย่อ x0.42 ให้สูงเท่าผนังเดิม y 350–600 แล้วต่อซ้ำ/กลับด้านสลับกันทั่วฐาน), กรอบ status สัตว์ `ui_status_panel.png`, การ์ดไอเทม Shop/Box `ui_item_slot.png` + ปุ่ม `ui_item_button(_hold).png`, SFX 17 ไฟล์, **BGM 7 ไฟล์ `.ogg`** (`Content/Music/`), SpriteFont 3 ตัว (`Fonts/Main\|Big\|Small`) — ตาราง §2 ใน [14-audio-fonts-list.md](14-audio-fonts-list.md) |
+| เสร็จ (อยู่ใน `Content/`) | parallax 5 ชั้น (`bg_parallax_{sky,clouds,hills,mid,near}.png`, 320x180 วาด 4x), `fg_jungle.png`, `player.png` (ภาพวาดนิ่งเดียว + `SpriteMotion` ขยับด้วยโค้ด), สัตว์ 4 ตัว `pet_mossling\|nibbleclaw\|blinkbun\|toothless.png` (ภาพนิ่ง; `pet_toothless` ใช้เป็นศัตรู Toothless ในฉากสู้ด้วย), ของในฐาน `prop_{bed,hearth,upgrade,notebook,door}.png` (crop + ย่อด้านยาว 512, `Art.Prop`), ผนัง/พื้นฐาน `bg_base.png` (ย่อ x0.42 ให้สูงเท่าผนังเดิม y 350–600 แล้วต่อซ้ำ/กลับด้านสลับกันทั่วฐาน), กรอบ status สัตว์ `ui_status_panel.png`, การ์ดไอเทม Shop/Box `ui_item_slot.png` + ปุ่ม `ui_item_button(_hold).png`, SFX 17 ไฟล์, **BGM 7 ไฟล์ `.ogg`** (`Content/Music/`), SpriteFont 3 ตัว (`Fonts/Main\|Big\|Small`) — ตาราง §2 ใน [14-audio-fonts-list.md](14-audio-fonts-list.md) |
 | ยังไม่ทำ | sprite สัตว์เลี้ยง / ศัตรู / NPC (โค้ดรองรับแล้วแต่ยังไม่มีไฟล์; ตอนนี้วาดด้วยรูปทรงใน `World/Art.cs`), UI/ไอคอน/ไอเทมทั้งหมด (การ์ดไอเทมวาดด้วยโค้ด), ฟอนต์จริงนอกเหนือ SpriteFont 3 ตัว (`Segoe UI` ชั่วคราว) |
 
 > **หมายเหตุ as-built:** Content อยู่ในโฟลเดอร์แบน `Content/Sprites/`, `Content/Sfx/`, `Content/Music/`, `Content/Fonts/` — ชื่อโฟลเดอร์ย่อย (`player/`, `pet/`, `env/`, `ui/...`) และชื่อ `spr_*` ในตารางด้านล่างเป็นชื่อที่ส่งมอบจาก Art (จะ rename ตอนวางไฟล์เข้า `Content/Sprites/` ตามที่โค้ดคาดไว้ เช่น `pet_<species>.png`) · ไฟล์ orphan: `_candidates/sfx/sfx_qte_perfect.wav` (ไม่ได้โหลด — Perfect chime สังเคราะห์ตอนรัน)
@@ -127,12 +127,12 @@ project: BePal
 
 | รหัส Asset | ชื่อไฟล์ | คำอธิบาย | ขนาด | Priority | สถานะ |
 | --- | --- | --- | --- | --- | --- |
-| **ENV-07** | `env/spr_core_hearth.png` | **Core Hearth:** แกนกลางฐาน แสงไฟส้มอุ่น จุดศูนย์กลางของชีวิตในฐาน (2–4 เฟรมไฟกะพริบ) | 240×280 | P0 | 🔲 Not Started |
-| **ENV-08** | `env/spr_bed.png` | **เตียง:** จุด End day (ซ้ายสุดของฐาน) | 240×140 | P0 | 🔲 Not Started |
-| **ENV-09** | `env/spr_door_red.png` | **ประตูเหล็กแดง (The Red Door):** ขวาสุดของฐาน — สถานะปิด | 220×360 | P0 | 🔲 Not Started |
+| **ENV-07** | `env/spr_core_hearth.png` | **Core Hearth:** แกนกลางฐาน แสงไฟส้มอุ่น จุดศูนย์กลางของชีวิตในฐาน (2–4 เฟรมไฟกะพริบ) | 240×280 | P0 | ✅ In game (2026-11-02, `prop_hearth.png`) |
+| **ENV-08** | `env/spr_bed.png` | **เตียง:** จุด End day (ซ้ายสุดของฐาน) | 240×140 | P0 | ✅ In game (2026-11-02, `prop_bed.png`) |
+| **ENV-09** | `env/spr_door_red.png` | **ประตูเหล็กแดง (The Red Door):** ขวาสุดของฐาน — สถานะปิด | 220×360 | P0 | ✅ In game (2026-11-02, `prop_door.png`) |
 | **ENV-10** | `env/spr_door_red_knock.png` | ประตูแดงตอนมี Event (สั่น/มีแสงแดงรั่ว) — ใช้คู่กับไอคอน Knock | 220×360 | P1 | 🔲 Not Started |
-| **ENV-11** | `env/spr_upgrade_station.png` | **สถานี Upgrade** | 200×240 | P1 | 🔲 Not Started |
-| **ENV-12** | `env/spr_notebook_desk.png` | **โต๊ะสมุด** (เปิดสมุด S9) | 180×180 | P1 | 🔲 Not Started |
+| **ENV-11** | `env/spr_upgrade_station.png` | **สถานี Upgrade** | 200×240 | P1 | ✅ In game (2026-11-02, `prop_upgrade.png`) |
+| **ENV-12** | `env/spr_notebook_desk.png` | **โต๊ะสมุด** (เปิดสมุด S9) | 180×180 | P1 | ✅ In game (2026-11-02, `prop_notebook.png`) |
 | **ENV-13** | `env/spr_doctor_station.png` | **มุมหมอ** (เตียงพยาบาล/ตู้ยา — หมอยืนข้างๆ) | 220×240 | P1 | 🔲 Not Started |
 | **ENV-14** | `env/spr_merchant_cart.png` | **เกวียนพ่อค้า** จอดหน้าประตู (Day 3) | 400×300 | P1 | 🔲 Not Started |
 | **ENV-15** | `env/spr_acid_puddle.png` | คราบกรดสีม่วงหน้าประตู (หลัง Toothless บุก) | 160×48 | Later | 🔲 Not Started |
