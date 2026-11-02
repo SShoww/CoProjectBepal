@@ -8,7 +8,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 BePal — a university team's MonoGame prototype (virtual-pet care + survival, "Endless Survival Management"). The repo is also an Obsidian vault (`.obsidian/`); design docs are Markdown, mostly in Thai.
 
-- Game code: `BEPAL/Bepal_Game/Bepal/` (MonoGame DesktopGL 3.8.4, .NET 8, C# with `Nullable` enabled, 1280x720)
+- Game code: `BEPAL/Bepal_Game/Bepal/` (MonoGame DesktopGL 3.8.4, .NET 8, C# with `Nullable` enabled, 1280x720); solutions `BEPAL/Bepal_Game/Bepal_Game.slnx` (gates, VS 17.13+) and `Bepal_Game.sln` (same single project, for older Visual Studio — keep both in sync when adding a project)
+- Releases: tag `vX.Y.Z` on `main` + GitHub Release with the self-contained win-x64 zip; player-facing build/run/play instructions live in the root `README.md`
 - Design docs: `BEPAL/Docs/GDD/` (index in `README.md`), Agile docs in `BEPAL/Docs/Agile/`, templates in `BEPAL/Template/`
 - **Scope authority:** `BEPAL/Docs/GDD/06-vertical-slice.md` defines the prototype (Day 1–5 slice) and overrides the other GDD files. Code structure is documented in `04-class-diagram.md` — keep it in sync when adding/renaming scenes or folders.
 - The Figma board (linked in the GDD README) is the upstream design source; where it conflicts with older GDD text, Figma wins (conflicts listed in the README changelog).
