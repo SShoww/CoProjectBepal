@@ -37,6 +37,7 @@ public class Button
     public Texture2D? Skin, SkinHeld;
     public Rectangle SkinSrc;
     public Color Ink = Palette.Text, InkDim = Palette.Dim;
+    public bool Shadow = true;
 
     public Button(Rectangle rect, string label)
     {
@@ -75,7 +76,7 @@ public class Button
         var font = Label.Length == 1 ? Gfx.Big                                   // glyph buttons ("+") need the big size to read
             : Gfx.Font.MeasureString(Label).X > room ? Gfx.Small : Gfx.Font;   // long label: drop to the small size first
         var label = Gfx.Fit(font, Label, room);
-        Gfx.Text(sb, font, label, new Vector2(r.Center.X, r.Center.Y - font.LineSpacing / 2f), Enabled ? Ink : InkDim, 0.5f);
+        Gfx.Text(sb, font, label, new Vector2(r.Center.X, r.Center.Y - font.LineSpacing / 2f), Enabled ? Ink : InkDim, 0.5f, Shadow);
     }
 }
 
@@ -147,12 +148,56 @@ public static class Ui
     /// <summary>Text on the light-brown item card art.</summary>
     public static readonly Color CardInk = new(255, 248, 236), CardInkDim = new(246, 230, 210);
 
+    /// <summary>Player status bar (ui_player_info.png, 1545x225, drawn at <see cref="PlayerInfoScale"/>) and its Energy pips (64x64, full / empty).</summary>
+    public static Texture2D? PlayerInfo, EnergyFull, EnergyEmpty;
+    public const float PlayerInfoScale = 1.2f / 3f;   // 2/3 of the Figma mockup size (1030x150)
+    /// <summary>Peach panels, each the exact size of the box it replaces: dialogue box with its name tab (1120x202), choice / pause prompt (800x260) and their
+    /// 220x60 buttons, options (720x400) + 200x50 button, main-menu button (240x56), notebook (960x560) + 240x120 section button, pet pick card (250x340), "Knock!" sign.</summary>
+    public static Texture2D? Dialog, Choice, ChoiceButton, Pause, PauseButton, Options, OptionsButton, MenuButton, Notebook, NotebookButton, PetCard, Knock;
+    /// <summary>Text on the peach panels.</summary>
+    public static readonly Color Ink = new(92, 52, 28), InkDim = new(160, 116, 84);
+
     public static void LoadOptional(ContentManager content)
     {
         StatusPanel = Load(content, "ui_status_panel");
         ItemSlot = Load(content, "ui_item_slot");
         ItemButton = Load(content, "ui_item_button");
         ItemButtonHold = Load(content, "ui_item_button_hold");
+        PlayerInfo = Load(content, "ui_player_info");
+        EnergyFull = Load(content, "ui_energy_full");
+        EnergyEmpty = Load(content, "ui_energy_empty");
+        Dialog = Load(content, "ui_dialog");
+        Choice = Load(content, "ui_choice");
+        ChoiceButton = Load(content, "ui_choice_button");
+        Pause = Load(content, "ui_pause");
+        PauseButton = Load(content, "ui_pause_button");
+        Options = Load(content, "ui_options");
+        OptionsButton = Load(content, "ui_options_button");
+        MenuButton = Load(content, "ui_menu_button");
+        Notebook = Load(content, "ui_notebook");
+        NotebookButton = Load(content, "ui_notebook_button");
+        PetCard = Load(content, "ui_pet_card");
+        Knock = Load(content, "ui_knock");
+    }
+
+    /// <summary>Draws <paramref name="tex"/> over <paramref name="r"/>, or the nine-patch <see cref="Panel"/> when the art is missing. Returns true if the art was drawn.</summary>
+    public static bool Skin(SpriteBatch sb, Texture2D? tex, Rectangle r, float alpha = 0.95f)
+    {
+        if (tex == null) { Panel(sb, r, alpha); return false; }
+        sb.Draw(tex, r, Color.White);
+        return true;
+    }
+
+    /// <summary>Gives <paramref name="b"/> the whole of <paramref name="tex"/> as its skin with <see cref="Ink"/> text; no art = unchanged nine-patch button.</summary>
+    public static Button Skin(Button b, Texture2D? tex)
+    {
+        if (tex == null) return b;
+        b.Skin = tex;
+        b.SkinSrc = tex.Bounds;
+        b.Ink = Ink;
+        b.InkDim = InkDim;
+        b.Shadow = false;
+        return b;
     }
 
     static Texture2D? Load(ContentManager content, string name)

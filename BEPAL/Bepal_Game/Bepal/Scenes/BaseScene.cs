@@ -237,7 +237,7 @@ public class BaseScene : Scene
             new Option("Resume", () => { }),
             new Option("Options", () => M.Push(new OptionsScene(OpenPause))),
             new Option("Main Menu", () => M.Reset(new MainMenuScene())),
-        }, cancellable: true));
+        }, cancellable: true, pause: true));
 
     static float WallCap(float top, float dist) => top * (0.5f + 0.5f * Ease.Smoothstep(dist));
 
@@ -558,11 +558,48 @@ public class BaseScene : Scene
             Gfx.Glow(sb, new Vector2(dx, g - doorH / 2), 220, doorH * 0.87f, Palette.Danger * (0.3f + 0.3f * pulse));
             Gfx.EndAdditive(sb);
             float shake = MathF.Sin(_time * 40) * 3 * pulse;
-            Gfx.Text(sb, Gfx.Font, "Knock Knock !!", new Vector2(dx + shake, g - doorH - 60), Palette.Danger, 0.5f);
+            if (Ui.Knock is { } knock)
+                sb.Draw(knock, new Vector2(dx + shake, g - doorH - 50), null, Color.White, 0, new Vector2(knock.Width, knock.Height) / 2, 1f, SpriteEffects.None, 0);
+            else Gfx.Text(sb, Gfx.Font, "Knock Knock !!", new Vector2(dx + shake, g - doorH - 60), Palette.Danger, 0.5f);
         }
     }
 
     void DrawHud(SpriteBatch sb)
+    {
+        if (Ui.PlayerInfo != null) DrawHudArt(sb, Ui.PlayerInfo);
+        else DrawHudPanel(sb);
+        if (_near == null && M.Top == this) Ui.Hint(sb, "A / D  Walk     SHIFT  Run     SPACE  Interact     ESC  Pause");
+    }
+
+    /// <summary>Player status bar art (ui_player_info.png); slot boxes are in the art's own pixels, scaled by <see cref="Ui.PlayerInfoScale"/>.</summary>
+    void DrawHudArt(SpriteBatch sb, Texture2D art)
+    {
+        const float s = Ui.PlayerInfoScale;
+        var o = new Vector2(32, 26);   // Figma mockup (48, 39) at the same 2/3
+        Rectangle R(int x, int y, int w, int h) => new((int)(o.X + x * s), (int)(o.Y + y * s), (int)(w * s), (int)(h * s));
+        void Centered(SpriteFont font, string text, Rectangle slot, Color c)
+        {
+            if (font.MeasureString(text).X > slot.Width - 4) font = Gfx.Small;   // small slots: drop to the small size
+            Gfx.Text(sb, font, Gfx.Fit(font, text, slot.Width - 4), new Vector2(slot.Center.X, slot.Center.Y - font.LineSpacing / 2f), c, 0.5f, false);
+        }
+
+        sb.Draw(art, new Rectangle((int)o.X, (int)o.Y, (int)(art.Width * s), (int)(art.Height * s)), Color.White);
+        Centered(Gfx.Font, $"Day {_gs.Day}", R(45, 42, 159, 81), Ui.Ink);
+        Centered(Gfx.Font, $"{_gs.Coin}", R(318, 42, 126, 81), Ui.Ink);
+        Centered(Gfx.Small, "Energy", R(45, 138, 159, 45), Ui.Ink);
+        for (int i = 0; i < _gs.MaxEnergy; i++)
+        {
+            var pip = i < _gs.Energy ? Ui.EnergyFull : Ui.EnergyEmpty;
+            if (pip != null) sb.Draw(pip, R(212 + i * 63, 131, 64, 64), Color.White);
+        }
+        Centered(Gfx.Font, $"Player LV. {_gs.PlayerLevel}", R(612, 42, 399, 81), Ui.Ink);
+        var bar = R(621, 141, 444, 36);
+        float t = _gs.PlayerMaxExp <= 0 ? 0 : MathHelper.Clamp(_expShown.Value / _gs.PlayerMaxExp, 0, 1);
+        Gfx.Rect(sb, bar.X, bar.Y, bar.Width * t, bar.Height, Palette.Progress);
+        Centered(Gfx.Font, $"Points {_gs.Points}", R(1155, 75, 327, 81), _gs.Points > 0 ? Ui.Ink : Ui.InkDim);
+    }
+
+    void DrawHudPanel(SpriteBatch sb)
     {
         var r = new Rectangle(16, 14, 488, 74);
         Ui.Panel(sb, r, 0.85f);
@@ -575,7 +612,5 @@ public class BaseScene : Scene
         Gfx.Text(sb, Gfx.Font, $"Player LV. {_gs.PlayerLevel}", new Vector2(r.X + 228, r.Y + 8), Palette.Text);
         Ui.Bar(sb, new Rectangle(r.X + 228, r.Y + 40, 150, 14), _expShown.Value, _gs.PlayerMaxExp, Palette.Progress);
         Gfx.Text(sb, Gfx.Font, $"Points {_gs.Points}", new Vector2(r.X + 392, r.Y + 24), _gs.Points > 0 ? Palette.Coin : Palette.Dim);
-
-        if (_near == null && M.Top == this) Ui.Hint(sb, "A / D  Walk     SHIFT  Run     SPACE  Interact     ESC  Pause");
     }
 }
