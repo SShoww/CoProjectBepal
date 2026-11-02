@@ -3,9 +3,9 @@
 ล่าสุด 10 งาน งานละ 3 บรรทัด เขียนผ่าน `tools/context/log-edit.py` เท่านั้น — รายการเก่าอยู่ที่ [archive/edit-log/](archive/edit-log/)
 
 <!-- entries -->
-- **2026-11-02 22:57 · Q-20261102-release-v1** — เตรียม release v1.0.0 ส่งงาน: README ส่วนผู้เล่น (ดาวน์โหลด/build/run/วิธีเล่น/เครดิต), เพิ่ม Bepal_Game.sln สำหรับ VS รุ่นเก่า
-  - Files: README.md, BEPAL/Bepal_Game/Bepal_Game.sln, CLAUDE.md, Context/Gitflow.md, Context/Status.md
-  - Validation: build sln+slnx 0/0; autoplay + refuse reached To be continued; shots 29 PNG
+- **2026-11-02 23:09 · Q-20261102-release-v1** — ส่งมอบ v1.0.0: tag + GitHub Release แนบ win-x64 zip, README วิธี build/run/เล่น, .sln; zip source/build/assets + เอกสารสรุปกระบวนการ .docx (หัวข้อ 2/3 เป็น template)
+  - Files: README.md, BEPAL/Bepal_Game/Bepal_Game.sln, CLAUDE.md, Context/Gitflow.md, Context/Status.md, publish/submission/ (gitignored)
+  - Validation: build sln+slnx 0/0; autoplay+refuse + published exe autoplay reached To be continued; source zip build 0/0; docx 23 หน้า export PDF ตรวจแล้ว
 - **2026-11-02 22:16 · Q-20261102-doctor-bigz-sprites** — ใส่ภาพหมอ (ตัดจาก Docter.png) + มุมหมอ (ป้าย/ม่าน/เตียง) + Big Z เข้าเกม
   - Files: Content/Sprites/npc_doctor|enemy_bigz|prop_doctor.png, Content.mgcb, World/Art.cs, Scenes/BaseScene.cs, CLAUDE.md, _candidates/README.md, 05-asset-list.md
   - Validation: build 0/0; shots 04/09/11 ok; autoplay reached To be continued; Big Z intro portrait ยังไม่ได้ดู
