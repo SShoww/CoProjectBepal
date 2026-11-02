@@ -340,12 +340,16 @@ public class BaseScene : Scene
         Gfx.Glow(sb, hearth, 620 * flicker, 360 * flicker, new Color(255, 150, 70) * (0.28f + 0.2f * night));
         Gfx.Glow(sb, hearth, 180, 140, new Color(255, 190, 110) * 0.55f);
         Gfx.EndAdditive(sb);
-        Gfx.Rect(sb, hearth.X - 50, GroundY - 26, 100, 26, new Color(70, 60, 60));
-        for (int i = 0; i < 3; i++)
-            Gfx.Ellipse(sb, hearth + new Vector2(-18 + i * 18, -4 - MathF.Abs(MathF.Sin(_time * 7 + i)) * 10), 12, 26,
-                Color.Lerp(new Color(255, 120, 40), new Color(255, 220, 120), i % 2));
+        var propTint = Color.Lerp(Color.White, Backdrop.NightTint, night * 0.7f);   // same night shade as the painted wall
+        if (!Art.Prop(sb, "prop_hearth", new Vector2(hearth.X, GroundY + 4), HearthH, Color.Lerp(propTint, Color.White, 0.6f), 0.97f + 0.03f * flicker))
+        {
+            Gfx.Rect(sb, hearth.X - 50, GroundY - 26, 100, 26, new Color(70, 60, 60));
+            for (int i = 0; i < 3; i++)
+                Gfx.Ellipse(sb, hearth + new Vector2(-18 + i * 18, -4 - MathF.Abs(MathF.Sin(_time * 7 + i)) * 10), 12, 26,
+                    Color.Lerp(new Color(255, 120, 40), new Color(255, 220, 120), i % 2));
+        }
 
-        DrawObjects(sb);
+        DrawObjects(sb, propTint);
 
         // Pets
         var playerHead = new Vector2(Sx(_playerX), GroundY - Art.PlayerSpriteHeight + 15);
@@ -489,14 +493,20 @@ public class BaseScene : Scene
         }
     }
 
-    void DrawObjects(SpriteBatch sb)
+    /// <summary>Drawn heights (px) of the prop_* sprites (Content/Sprites, 512 px on the long side).</summary>
+    const float BedH = 110, HearthH = 130, UpgradeH = 170, BookH = 120, DoorH = 205;   // door panel ≈ 1.3x the 140 px player
+
+    void DrawObjects(SpriteBatch sb, Color tint)
     {
         float g = GroundY;
         // Bed
         float bx = Sx(BedX);
-        Gfx.Rect(sb, bx - 90, g - 50, 180, 50, new Color(120, 80, 60));
-        Gfx.Rect(sb, bx - 90, g - 70, 180, 26, new Color(200, 170, 150));
-        Gfx.Rect(sb, bx - 90, g - 90, 50, 40, new Color(236, 220, 200));
+        if (!Art.Prop(sb, "prop_bed", new Vector2(bx, g + 4), BedH, tint))
+        {
+            Gfx.Rect(sb, bx - 90, g - 50, 180, 50, new Color(120, 80, 60));
+            Gfx.Rect(sb, bx - 90, g - 70, 180, 26, new Color(200, 170, 150));
+            Gfx.Rect(sb, bx - 90, g - 90, 50, 40, new Color(236, 220, 200));
+        }
         // Box (items from the merchant); the dot shows there is something inside
         float kx = Sx(BoxX);
         Gfx.Rect(sb, kx - 45, g - 60, 90, 60, new Color(130, 92, 60));
@@ -505,35 +515,50 @@ public class BaseScene : Scene
         if (_gs.Inventory.Values.Any(n => n > 0)) Gfx.Circle(sb, new Vector2(kx + 45, g - 62), 8, Palette.Coin);
         // Upgrade console
         float ux = Sx(UpgradeX);
-        Gfx.Rect(sb, ux - 50, g - 150, 100, 150, new Color(60, 70, 84));
-        Gfx.Rect(sb, ux - 38, g - 136, 76, 50, new Color(40, 200, 170) * (0.6f + 0.2f * MathF.Sin(_time * 2)));
-        Gfx.Text(sb, Gfx.Small, "UPGRADE", new Vector2(ux, g - 70), new Color(160, 240, 220), 0.5f);
-        if (_gs.Points > 0) Gfx.Circle(sb, new Vector2(ux + 50, g - 150), 10, Palette.Coin);
+        if (Art.Prop(sb, "prop_upgrade", new Vector2(ux, g + 4), UpgradeH, tint))
+        {
+            if (_gs.Points > 0) Gfx.Circle(sb, new Vector2(ux + 66, g - UpgradeH + 4), 10, Palette.Coin);   // top-right corner of the notice board
+        }
+        else
+        {
+            Gfx.Rect(sb, ux - 50, g - 150, 100, 150, new Color(60, 70, 84));
+            Gfx.Rect(sb, ux - 38, g - 136, 76, 50, new Color(40, 200, 170) * (0.6f + 0.2f * MathF.Sin(_time * 2)));
+            Gfx.Text(sb, Gfx.Small, "UPGRADE", new Vector2(ux, g - 70), new Color(160, 240, 220), 0.5f);
+            if (_gs.Points > 0) Gfx.Circle(sb, new Vector2(ux + 50, g - 150), 10, Palette.Coin);
+        }
         // Doctor
         Art.Doctor(sb, new Vector2(Sx(DoctorX), g + 6), _time);
         Gfx.Rect(sb, Sx(DoctorX) + 40, g - 60, 80, 60, new Color(200, 200, 210));
         if (_gs.Pets.Any(p => p.Dead)) Gfx.Text(sb, Gfx.Font, "+", new Vector2(Sx(DoctorX), g - 170), Palette.Danger, 0.5f);
         // Notebook desk
         float nx = Sx(BookX);
-        Gfx.Rect(sb, nx - 60, g - 70, 120, 12, new Color(110, 76, 56));
-        Gfx.Rect(sb, nx - 52, g - 58, 10, 58, new Color(90, 62, 46));
-        Gfx.Rect(sb, nx + 42, g - 58, 10, 58, new Color(90, 62, 46));
-        Gfx.Rect(sb, nx - 30, g - 84, 60, 14, new Color(180, 60, 60));
-        Gfx.Rect(sb, nx - 26, g - 82, 52, 3, new Color(240, 230, 210));
+        if (!Art.Prop(sb, "prop_notebook", new Vector2(nx, g + 4), BookH, tint))
+        {
+            Gfx.Rect(sb, nx - 60, g - 70, 120, 12, new Color(110, 76, 56));
+            Gfx.Rect(sb, nx - 52, g - 58, 10, 58, new Color(90, 62, 46));
+            Gfx.Rect(sb, nx + 42, g - 58, 10, 58, new Color(90, 62, 46));
+            Gfx.Rect(sb, nx - 30, g - 84, 60, 14, new Color(180, 60, 60));
+            Gfx.Rect(sb, nx - 26, g - 82, 52, 3, new Color(240, 230, 210));
+        }
         // The red door
         float dx = Sx(DoorX);
-        Gfx.Rect(sb, dx - 90, g - 300, 180, 300, new Color(40, 30, 34));
-        Gfx.Rect(sb, dx - 72, g - 282, 144, 282, new Color(170, 30, 38));
-        Gfx.Rect(sb, dx - 4, g - 282, 8, 282, new Color(110, 18, 24));
-        Gfx.Circle(sb, new Vector2(dx + 50, g - 140), 7, Palette.Coin);
+        float doorH = DoorH;
+        if (!Art.Prop(sb, "prop_door", new Vector2(dx, g + 4), DoorH, tint))
+        {
+            doorH = 300;
+            Gfx.Rect(sb, dx - 90, g - 300, 180, 300, new Color(40, 30, 34));
+            Gfx.Rect(sb, dx - 72, g - 282, 144, 282, new Color(170, 30, 38));
+            Gfx.Rect(sb, dx - 4, g - 282, 8, 282, new Color(110, 18, 24));
+            Gfx.Circle(sb, new Vector2(dx + 50, g - 140), 7, Palette.Coin);
+        }
         if (_gs.DoorEventPending)
         {
             float pulse = 0.5f + 0.5f * MathF.Sin(_time * 8);
             Gfx.BeginAdditive(sb);
-            Gfx.Glow(sb, new Vector2(dx, g - 150), 220, 260, Palette.Danger * (0.3f + 0.3f * pulse));
+            Gfx.Glow(sb, new Vector2(dx, g - doorH / 2), 220, doorH * 0.87f, Palette.Danger * (0.3f + 0.3f * pulse));
             Gfx.EndAdditive(sb);
             float shake = MathF.Sin(_time * 40) * 3 * pulse;
-            Gfx.Text(sb, Gfx.Font, "Knock Knock !!", new Vector2(dx + shake, g - 360), Palette.Danger, 0.5f);
+            Gfx.Text(sb, Gfx.Font, "Knock Knock !!", new Vector2(dx + shake, g - doorH - 60), Palette.Danger, 0.5f);
         }
     }
 

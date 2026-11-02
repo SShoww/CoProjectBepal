@@ -15,7 +15,7 @@ public static class Art
     }
 
     // ---- Optional real sprites: Content/Sprites/<name>.png registered in Content.mgcb; a missing file means "draw the primitive" ----
-    // Names: pet_<species lowercase>, enemy_toothless, enemy_bigz, npc_merchant, npc_doctor. See BEPAL/Assets/_candidates/README.md.
+    // Names: pet_<species lowercase>, enemy_toothless, enemy_bigz, npc_merchant, npc_doctor, prop_* (base furniture, see Prop). See BEPAL/Assets/_candidates/README.md.
     record Sprite(Texture2D Tex, Rectangle Src);
     static readonly System.Collections.Generic.Dictionary<string, Sprite> Sprites = new();
 
@@ -24,7 +24,8 @@ public static class Art
 
     public static void LoadOptional(ContentManager content)
     {
-        var names = new System.Collections.Generic.List<string> { "enemy_toothless", "enemy_bigz", "npc_merchant", "npc_doctor" };
+        var names = new System.Collections.Generic.List<string> { "enemy_toothless", "enemy_bigz", "npc_merchant", "npc_doctor",
+            "prop_bed", "prop_hearth", "prop_notebook", "prop_door", "prop_upgrade" };
         foreach (Species s in Enum.GetValues<Species>()) names.Add("pet_" + s.ToString().ToLowerInvariant());
         foreach (var n in names)
         {
@@ -62,6 +63,15 @@ public static class Art
         float breath = MathF.Sin(time * 2f) * Balance.BreathScale;
         var pose = new Pose { Offset = new Vector2(0, -MathF.Abs(MathF.Sin(time * 3f)) * bobPx), Scale = new Vector2(1 - breath * 0.6f, 1 + breath) };
         SpriteMotion.Draw(sb, spr.Tex, spr.Src, feet, height, pose, dx < -8 ? -1 : 1, tint, SamplerState.LinearClamp);
+        return true;
+    }
+
+    /// <summary>Draws a still base prop (prop_*) standing on <paramref name="feet"/>, <paramref name="height"/> px tall (x <paramref name="stretchY"/>), in the current batch. Returns false if there is no such sprite.</summary>
+    public static bool Prop(SpriteBatch sb, string name, Vector2 feet, float height, Color tint, float stretchY = 1)
+    {
+        if (!Sprites.TryGetValue(name, out var spr)) return false;
+        float k = height / spr.Src.Height;
+        sb.Draw(spr.Tex, feet, spr.Src, tint, 0, new Vector2(spr.Src.Width / 2f, spr.Src.Height), new Vector2(k, k * stretchY), SpriteEffects.None, 0);
         return true;
     }
 
