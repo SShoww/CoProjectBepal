@@ -22,6 +22,8 @@ public struct Pose
 public class SpriteMotion
 {
     public Pose Pose = Pose.Rest;
+    /// <summary>Screen px thickness of the highlight outline (<see cref="Draw"/>'s <c>outline</c>).</summary>
+    public const float OutlinePx = 4f;
     /// <summary>Visual facing -1..1; slides through 0 on a turn so the image flips smoothly.</summary>
     public float Face = 1;
 
@@ -65,15 +67,25 @@ public class SpriteMotion
     /// Draw part <paramref name="src"/> of a single still <paramref name="tex"/> (origin = bottom centre of src) standing on
     /// <paramref name="feet"/>, <paramref name="height"/> px tall. Point-sampled by default so pixel art stays crisp;
     /// painted art passes <see cref="SamplerState.LinearClamp"/> (with mipmaps) so downscaling stays smooth.
+    /// <paramref name="outline"/> (a white silhouette of <paramref name="tex"/>, same size) is stamped around the image in <paramref name="outlineColor"/>, <see cref="OutlinePx"/> thick.
     /// </summary>
-    public static void Draw(SpriteBatch sb, Texture2D tex, Rectangle src, Vector2 feet, float height, Pose p, float face, Color? tint = null, SamplerState? sampler = null)
+    public static void Draw(SpriteBatch sb, Texture2D tex, Rectangle src, Vector2 feet, float height, Pose p, float face, Color? tint = null, SamplerState? sampler = null,
+        Texture2D? outline = null, Color outlineColor = default)
     {
         float k = height / src.Height;
         // Negative scale gets culled by SpriteBatch, so flip with SpriteEffects; |face| still squashes the image through zero on a turn
         var scale = new Vector2(k * p.Scale.X * MathF.Abs(face), k * p.Scale.Y);
+        var origin = new Vector2(src.Width / 2f, src.Height);
+        var fx = face < 0 ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
         sb.End();
         Gfx.Begin(sb, null, sampler ?? SamplerState.PointClamp);
-        sb.Draw(tex, feet + p.Offset, src, tint ?? Color.White, p.Rot, new Vector2(src.Width / 2f, src.Height), scale, face < 0 ? SpriteEffects.FlipHorizontally : SpriteEffects.None, 0);
+        if (outline != null)
+            for (int i = 0; i < 12; i++)   // 12 stamps on a circle read as a smooth ring at this thickness
+            {
+                float a = i * MathHelper.TwoPi / 12;
+                sb.Draw(outline, feet + p.Offset + new Vector2(MathF.Cos(a), MathF.Sin(a)) * OutlinePx, src, outlineColor, p.Rot, origin, scale, fx, 0);
+            }
+        sb.Draw(tex, feet + p.Offset, src, tint ?? Color.White, p.Rot, origin, scale, fx, 0);
         sb.End();
         Gfx.Begin(sb);
     }
