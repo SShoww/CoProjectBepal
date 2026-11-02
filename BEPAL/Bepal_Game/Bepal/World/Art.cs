@@ -16,8 +16,11 @@ public static class Art
 
     // ---- Optional real sprites: Content/Sprites/<name>.png registered in Content.mgcb; a missing file means "draw the primitive" ----
     // Names: pet_<species lowercase>, enemy_toothless, enemy_bigz, npc_merchant, npc_doctor, prop_* (base furniture, see Prop). See BEPAL/Assets/_candidates/README.md.
-    record Sprite(Texture2D Tex, Rectangle Src);
+    record Sprite(Texture2D Tex, Rectangle Src, Texture2D? Silhouette = null);
     static readonly System.Collections.Generic.Dictionary<string, Sprite> Sprites = new();
+
+    /// <summary>Highlight ring drawn around a pet sprite when the player is near it or hovers its pick card.</summary>
+    static readonly Color OutlineColor = new(0x60, 0xDF, 0xFF);   // #60DFFF
 
     /// <summary>Drawn height (px) of each sprite at scale 1 (match the primitive it replaces); feet = bottom edge of the opaque pixels.</summary>
     const float PetSpriteHeight = 90, DoctorSpriteHeight = 125, MerchantSpriteHeight = 220, ToothlessEnemyHeight = 150, BigZSpriteHeight = 230;
@@ -32,7 +35,7 @@ public static class Art
             try
             {
                 var tex = content.Load<Texture2D>("Sprites/" + n);
-                Sprites[n] = new Sprite(tex, OpaqueBounds(tex));
+                Sprites[n] = new Sprite(tex, OpaqueBounds(tex), n.StartsWith("pet_") ? Silhouette(tex) : null);
             }
             catch (ContentLoadException) { }   // no art yet: keep the primitive
         }
@@ -54,15 +57,42 @@ public static class Art
         return x1 < 0 ? new Rectangle(0, 0, tex.Width, tex.Height) : new Rectangle(x0, y0, x1 - x0 + 1, y1 - y0 + 1);
     }
 
+    /// <summary>White copy of <paramref name="tex"/> keeping only its alpha (premultiplied), with box-filtered mipmaps so it downsizes as smoothly as the sprite.
+    /// Tinting it gives a solid-colour silhouette for <see cref="SpriteMotion.Draw"/>'s outline.</summary>
+    static Texture2D Silhouette(Texture2D tex)
+    {
+        int w = tex.Width, h = tex.Height;
+        var px = new Color[w * h];
+        tex.GetData(px);
+        for (int i = 0; i < px.Length; i++) { byte a = px[i].A; px[i] = new Color(a, a, a, a); }
+        var sil = new Texture2D(tex.GraphicsDevice, w, h, true, SurfaceFormat.Color);
+        for (int level = 0; level < sil.LevelCount; level++)
+        {
+            sil.SetData(level, null, px, 0, w * h);
+            int nw = Math.Max(1, w / 2), nh = Math.Max(1, h / 2);
+            var next = new Color[nw * nh];
+            for (int y = 0; y < nh; y++)
+            for (int x = 0; x < nw; x++)
+            {
+                int x0 = Math.Min(x * 2, w - 1), x1 = Math.Min(x * 2 + 1, w - 1), y0 = Math.Min(y * 2, h - 1), y1 = Math.Min(y * 2 + 1, h - 1);
+                int a = (px[y0 * w + x0].A + px[y0 * w + x1].A + px[y1 * w + x0].A + px[y1 * w + x1].A) / 4;
+                next[y * nw + x] = new Color(a, a, a, a);
+            }
+            px = next; w = nw; h = nh;
+        }
+        return sil;
+    }
+
     /// <summary>Draws the named sprite standing on <paramref name="feet"/> (idle breathing + bob via <see cref="SpriteMotion"/>'s <see cref="Pose"/>). Returns false if there is no such sprite.
     /// Sprites face right; <paramref name="lookAt"/> mirrors them toward it.</summary>
-    static bool TryDrawSprite(SpriteBatch sb, string name, Vector2 feet, float height, float time, Vector2 lookAt, Color tint, float bobPx)
+    static bool TryDrawSprite(SpriteBatch sb, string name, Vector2 feet, float height, float time, Vector2 lookAt, Color tint, float bobPx, float outlineAlpha = 0)
     {
         if (!Sprites.TryGetValue(name, out var spr)) return false;
         float dx = lookAt.X - feet.X;
         float breath = MathF.Sin(time * 2f) * Balance.BreathScale;
         var pose = new Pose { Offset = new Vector2(0, -MathF.Abs(MathF.Sin(time * 3f)) * bobPx), Scale = new Vector2(1 - breath * 0.6f, 1 + breath) };
-        SpriteMotion.Draw(sb, spr.Tex, spr.Src, feet, height, pose, dx < -8 ? -1 : 1, tint, SamplerState.LinearClamp);
+        SpriteMotion.Draw(sb, spr.Tex, spr.Src, feet, height, pose, dx < -8 ? -1 : 1, tint, SamplerState.LinearClamp,
+            outlineAlpha > 0 ? spr.Silhouette : null, OutlineColor * outlineAlpha);
         return true;
     }
 
@@ -87,10 +117,11 @@ public static class Art
         look = look.LengthSquared() > 1 ? Vector2.Normalize(look) : Vector2.Zero;
 
         Gfx.Ellipse(sb, feet + new Vector2(0, -2), 40 * scale, 8 * scale, Color.Black * 0.3f * alpha);
-        if (highlight) Gfx.Glow(sb, body, 90 * scale, 90 * scale, Palette.Warm * 0.55f);
 
         var spriteTint = Color.Lerp(dead ? Color.Gray : Color.White, new Color(255, 110, 110), flash) * alpha;
-        if (TryDrawSprite(sb, "pet_" + s.ToString().ToLowerInvariant(), feet, PetSpriteHeight * scale, time, lookAt, spriteTint, dead ? 0 : 3 * scale)) return;
+        float outline = highlight ? (0.8f + 0.2f * MathF.Sin(time * 5f)) * alpha : 0;   // sprites get a soft-pulsing outline
+        if (TryDrawSprite(sb, "pet_" + s.ToString().ToLowerInvariant(), feet, PetSpriteHeight * scale, time, lookAt, spriteTint, dead ? 0 : 3 * scale, outline)) return;
+        if (highlight) Gfx.Glow(sb, body, 90 * scale, 90 * scale, Palette.Warm * 0.55f);   // primitive fallback: glow instead
 
         switch (s)
         {
