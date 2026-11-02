@@ -3,7 +3,7 @@
 ล่าสุด 10 งาน งานละ 3 บรรทัด เขียนผ่าน `tools/context/log-edit.py` เท่านั้น — รายการเก่าอยู่ที่ [archive/edit-log/](archive/edit-log/)
 
 <!-- entries -->
-- **2026-11-02 09:13 · Q-20261102-base-props-sprites** — ใส่ sprite เตียง/เตาไฟ/โต๊ะอัปเกรด/แท่นสมุด/ประตูแดง ในฐานแทน primitive (Art.Prop, fallback เดิม); ย่อประตูเหลือ 205 px ให้สมส่วนกับ player
+- **2026-11-02 12:01 · Q-20261102-base-props-sprites** — ใส่ sprite เตียง/เตาไฟ/โต๊ะอัปเกรด/แท่นสมุด/ประตูแดง ในฐานแทน primitive (Art.Prop, fallback เดิม); ย่อประตูเหลือ 205 px ให้สมส่วนกับ player; merge PR #44 และปิด quest ตามคำสั่งผู้ใช้
   - Files: BEPAL/Bepal_Game/Bepal/Content/Sprites/prop_*.png, Content.mgcb, World/Art.cs, World/Backdrop.cs, Scenes/BaseScene.cs, 05-asset-list.md, _candidates/README.md, CLAUDE.md
   - Validation: build 0/0; --shots ฉากฐาน + 04_base_door ดูแล้ว; --autoplay reached To be continued; ยังไม่ได้เล่นจริง
 - **2026-11-01 17:02 · Q-20261101-fullscreen-close** — ปิด quest fullscreen (ย้ายไป archive ตามคำสั่งผู้ใช้)
