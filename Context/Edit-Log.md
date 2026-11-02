@@ -3,6 +3,9 @@
 ล่าสุด 10 งาน งานละ 3 บรรทัด เขียนผ่าน `tools/context/log-edit.py` เท่านั้น — รายการเก่าอยู่ที่ [archive/edit-log/](archive/edit-log/)
 
 <!-- entries -->
+- **2026-11-02 22:57 · Q-20261102-release-v1** — เตรียม release v1.0.0 ส่งงาน: README ส่วนผู้เล่น (ดาวน์โหลด/build/run/วิธีเล่น/เครดิต), เพิ่ม Bepal_Game.sln สำหรับ VS รุ่นเก่า
+  - Files: README.md, BEPAL/Bepal_Game/Bepal_Game.sln, CLAUDE.md, Context/Gitflow.md, Context/Status.md
+  - Validation: build sln+slnx 0/0; autoplay + refuse reached To be continued; shots 29 PNG
 - **2026-11-02 22:16 · Q-20261102-doctor-bigz-sprites** — ใส่ภาพหมอ (ตัดจาก Docter.png) + มุมหมอ (ป้าย/ม่าน/เตียง) + Big Z เข้าเกม
   - Files: Content/Sprites/npc_doctor|enemy_bigz|prop_doctor.png, Content.mgcb, World/Art.cs, Scenes/BaseScene.cs, CLAUDE.md, _candidates/README.md, 05-asset-list.md
   - Validation: build 0/0; shots 04/09/11 ok; autoplay reached To be continued; Big Z intro portrait ยังไม่ได้ดู
@@ -30,6 +33,3 @@
 - **2026-10-25 20:05 · Q-20261025-font-size-docs** — Small font ตามจริง = 12 pt (Small.spritefont) แทน 15; CLAUDE.md นับ Sprites เป็น 14 PNG + ระบุ ui_item_* ของ Q-20261025-item-slot-ui
   - Files: CLAUDE.md, BEPAL/Docs/GDD/14-audio-fonts-list.md
   - Validation: เทียบกับ Content/Fonts/Small.spritefont และ ls Content/Sprites; แก้เฉพาะเอกสาร
-- **2026-10-25 19:52 · Q-20261025-item-slot-ui** — ใส่ภาพกรอบการ์ดไอเทม + ปุ่ม Buy/Use (normal/hold) ใน Shop/Box; Button รองรับ sprite skin
-  - Files: BEPAL/Bepal_Game/Bepal/Content/Sprites/ui_item_*.png, Content.mgcb, Core/Ui.cs, Model/Items.cs, Scenes/BaseMenus.cs, 05-asset-list.md, _candidates/README.md
-  - Validation: build 0/0; shots shop/inventory ok; autoplay ทั้ง 2 แบบ reached To be continued; ยังไม่ได้ดูปุ่ม hold ด้วยตา

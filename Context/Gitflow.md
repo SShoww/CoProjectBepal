@@ -42,7 +42,7 @@ Gitflow assigns explicit responsibilities to branches and governs when and how t
 - **Rules**:
   - Source branch for all new features and releases.
   - Receives merged features, release bugfix back-merges, and hotfix back-merges.
-  - Must stay buildable (`dotnet build BEPAL/Bepal_Game/Bepal_Game.slnx`).
+  - Must stay buildable (`dotnet build BEPAL/Bepal_Game/Bepal_Game.slnx`). `Bepal_Game.sln` (added for v1.0.0) holds the same project for older Visual Studio — update both when the solution changes.
 
 ---
 
