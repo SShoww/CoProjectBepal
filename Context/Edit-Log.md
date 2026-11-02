@@ -3,6 +3,9 @@
 ล่าสุด 10 งาน งานละ 3 บรรทัด เขียนผ่าน `tools/context/log-edit.py` เท่านั้น — รายการเก่าอยู่ที่ [archive/edit-log/](archive/edit-log/)
 
 <!-- entries -->
+- **2026-11-02 22:16 · Q-20261102-doctor-bigz-sprites** — ใส่ภาพหมอ (ตัดจาก Docter.png) + มุมหมอ (ป้าย/ม่าน/เตียง) + Big Z เข้าเกม
+  - Files: Content/Sprites/npc_doctor|enemy_bigz|prop_doctor.png, Content.mgcb, World/Art.cs, Scenes/BaseScene.cs, CLAUDE.md, _candidates/README.md, 05-asset-list.md
+  - Validation: build 0/0; shots 04/09/11 ok; autoplay reached To be continued; Big Z intro portrait ยังไม่ได้ดู
 - **2026-11-02 21:27 · Q-20261102-upgrade-ui-skin** — หน้า Upgrade ใช้กรอบ peach (ui_options) + การ์ดแถว ui_item_slot + ปุ่ม ui_options_button แบบ nine-slice (Ui.SkinSliced/NineSlice, Button.SkinCorner) และใช้ ui_energy_full/empty เป็น pip ระดับอัปเกรด
   - Files: BEPAL/Bepal_Game/Bepal/Core/Ui.cs, BEPAL/Bepal_Game/Bepal/Scenes/BaseMenus.cs, CLAUDE.md, Context/quests/Q-20261102-upgrade-ui-skin.md
   - Validation: build 0/0; --shots 10_upgrade/10b ดูแล้ว; --autoplay reached To be continued; upgrade-first bot ซื้อ 6 ครั้ง; ยังไม่ได้เล่นจริง
@@ -30,6 +33,3 @@
 - **2026-10-25 19:52 · Q-20261025-item-slot-ui** — ใส่ภาพกรอบการ์ดไอเทม + ปุ่ม Buy/Use (normal/hold) ใน Shop/Box; Button รองรับ sprite skin
   - Files: BEPAL/Bepal_Game/Bepal/Content/Sprites/ui_item_*.png, Content.mgcb, Core/Ui.cs, Model/Items.cs, Scenes/BaseMenus.cs, 05-asset-list.md, _candidates/README.md
   - Validation: build 0/0; shots shop/inventory ok; autoplay ทั้ง 2 แบบ reached To be continued; ยังไม่ได้ดูปุ่ม hold ด้วยตา
-- **2026-10-24 19:50 · Q-20261024-pet-player-sprites-close** — ปิด quest pet-player-sprites (ย้ายไป archive ตามคำสั่งผู้ใช้)
-  - Files: Context/quests, Context/archive/quests
-  - Validation: merge แล้ว PR #37; ยังไม่ได้เล่นจริง

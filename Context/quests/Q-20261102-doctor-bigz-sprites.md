@@ -1,0 +1,8 @@
+### 2026-11-02 — Q-20261102-doctor-bigz-sprites — ใส่ภาพหมอ (Docter) + Big Z เข้าเกม
+- Status: ready-to-close
+- Owner: Claude Code (ตามคำสั่งผู้ใช้ 2026-11-02)
+- Goal: นำ `BEPAL/Assets/_candidates/sprites/player/Docter.png` และ `Enemy/Big-Z.png` เข้าเกมเป็น `npc_doctor` / `enemy_bigz` (ท่อ `Art.LoadOptional` มีอยู่แล้ว)
+- Files: BEPAL/Bepal_Game/Bepal/Content/Sprites/prop_doctor.png, BEPAL/Bepal_Game/Bepal/Scenes/BaseScene.cs, BEPAL/Assets/_candidates/sprites/player/Docter.png, BEPAL/Assets/_candidates/sprites/Enemy/Big-Z.png, BEPAL/Bepal_Game/Bepal/Content/Sprites/npc_doctor.png, BEPAL/Bepal_Game/Bepal/Content/Sprites/enemy_bigz.png, BEPAL/Bepal_Game/Bepal/Content/Content.mgcb, BEPAL/Bepal_Game/Bepal/World/Art.cs, BEPAL/Docs/GDD/05-asset-list.md, BEPAL/Assets/_candidates/README.md, CLAUDE.md, Context/quests/Q-20261102-doctor-bigz-sprites.md
+- Context: Docter.png เป็นแผ่นรวม (หมอ + ป้ายกาชาด + ม่าน + เตียง) — ตัดเฉพาะหมอ (คอลัมน์ 468..640) ย่อเป็นสูง 256 px; Big-Z ตัดขอบโปร่งใส ย่อสูง 512 px แล้วกลับด้าน (ต้นฉบับมองซ้าย — ตาม convention หันขวา เกม mirror เข้าหาเป้าเอง; ผู้ใช้สั่ง 2026-11-02 ให้มองซ้ายในฉากต่อสู้); ป้าย+ม่าน+เตียง (คอลัมน์ 697..1348) เป็น `prop_doctor` วางขวาหมอ 123 px สูง 142 px (สเกลเดียวกับหมอ 125 px) แทนกล่องเทา placeholder
+- Validation (2026-11-02): build 0 warning/0 error; `--shots` 04_base_door (หมอ+มุมหมอ), 09_fight_bigz (หลังกลับด้าน: มองซ้ายเข้าหาสัตว์), 11_doctor ดูแล้วถูกต้อง; `--autoplay` -> RESULT: reached To be continued. ภาพ Big Z ตอน intro Day 5 (DialogueScene portrait) ไม่มี shot — ยังไม่ได้ดูด้วยตา
+- Next action: ผู้ใช้ดูในเกมจริง (ขนาดหมอ 125 px vs ผู้เล่น 140 px, Big Z intro); ยืนยันปิด quest / ship branch `feature/doctor-bigz-sprites`
