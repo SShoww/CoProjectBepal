@@ -3,6 +3,9 @@
 ล่าสุด 10 งาน งานละ 3 บรรทัด เขียนผ่าน `tools/context/log-edit.py` เท่านั้น — รายการเก่าอยู่ที่ [archive/edit-log/](archive/edit-log/)
 
 <!-- entries -->
+- **2026-11-02 09:13 · Q-20261102-base-props-sprites** — ใส่ sprite เตียง/เตาไฟ/โต๊ะอัปเกรด/แท่นสมุด/ประตูแดง ในฐานแทน primitive (Art.Prop, fallback เดิม); ย่อประตูเหลือ 205 px ให้สมส่วนกับ player
+  - Files: BEPAL/Bepal_Game/Bepal/Content/Sprites/prop_*.png, Content.mgcb, World/Art.cs, World/Backdrop.cs, Scenes/BaseScene.cs, 05-asset-list.md, _candidates/README.md, CLAUDE.md
+  - Validation: build 0/0; --shots ฉากฐาน + 04_base_door ดูแล้ว; --autoplay reached To be continued; ยังไม่ได้เล่นจริง
 - **2026-11-01 17:02 · Q-20261101-fullscreen-close** — ปิด quest fullscreen (ย้ายไป archive ตามคำสั่งผู้ใช้)
   - Files: Context/quests, Context/archive/quests
   - Validation: merge แล้ว PR #42; ผู้ใช้ทดสอบ F11 แล้ว
@@ -30,6 +33,3 @@
 - **2026-10-14 13:54 · Q-20261014-ui-font-patrick-hand** — ปิด quest ui-font-patrick-hand (ย้ายไป archive ตามคำสั่งผู้ใช้)
   - Files: Context/quests, Context/archive/quests
   - Validation: merge แล้ว PR #32; ยังไม่ได้เล่นจริง
-- **2026-10-14 13:54 · Q-20261014-custom-fonts** — ปิด quest custom-fonts (ย้ายไป archive ตามคำสั่งผู้ใช้)
-  - Files: Context/quests, Context/archive/quests
-  - Validation: merge แล้ว PR #31; ยังไม่ได้เล่นจริง
