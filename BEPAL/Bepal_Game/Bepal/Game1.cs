@@ -24,7 +24,7 @@ namespace Bepal
             IsMouseVisible = true;
             Window.Title = "BePal";
             Window.AllowUserResizing = true;
-            _graphics.HardwareModeSwitch = false;   // borderless full screen at desktop resolution
+            InactiveSleepTime = System.TimeSpan.Zero;   // keep full frame rate behind other windows (default 20 ms sleep stutters)
         }
 
         protected override void Initialize()
@@ -35,14 +35,18 @@ namespace Bepal
             base.Initialize();
         }
 
-        /// <summary>Full screen keeps the game at W x H: <see cref="Gfx.Viewport"/> scales it up with black bars.</summary>
+        /// <summary>Borderless window the size of the desktop (not true full screen, so Alt+Tab doesn't minimize).
+        /// The game stays at W x H: <see cref="Gfx.Viewport"/> scales it up with black bars.
+        /// 1 px taller than the screen so Windows doesn't treat it as exclusive full screen
+        /// (that switch on Alt+Tab is what causes the hitch and the colour shift).</summary>
         void SetFullScreen(bool on)
         {
             var mode = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode;
+            Window.IsBorderless = on;
             _graphics.PreferredBackBufferWidth = on ? mode.Width : Gfx.W;
-            _graphics.PreferredBackBufferHeight = on ? mode.Height : Gfx.H;
-            _graphics.IsFullScreen = on;
+            _graphics.PreferredBackBufferHeight = on ? mode.Height + 1 : Gfx.H;
             _graphics.ApplyChanges();
+            Window.Position = on ? Point.Zero : new Point((mode.Width - Gfx.W) / 2, (mode.Height - Gfx.H) / 2);
             Settings.Fullscreen = on;
         }
 
@@ -149,7 +153,7 @@ namespace Bepal
             Input.Update();
             if (Gfx.Viewport != null && Input.ToggleFullScreen)
             {
-                SetFullScreen(!_graphics.IsFullScreen);
+                SetFullScreen(!Window.IsBorderless);
                 Settings.Save();
                 Input.Consume();   // Alt+Enter must not also confirm in the scene
             }
