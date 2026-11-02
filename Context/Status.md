@@ -13,7 +13,7 @@
   - ทำแล้ว 2026-10-13: ตัวเลข care/shop/EXP ย้ายเข้า `Balance`; Energy 0 เปิด care ไม่ได้ + Heal จางเมื่อ HP เต็ม; หน้าจบบอกว่าเป็น demo; Point cost ต่อเลเวล (Energy 1/2/4, Progress 1/2/3 max 3) + UI อธิบาย Point; ร้านเปิดหลัง Sell/Refuse, ของเข้า Box (`InventoryScene`), ไอเทมใหม่ 4 ชิ้น (เพดาน 3 ชิ้นต่อชนิด `Balance.ShopMaxOwned` — ผู้ใช้ยังไม่ได้ confirm)
 
 ## ค้าง / รอบถัดไป
-- ฟอนต์ OFL; release build (`dotnet publish -c Release -r win-x64 --self-contained`)
+- ฟอนต์ OFL (Animal ยังเป็น Personal Use Only); release v1.0.0 ส่งงาน 2026-11-02 — tag `v1.0.0` + GitHub Release แนบ win-x64 self-contained zip, README มีวิธี build/run/เล่น, เพิ่ม `Bepal_Game.sln` (Q-20261102-release-v1)
 - `validate.ps1` แก้แล้ว (C10): รับ `-Raw/-Csv/-Out`, รู้จัก `starter`, ราคา Point ใหม่ และมี invariant I16 สำหรับไอเทม — รันผ่าน 16/16 กับ batch 50 run หลังข้อ 6 (ยังไม่ได้ลองกับ data คนจริง เพราะไม่มีไฟล์ดิบในเครื่อง); ไม่มี CI; ShotRunner ไม่มี shot GameOver/Night/PetPick; มี `--scene <name>` และ F2 กระโดดไป scene (SceneCatalog)
 - เก็บ telemetry คนจริงเพิ่ม (ปัจจุบัน 8 runs ก่อนแก้ข้อ 3/5/6; เป้า 15–20) เพื่อดูว่าซื้อ Energy/ใช้ของมากขึ้นไหม; `sprint-plan-02.md` ยังไม่มี
 - ท่า attack/hurt/happy ของ sprite ยังไม่ต่อโค้ด; ยังไม่ได้ดู popup "No energy", dialogue Sell→ร้าน, hint Point แรก ด้วยตา
