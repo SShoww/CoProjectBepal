@@ -36,6 +36,8 @@ public class Button
     /// <summary>Sprite skin (normal / held while the mouse is down on it), drawn from <see cref="SkinSrc"/>; null = nine-patch.</summary>
     public Texture2D? Skin, SkinHeld;
     public Rectangle SkinSrc;
+    /// <summary>&gt; 0 = draw the whole <see cref="Skin"/> as a nine-slice with corners this many art px (ignores <see cref="SkinSrc"/>), for art whose size differs from the button.</summary>
+    public int SkinCorner;
     public Color Ink = Palette.Text, InkDim = Palette.Dim;
     public bool Shadow = true;
 
@@ -65,7 +67,9 @@ public class Button
         if (Skin != null)
         {
             var tex = Hover && Input.MouseHeld && SkinHeld != null ? SkinHeld : Skin;
-            sb.Draw(tex, r, SkinSrc, Enabled ? Color.White : new Color(120, 112, 108));
+            var tint = Enabled ? Color.White : new Color(120, 112, 108);
+            if (SkinCorner > 0) Ui.NineSlice(sb, tex, r, SkinCorner, tint);
+            else sb.Draw(tex, r, SkinSrc, tint);
         }
         else
         {
@@ -76,7 +80,11 @@ public class Button
         var font = Label.Length == 1 ? Gfx.Big                                   // glyph buttons ("+") need the big size to read
             : Gfx.Font.MeasureString(Label).X > room ? Gfx.Small : Gfx.Font;   // long label: drop to the small size first
         var label = Gfx.Fit(font, Label, room);
-        Gfx.Text(sb, font, label, new Vector2(r.Center.X, r.Center.Y - font.LineSpacing / 2f), Enabled ? Ink : InkDim, 0.5f, Shadow);
+        // A lone glyph ("+") is centred on its ink, not on the line box (which sits it low in the button)
+        float top = font.LineSpacing / 2f;
+        if (Label.Length == 1 && font.GetGlyphs().TryGetValue(Label[0], out var g))
+            top = g.Cropping.Y + g.BoundsInTexture.Height / 2f;
+        Gfx.Text(sb, font, label, new Vector2(r.Center.X, r.Center.Y - top), Enabled ? Ink : InkDim, 0.5f, Shadow);
     }
 }
 
@@ -188,12 +196,33 @@ public static class Ui
         return true;
     }
 
-    /// <summary>Gives <paramref name="b"/> the whole of <paramref name="tex"/> as its skin with <see cref="Ink"/> text; no art = unchanged nine-patch button.</summary>
-    public static Button Skin(Button b, Texture2D? tex)
+    /// <summary>Like <see cref="Skin(SpriteBatch, Texture2D?, Rectangle, float)"/>, but nine-slices the art (<paramref name="corner"/> art px kept unscaled) so it fits a box of another size.</summary>
+    public static bool SkinSliced(SpriteBatch sb, Texture2D? tex, Rectangle r, int corner, float alpha = 0.95f)
+    {
+        if (tex == null) { Panel(sb, r, alpha); return false; }
+        NineSlice(sb, tex, r, corner, Color.White);
+        return true;
+    }
+
+    /// <summary>Draws the whole of <paramref name="tex"/> into <paramref name="r"/>: <paramref name="corner"/>-px corners keep their size, edges and centre stretch.</summary>
+    public static void NineSlice(SpriteBatch sb, Texture2D tex, Rectangle r, int corner, Color color)
+    {
+        int c = Math.Min(corner, Math.Min(r.Width, r.Height) / 2);
+        int[] dx = { r.X, r.X + c, r.Right - c, r.Right }, dy = { r.Y, r.Y + c, r.Bottom - c, r.Bottom };
+        int[] sx = { 0, corner, tex.Width - corner, tex.Width }, sy = { 0, corner, tex.Height - corner, tex.Height };
+        for (int j = 0; j < 3; j++)
+            for (int i = 0; i < 3; i++)
+                sb.Draw(tex, new Rectangle(dx[i], dy[j], dx[i + 1] - dx[i], dy[j + 1] - dy[j]),
+                    new Rectangle(sx[i], sy[j], sx[i + 1] - sx[i], sy[j + 1] - sy[j]), color);
+    }
+
+    /// <summary>Gives <paramref name="b"/> the whole of <paramref name="tex"/> as its skin with <see cref="Ink"/> text (nine-sliced when <paramref name="corner"/> &gt; 0); no art = unchanged nine-patch button.</summary>
+    public static Button Skin(Button b, Texture2D? tex, int corner = 0)
     {
         if (tex == null) return b;
         b.Skin = tex;
         b.SkinSrc = tex.Bounds;
+        b.SkinCorner = corner;
         b.Ink = Ink;
         b.InkDim = InkDim;
         b.Shadow = false;

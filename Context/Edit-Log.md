@@ -3,6 +3,9 @@
 ล่าสุด 10 งาน งานละ 3 บรรทัด เขียนผ่าน `tools/context/log-edit.py` เท่านั้น — รายการเก่าอยู่ที่ [archive/edit-log/](archive/edit-log/)
 
 <!-- entries -->
+- **2026-11-02 21:27 · Q-20261102-upgrade-ui-skin** — หน้า Upgrade ใช้กรอบ peach (ui_options) + การ์ดแถว ui_item_slot + ปุ่ม ui_options_button แบบ nine-slice (Ui.SkinSliced/NineSlice, Button.SkinCorner) และใช้ ui_energy_full/empty เป็น pip ระดับอัปเกรด
+  - Files: BEPAL/Bepal_Game/Bepal/Core/Ui.cs, BEPAL/Bepal_Game/Bepal/Scenes/BaseMenus.cs, CLAUDE.md, Context/quests/Q-20261102-upgrade-ui-skin.md
+  - Validation: build 0/0; --shots 10_upgrade/10b ดูแล้ว; --autoplay reached To be continued; upgrade-first bot ซื้อ 6 ครั้ง; ยังไม่ได้เล่นจริง
 - **2026-11-02 21:21 · Q-20261102-pet-outline-icon** — ไอคอน exe/หน้าต่างจาก YourStory_Bepal_icon.png; outline สี #60DFFF กระพริบรอบ sprite สัตว์เมื่อ player เข้าใกล้และเมื่อ hover การ์ดเลือกสัตว์
   - Files: BEPAL/Bepal_Game/Bepal/Icon.ico, BEPAL/Bepal_Game/Bepal/Icon.bmp, BEPAL/Bepal_Game/Bepal/World/Art.cs, BEPAL/Bepal_Game/Bepal/World/SpriteMotion.cs, CLAUDE.md
   - Validation: build slnx 0/0; --shots 02_choose (บังคับ highlight ชั่วคราว) เห็น outline ฟ้า; exe icon ตรวจด้วย ExtractAssociatedIcon; --autoplay reached To be continued (หลังเปลี่ยนสี)
@@ -30,6 +33,3 @@
 - **2026-10-24 19:50 · Q-20261024-pet-player-sprites-close** — ปิด quest pet-player-sprites (ย้ายไป archive ตามคำสั่งผู้ใช้)
   - Files: Context/quests, Context/archive/quests
   - Validation: merge แล้ว PR #37; ยังไม่ได้เล่นจริง
-- **2026-10-24 19:49 · Q-20261024-pet-player-sprites** — ใส่ sprite สัตว์ 3 ตัว + player ใหม่ (แก้หันผิดทาง) + กรอบ ui_status_panel แทน panel status สัตว์
-  - Files: Content/Sprites/*.png, Content/Content.mgcb, World/Art.cs, World/SpriteMotion.cs, Core/Ui.cs, Core/Gfx.cs, Scenes/CareScenes.cs, Scenes/BaseScene.cs, docs
-  - Validation: slnx build 0 warn/0 err; --autoplay reached To be continued; --shots 29 PNG; ยังไม่ได้เล่นจริงด้วยมือ
