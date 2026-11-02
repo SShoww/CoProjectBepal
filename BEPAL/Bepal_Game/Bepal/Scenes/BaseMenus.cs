@@ -26,7 +26,7 @@ public class UpgradeScene : Scene
     const int ArtCorner = 8, CardCorner = 16;   // nine-slice corners of the peach panel/button art and of the brown item card art
     static readonly Color NeedInk = new(255, 196, 180);   // "Need ..." on the brown card (Palette.Danger is too dark there)
 
-    static readonly Rectangle Panel = new(280, 110, 500, 520);
+    static readonly Rectangle Panel = new(280, 110, 720, 520);
     /// <summary>Brown card behind upgrade row <paramref name="i"/>.</summary>
     static Rectangle RowRect(int i) => new(Panel.X + Ui.Pad, 236 + i * 124, Panel.Width - 2 * Ui.Pad, 108);
     /// <summary>Hit box of the "+" button of row <paramref name="i"/> (also used by the autoplay bot).</summary>
